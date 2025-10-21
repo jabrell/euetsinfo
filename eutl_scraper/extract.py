@@ -1,3 +1,7 @@
+import io
+import zipfile
+
+import httpx
 import pandas as pd
 
 from eutl_scraper.mappings import map_account_type_inv
@@ -121,5 +125,17 @@ def extract_transactions(url: str | None = None) -> pd.DataFrame:
     if url is None:
         url = url_source["transactions"]
 
-    df = pd.read_csv(url, compression="gzip")
+    # Download the zip file to memory
+    response = httpx.get(url_source["transactions"])
+    zip_content = io.BytesIO(response.content)
+
+    # Extract the CSV file that starts with "transactions_EUTL_PUBLIC_NOTESD"
+    with zipfile.ZipFile(zip_content) as zf:
+        csv_filename = [
+            name
+            for name in zf.namelist()
+            if name.startswith("transactions_EUTL_PUBLIC_NOTESD")
+        ][0]
+        with zf.open(csv_filename) as csv_file:
+            df = pd.read_csv(csv_file, low_memory=False)
     return df
