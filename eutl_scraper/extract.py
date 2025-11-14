@@ -1,141 +1,105 @@
-import io
-import zipfile
+"""The module for extracting the basic tables from the EUTL data downloads."""
 
-import httpx
 import pandas as pd
 
-from eutl_scraper.mappings import map_account_type_inv
 
-url_source = {
-    "accounts": "https://dlsclimabi.blob.core.windows.net/public-data/eutlpublic/extracts/_all_extracts/account/accounts_daily.csv.gz",
-    "installations": "https://dlsclimabi.blob.core.windows.net/public-data/eutlpublic/extracts/_all_extracts/operator/operators_daily.csv.gz",
-    "compliance": "https://dlsclimabi.blob.core.windows.net/public-data/eutlpublic/extracts/_all_extracts/operators_yearly_activity/operators_yearly_activity_daily.csv.gz",
-    "transactions": "https://climate.ec.europa.eu/document/download/0cda99f1-16f6-41e7-b190-887cd71339a4_en?filename=transactions_eutl_2024_0.zip",
-}
-
-
-def extract_accounts(url: str | None = None) -> pd.DataFrame:
-    """Extract account data from the givrn URL or default URL.
+def extract_installations(df: pd.DataFrame, fn_out: str | None = None) -> pd.DataFrame:
+    """Extract installation data from the given DataFrame.
 
     Args:
-        url (str | None, optional): URL to extract data from. Defaults to None.
-
-    Returns:
-        pd.DataFrame: DataFrame containing account data.
-    """
-    if url is None:
-        url = url_source["accounts"]
-
-    # some column renaming (mainly to lower case)
-    map_col = {
-        "REGISTRY_CODE": "registry_id",
-    }
-
-    # get and do minor transformations including creating a unique account id
-    df = pd.read_csv(url, compression="gzip")
-    df = (
-        df.assign(
-            account_id=lambda df: df.REGISTRY_CODE
-            + "_"
-            + df.ACCOUNT_IDENTIFIER.astype(str),
-            # TODO some missings here which seem to be national ETS2 accounts
-            account_type_id=lambda df: (
-                df.FULL_TYPE.fillna(df.ETS_ACCOUNT_TYPE).map(map_account_type_inv)
-            ),
-            closure_pending=lambda df: df.IS_CLOSURE_PENDING == "Y",
-        )
-        .drop(columns=["ACCOUNT_IDENTIFIER", "IS_CLOSURE_PENDING"])
-        .rename(columns=map_col)
-        .rename(columns=lambda x: x.lower())
-    )
-    return df
-
-
-def extract_compliance(url: str | None = None) -> pd.DataFrame:
-    """Extract compliance data from the given URL or default URL.
-
-    Args:
-        url (str | None, optional): URL to extract data from. Defaults to None.
-
-    Returns:
-        pd.DataFrame: DataFrame containing compliance data.
-    """
-    if url is None:
-        url = url_source["compliance"]
-
-    # get data and do minor transformations including creating a unique
-    # installation ID
-    map_col = {
-        "REGISTRY_CODE": "registry_id",
-    }
-    df = (
-        pd.read_csv(url, compression="gzip")
-        .assign(
-            installation_id=lambda df: df.REGISTRY_CODE
-            + "_"
-            + df.INSTALLATION_IDENTIFIER.astype(str)
-        )
-        .drop(columns=["INSTALLATION_IDENTIFIER"])
-        .rename(columns=map_col)
-        .rename(columns=lambda x: x.lower())
-    )
-    return df
-
-
-def extract_installations(url: str | None = None) -> pd.DataFrame:
-    """Extract installation data from the given URL or default URL.
-
-    Args:
-        url (str | None, optional): URL to extract data from. Defaults to None.
+        df (pd.DataFrame): DataFrame containing the installations data after
+            the normalization step.
+        fn_out (str | None, optional): Output filename to save the data.
+            Defaults to None.
 
     Returns:
         pd.DataFrame: DataFrame containing installation data.
+
+    Raises:
+        ValueError: If installation IDs are not unique or if any installation ID
+            is missing.
     """
-    if url is None:
-        url = url_source["installations"]
+    # Filter and return installation-related columns
+    installation_cols = [
+        "installation_id",
+        "ets_id",
+        "account_id",
+        "registry_id",
+        "registry_name",
+        "installation_name",
+        "eper_identification",
+        "activity_type_code",
+        "activity_type",
+        "permit_identifier",
+        "permit_revocation_date",
+        "city",
+        "postal_code",
+        "address1",
+        "address2",
+        "year_of_first_emissions",
+        "year_of_last_emissions",
+        "snapshot_date",
+    ]
+    # ensure that we do not have duplicated or missing installation IDs
+    if not df.installation_id.is_unique:
+        raise ValueError("Installation IDs are not unique.")
+    if df.installation_id.isnull().any():
+        raise ValueError("Some installation IDs are missing.")
+    df_installation = df[installation_cols].copy()
+    if fn_out is not None:
+        df_installation.to_csv(fn_out, index=False)
+    return df_installation
 
-    # get data and do minor transformations including creating a unique
-    # installation ID
-    map_col = {
-        "REGISTRY_CODE": "registry_id",
-    }
-    df = (
-        pd.read_csv(url, compression="gzip")
-        .assign(
-            installation_id=lambda df: df.REGISTRY_CODE
-            + "_"
-            + df.INSTALLATION_IDENTIFIER.astype(str)
-        )
-        .drop(columns=["INSTALLATION_IDENTIFIER"])
-        .rename(columns=map_col)
-        .rename(columns=lambda x: x.lower())
-    )
-    return df
 
-
-def extract_transactions(url: str | None = None) -> pd.DataFrame:
-    """Extract transaction data from the given URL or default URL.
+def extract_compliance(df: pd.DataFrame, fn_out: str | None = None) -> pd.DataFrame:
+    """Extract compliance data from the given DataFrame.
 
     Args:
-        url (str | None, optional): URL to extract data from. Defaults to None.
+        df (pd.DataFrame): DataFrame containing the compliance data after normalization.
+        fn_out (str | None, optional): Output filename to save the data.
+            Defaults to None.
 
     Returns:
-        pd.DataFrame: DataFrame containing transaction data.
+        pd.DataFrame: DataFrame containing compliance data.
+
+    Raises:
+        ValueError: If the compliance data is not unique by installation ID and year.
     """
-    if url is None:
-        url = url_source["transactions"]
+    col_map = {
+        "installation_id": "installation_id",
+        "installation_name": "installation_name",
+        "registry_id": "registry_id",
+        "registry_name": "registry_name",
+        "year": "year",
+        # allocations
+        "allocation": "allocated",
+        "ch_allocation": "allocated_ch",
+        "allocation_res": "allocation_res",
+        "allocation_tra": "allocation_tra",
+        # verified emissions
+        "verified_emissions": "verified",
+        "ch_verified_emissions": "verified_ch",
+        # surrendering
+        "surr_all": "surrendered",
+        "surr_eua": "surrendered_eua",
+        "surr_euaa": "surrendered_euaa",
+        "surr_chu": "surrendered_chu",
+        "surr_chua": "surrendered_chua",
+        "surr_eru_from_aau": "surrendered_eru_from_aau",
+        "surr_former_eua": "surrendered_former_eua",
+        "surr_cer": "surrendered_cer",
+        # excluded flags
+        "excluded": "excluded",
+        "ch_excluded": "ch_excluded",
+        # snapshot date
+        "snapshot_date": "snapshot_date",
+    }
 
-    # Download the zip file to memory
-    response = httpx.get(url_source["transactions"])
-    zip_content = io.BytesIO(response.content)
+    # check that the data by year and installation ID is unique
+    if not df.set_index(["installation_id", "year"]).index.is_unique:
+        raise ValueError("Compliance data is not unique by installation ID and year.")
 
-    # Extract the CSV file that starts with "transactions_EUTL_PUBLIC_NOTESD"
-    with zipfile.ZipFile(zip_content) as zf:
-        csv_filename = [
-            name
-            for name in zf.namelist()
-            if name.startswith("transactions_EUTL_PUBLIC_NOTESD")
-        ][0]
-        with zf.open(csv_filename) as csv_file:
-            df = pd.read_csv(csv_file, low_memory=False)
-    return df
+    df_comp = df.rename(columns=col_map)[list(col_map.values())].copy()
+    if fn_out is not None:
+        df_comp.to_csv(fn_out, index=False)
+    return df_comp
