@@ -102,7 +102,7 @@ def transactions(url: str | None = None, fn_out: str | None = None) -> pd.DataFr
         url = url_source["transactions"]
 
     # Download the zip file to memory
-    response = httpx.get(url_source["transactions"])
+    response = httpx.get(url)
     zip_content = io.BytesIO(response.content)
 
     # Extract the CSV file that starts with "transactions_EUTL_PUBLIC_NOTESD"
