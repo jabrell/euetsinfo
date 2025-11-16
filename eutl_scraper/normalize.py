@@ -14,6 +14,21 @@ from eutl_scraper.mappings import map_account_type_inv
 from .mappings import map_registryCode_inv
 
 
+def _strip_str(df: pd.DataFrame) -> pd.DataFrame:
+    """Strip whitespace from string columns in the DataFrame.
+
+    Args:
+        df (pd.DataFrame): Input DataFrame.
+
+    Returns:
+        pd.DataFrame: DataFrame with whitespace stripped from string columns.
+    """
+    df = df.copy()
+    str_cols = df.select_dtypes(include=["object", "string"]).columns
+    df[str_cols] = df[str_cols].apply(lambda x: x.str.strip())
+    return df
+
+
 def compliance(df: pd.DataFrame) -> pd.DataFrame:
     """Normalize compliance data from the given DataFrame.
 
@@ -28,7 +43,8 @@ def compliance(df: pd.DataFrame) -> pd.DataFrame:
         "REGISTRY_CODE": "registry_id",
     }
     df_c = (
-        df.assign(
+        _strip_str(df)
+        .assign(
             installation_id=lambda df: (
                 df.REGISTRY_CODE + "_" + df.INSTALLATION_IDENTIFIER.astype(str)
             ),
@@ -66,7 +82,8 @@ def installations(df: pd.DataFrame) -> pd.DataFrame:
         "REGISTRY_CODE": "registry_id",
     }
     df_inst = (
-        df.assign(
+        _strip_str(df)
+        .assign(
             installation_id=(
                 lambda df: df.REGISTRY_CODE
                 + "_"
@@ -96,35 +113,45 @@ def transactions(df: pd.DataFrame) -> pd.DataFrame:
     Returns:
         pd.DataFrame: DataFrame containing normalized transaction data.
     """
-    df_trans = df.assign(
-        # add the registry ids
-        acquiring_registry_id=(
-            lambda df: df.ACQUIRING_REGISTRY_NAME.map(map_registryCode_inv)
-        ),
-        transferring_registry_id=(
-            lambda df: df.TRANSFERRING_REGISTRY_NAME.map(map_registryCode_inv)
-        ),
-        originating_registry_id=(
-            lambda df: df.ORIGINATING_REGISTRY.map(map_registryCode_inv)
-        ),
-        ets_id="euets",
-    ).rename(columns=lambda x: x.lower())
+    col_rename = {
+        "ORIGINATING_REGISTRY": "originating_registry_id",
+    }
+    df_trans = (
+        _strip_str(df)
+        .assign(
+            # add the registry ids
+            acquiring_registry_id=(
+                lambda df: df.ACQUIRING_REGISTRY_NAME.str.strip().map(
+                    map_registryCode_inv
+                )
+            ),
+            transferring_registry_id=(
+                lambda df: df.TRANSFERRING_REGISTRY_NAME.str.strip().map(
+                    map_registryCode_inv
+                )
+            ),
+            ets_id="euets",
+        )
+        .rename(columns=col_rename)
+        .rename(columns=lambda x: x.lower())
+    )
     # assign account and installation ids
     for prefix in ["acquiring", "transferring"]:
         # account identifier
-        df_trans[f"{prefix}_account_id"] = (
-            df_trans[f"{prefix}_registry_id"]
+        mask = df_trans[f"{prefix}_account_identifier"].notna()
+        df_trans.loc[mask, f"{prefix}_account_id"] = (
+            df_trans.loc[mask, f"{prefix}_registry_id"]
             + "_"
-            + df_trans[f"{prefix}_account_identifier"].astype(str)
+            + df_trans.loc[mask, f"{prefix}_account_identifier"].astype(int).astype(str)
         )
         # installation identifier
         mask = df_trans[f"{prefix}_installation_installation_identifier"].notna()
         df_trans.loc[mask, f"{prefix}_installation_id"] = (
             df_trans.loc[mask, f"{prefix}_registry_id"]
             + "_"
-            + df_trans.loc[
-                mask, f"{prefix}_installation_installation_identifier"
-            ].astype(str)
+            + df_trans.loc[mask, f"{prefix}_installation_installation_identifier"]
+            .astype(int)
+            .astype(str)
         )
     return df_trans
 
