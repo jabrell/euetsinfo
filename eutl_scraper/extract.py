@@ -162,7 +162,7 @@ def extract_projects_from_transactions(df: pd.DataFrame) -> pd.DataFrame:
         pd.DataFrame: DataFrame containing unique project data.
     """
 
-    def impose_project_type(unit_type_desc: str) -> str:
+    def impose_project_type(unit_type_desc: str) -> str | None:
         if "RMU" in unit_type_desc:
             return "RMU"
         if "CER" in unit_type_desc:
@@ -171,6 +171,7 @@ def extract_projects_from_transactions(df: pd.DataFrame) -> pd.DataFrame:
             return "tCER"
         if "ERU" in unit_type_desc:
             return "ERU"
+        return
 
     project_columns = [
         "originating_registry_id",
