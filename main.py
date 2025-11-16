@@ -24,7 +24,6 @@ def extract_tables(dir_normalized: str, dir_out: str) -> None:
     df_transactions = pd.read_csv(f"{dir_normalized}/eutl_transactions.csv")
     extract.transactions(df_transactions, dir_out=dir_out)
 
-    pass
 
 
 if __name__ == "__main__":
