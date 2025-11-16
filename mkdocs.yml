@@ -42,3 +42,4 @@ plugins:
 
 nav:
   - Home: index.md
+  - Data Processing: data_processing.md

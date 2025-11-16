@@ -6,7 +6,7 @@ Welcome to the EUTL Scraper v2 documentation.
 
 This project provides tools for scraping and processing data from the EU Transaction Log (EUTL).
 
-## Getting Started
+## Contributing
 
 ### Clone the Repository
 
@@ -19,8 +19,9 @@ cd eutl_scraper_v2
 
 This project uses [uv](https://docs.astral.sh/uv/) for fast and reliable Python package management.
 
-First, install uv if you haven't already. Then install the project dependencies:
+First, install uv if you haven't already. Then install the project dependencies (including the
+dev dependencies).
 
 ```bash
-uv sync
+uv sync --all-groups
 ```
