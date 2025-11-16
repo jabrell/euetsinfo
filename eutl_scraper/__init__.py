@@ -6,7 +6,7 @@ __all__ = ["download", "normalize", "extract", "download_and_normalize_data"]
 def download_and_normalize_data(dir_out: str) -> None:
     """Download and normalize all datasets: compliance, installations, and transactions.
 
-    Args
+    Args:
         dir_out (str): Directory to save the normalized data.
     """
     # Installations
