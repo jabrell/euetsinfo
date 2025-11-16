@@ -2,7 +2,7 @@
 provides functions to download datasets related to accounts, compliance,
 installations, and transactions. The data can be saved locally as CSV files
 for further processing. The module currently only supports download of the
-data given under the "doenload data" section but not from the PowerBi app itself.
+data given under the "download data" section but not from the PowerBi app itself.
 """
 
 import io
