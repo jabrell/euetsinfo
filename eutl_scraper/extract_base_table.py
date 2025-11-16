@@ -3,7 +3,7 @@
 import pandas as pd
 
 
-def extract_installations(df: pd.DataFrame, fn_out: str | None = None) -> pd.DataFrame:
+def installations(df: pd.DataFrame, fn_out: str | None = None) -> pd.DataFrame:
     """Extract installation data from the given DataFrame.
 
     Args:
@@ -51,7 +51,7 @@ def extract_installations(df: pd.DataFrame, fn_out: str | None = None) -> pd.Dat
     return df_installation
 
 
-def extract_compliance(df: pd.DataFrame, fn_out: str | None = None) -> pd.DataFrame:
+def compliance(df: pd.DataFrame, fn_out: str | None = None) -> pd.DataFrame:
     """Extract compliance data from the given DataFrame.
 
     Args:

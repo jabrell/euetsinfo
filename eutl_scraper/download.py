@@ -36,9 +36,7 @@ def _download_data(url: str, fn_out: str | None = None) -> pd.DataFrame:
     return df
 
 
-def download_accounts(
-    url: str | None = None, fn_out: str | None = None
-) -> pd.DataFrame:
+def accounts(url: str | None = None, fn_out: str | None = None) -> pd.DataFrame:
     """Extract account data from the given URL or default URL.
 
     Args:
@@ -55,9 +53,7 @@ def download_accounts(
     return df
 
 
-def download_compliance(
-    url: str | None = None, fn_out: str | None = None
-) -> pd.DataFrame:
+def compliance(url: str | None = None, fn_out: str | None = None) -> pd.DataFrame:
     """Download compliance data from the given URL or default URL.
 
     Args:
@@ -74,9 +70,7 @@ def download_compliance(
     return df
 
 
-def download_installations(
-    url: str | None = None, fn_out: str | None = None
-) -> pd.DataFrame:
+def installations(url: str | None = None, fn_out: str | None = None) -> pd.DataFrame:
     """Download installation data from the given URL or default URL.
 
     Args:
@@ -93,9 +87,7 @@ def download_installations(
     return df
 
 
-def download_transactions(
-    url: str | None = None, fn_out: str | None = None
-) -> pd.DataFrame:
+def transactions(url: str | None = None, fn_out: str | None = None) -> pd.DataFrame:
     """Download transaction data from the given URL or default URL.
 
     Args:
@@ -127,22 +119,22 @@ def download_transactions(
     return df
 
 
-def download_all_data(dir_out: str) -> None:
+def all_data(dir_out: str) -> None:
     """Download all datasets:
     accounts, compliance, installations, and transactions.
 
     Args:
         dir_out (str): Directory to save the downloaded datasets.
     """
-    download_accounts(
+    accounts(
         fn_out=f"{dir_out}/eutl_accounts.csv",
     )
-    download_compliance(
+    compliance(
         fn_out=f"{dir_out}/eutl_compliance.csv",
     )
-    download_installations(
+    installations(
         fn_out=f"{dir_out}/eutl_installations.csv",
     )
-    download_transactions(
+    transactions(
         fn_out=f"{dir_out}/eutl_transactions.csv",
     )
