@@ -125,7 +125,7 @@ def transactions(df: pd.DataFrame, dir_out: str) -> None:
     df_accounts = extract_accounts_from_transactions(df)
 
     # transaction data
-    transaction_columns = transaction_columns = [
+    transaction_columns = [
         "transaction_id",
         "transaction_type",
         "transaction_date",
