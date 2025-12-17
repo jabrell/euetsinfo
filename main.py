@@ -1,6 +1,7 @@
 import pandas as pd
 
 from eutl_scraper import download_and_normalize_data, extract
+from eutl_scraper.nace_assignments import extract_nace_by_installation
 
 
 def extract_tables(dir_normalized: str, dir_out: str) -> None:
@@ -25,10 +26,11 @@ def extract_tables(dir_normalized: str, dir_out: str) -> None:
     extract.transactions(df_transactions, dir_out=dir_out)
 
 
-
 if __name__ == "__main__":
     dir_normalized = "data/normalized"
     dir_extracted = "data/extracted"
     download_and_normalize_data(dir_out=dir_normalized)
     extract_tables(dir_normalized=dir_normalized, dir_out=dir_extracted)
+    # also extract the current NACE assignments
+    extract_nace_by_installation(fn_out=f"{dir_extracted}/installation_to_nace.csv")
     print("done")
