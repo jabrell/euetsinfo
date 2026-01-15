@@ -217,3 +217,6 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+eutl_installations*
+!eutl_installations_coordinates.csv
