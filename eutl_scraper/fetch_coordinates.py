@@ -1,6 +1,5 @@
-import os
 import time
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 import pandas as pd
 import requests
@@ -8,7 +7,8 @@ from tqdm import tqdm
 
 GEOAPIFY_URL = "https://api.geoapify.com/v1/geocode/search"
 
-def clean_part(value: Any) -> Optional[str]:
+
+def clean_part(value: Any) -> str | None:
     """
     Clean a single address component.
 
@@ -47,7 +47,7 @@ def build_full_address(row: dict) -> str:
     Returns:
         A single comma-separated address string.
     """
-    parts: List[str] = []
+    parts: list[str] = []
 
     # Address lines
     addr1 = clean_part(row.get("address_1"))
@@ -78,7 +78,7 @@ def geocode_address(
     api_key: str,
     base_url: str = GEOAPIFY_URL,
     timeout: int = 10,
-) -> Tuple[Optional[float], Optional[float]]:
+) -> tuple[float | None, float | None]:
     """
     Geocode a single address using the Geoapify API.
 
@@ -156,14 +156,14 @@ def geocode_installations(
     df = df[df["activity_type_code"] != 50]
 
     # Optional cache to avoid duplicate calls
-    cache: Dict[str, Tuple[Optional[float], Optional[float]]] = {}
+    cache: dict[str, tuple[float | None, float | None]] = {}
 
-    new_rows: List[Dict[str, Any]] = []
-    coordinates_rows: List[Dict[str, Any]] = []
+    new_rows: list[dict[str, Any]] = []
+    coordinates_rows: list[dict[str, Any]] = []
 
     try:
         for row in tqdm(df.to_dict("records")):
-            # Extra safety check, in case codes are strings
+            # exclude activity types 10 and 50 (aviation and shipping)
             if str(row.get("activity_type_code")) in ["10", "50"]:
                 continue
 
@@ -204,27 +204,3 @@ def geocode_installations(
         pd.DataFrame(coordinates_rows).to_csv(output_coordinates_csv, index=False)
 
     print("Done.")
-
-
-if __name__ == "__main__":
-    # --- Configuration / constants section ---
-    GEOAPIFY_API_KEY = ""  # TODO: set your API key here or read from env
-
-    CURRENT_PATH = os.path.dirname(__file__)
-    DATA_PATH = os.path.join(CURRENT_PATH, "..", "data")
-    INPUT_CSV = os.path.join(DATA_PATH, "eutl_installations.csv")
-    OUTPUT_CSV = os.path.join(DATA_PATH, "eutl_installations-output.csv")
-    OUTPUT_COORDINATES_CSV = os.path.join(
-        DATA_PATH, "eutl_installations_coordinates.csv"
-    )
-
-    # Optionally, read API key from environment instead:
-    # GEOAPIFY_API_KEY = os.environ.get("GEOAPIFY_API_KEY", "")
-
-    geocode_installations(
-        input_csv=INPUT_CSV,
-        output_csv=OUTPUT_CSV,
-        output_coordinates_csv=OUTPUT_COORDINATES_CSV,
-        api_key=GEOAPIFY_API_KEY,
-        rate_limit_seconds=0.25,
-    )
