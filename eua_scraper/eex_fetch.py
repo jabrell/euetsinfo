@@ -260,7 +260,7 @@ def update_eex_auction_prices(
         return combined
 
     # -------------------------
-    # main flow
+    # main
     # -------------------------
     xlsx_url, zip_url = find_first_xlsx_and_zip(eex_url)
     print("XLSX:", xlsx_url)
@@ -314,12 +314,10 @@ def update_eex_auction_prices(
         os.remove(zip_path)
         print("ZIP processed and deleted.")
 
-    # -------- CRITICAL: parse AFTER zip extraction --------
+    # -------- parse AFTER zip extraction --------
     print("Parsing all raw Excel files (ZIP history + latest)...")
     consolidated = parse_all_raw_excel(raw_dir)
 
-    # Let latest XLSX "win" on duplicates (already keep='last' above),
-    # but to be extra safe, append the latest one at the end again:
     try:
         latest_df = extract_prices_from_excel(latest_raw_path)
         latest_df["source_file"] = os.path.basename(latest_raw_path)
