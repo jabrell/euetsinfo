@@ -167,8 +167,9 @@ def extract_holders(
     df_holder_trans = (
         df_trans[["account_id"] + list(trans_holder_cols.keys())]
         # drop holder if the name is missing
-        .loc[lambda df: pd.notnull(df["ACCOUNT_HOLDER"])]
-        .rename(columns=trans_holder_cols)
+        .loc[lambda df: pd.notnull(df["ACCOUNT_HOLDER"])].rename(
+            columns=trans_holder_cols
+        )
         # assign unique id
         .assign(
             holder_id=lambda df: df.apply(generate_account_holder_id, axis=1),
@@ -193,8 +194,9 @@ def extract_holders(
         # drop holder if the name is missing
         .loc[lambda df: pd.notnull(df["Account Holder Name"])]
         # exclude accounts that are already in the transaction holders
-        .loc[lambda df: ~df["account_id"].isin(df_holder_trans["account_id"])]
-        .rename(columns=bi_holder_cols)
+        .loc[lambda df: ~df["account_id"].isin(df_holder_trans["account_id"])].rename(
+            columns=bi_holder_cols
+        )
         # assign unique id
         .assign(
             holder_id=lambda df: df.apply(generate_account_holder_id, axis=1),
@@ -205,7 +207,9 @@ def extract_holders(
     # mapping
     df_holder = pd.concat([df_holder_bi, df_holder_trans], axis=0)
     df_link_account_holder = df_holder[["holder_id", "account_id"]].drop_duplicates()
-    df_holder = df_holder.drop_duplicates(subset=["holder_id"])
+    df_holder = df_holder.drop_duplicates(subset=["holder_id"]).drop(
+        columns=["account_id"]
+    )
 
     return df_holder.reset_index(drop=True), df_link_account_holder.reset_index(
         drop=True
@@ -288,9 +292,9 @@ def create_account_table_with_holders(
     )
 
     # add the account holder IDs to the account table
-    assert df_link_account_holder["account_id"].is_unique, (
-        "Account IDs in link table are not unique"
-    )
+    assert df_link_account_holder[
+        "account_id"
+    ].is_unique, "Account IDs in link table are not unique"
 
     df_accounts = df_accounts.merge(df_link_account_holder, on="account_id", how="left")
 

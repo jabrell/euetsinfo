@@ -1,6 +1,6 @@
 import pandas as pd
 
-from eutl_scraper import download, extract
+from eutl_scraper import download, extract, download_and_normalize_data
 
 
 def extract_tables(dir_normalized: str, dir_out: str) -> None:
@@ -28,7 +28,7 @@ def extract_tables(dir_normalized: str, dir_out: str) -> None:
 if __name__ == "__main__":
     dir_normalized = "data/normalized"
     dir_extracted = "data/extracted"
-    download.all_data(dir_out="data/source/automatic")
-    # download_and_normalize_data(dir_out=dir_normalized)
-    # extract_tables(dir_normalized=dir_normalized, dir_out=dir_extracted)
+    # download.all_data(dir_out="data/source/automatic")
+    download_and_normalize_data(dir_out=dir_normalized)
+    extract_tables(dir_normalized=dir_normalized, dir_out=dir_extracted)
     # print("done")
