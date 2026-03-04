@@ -45,3 +45,4 @@ nav:
   - Data Processing:
     - Overview: data_processing.md
     - Accounts and Account Holders: account_processing.md
+    - Carbon prices: carbon_price_data_collecting.md

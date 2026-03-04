@@ -17,7 +17,7 @@ def update_eex_auction_prices(
 ) -> pd.DataFrame:
     """
     Incrementally update EEX EUA primary auction price data.
-    
+
     This function retrieves the latest EUA primary auction price data from the
     European Energy Exchange (EEX) website, extracts the auction date and price
     from the top-level Excel file, and merges any newly available observations
@@ -31,41 +31,38 @@ def update_eex_auction_prices(
 
     Column headers and file formats are normalised automatically to account
     for historical inconsistencies in EEX data exports.
-    
-    Parameters
-    ----------
-    eex_url : str
-        URL of the EEX web page that hosts the EUA primary auction data downloads.
-        The function automatically discovers the current Excel download link.
-    data_dir : str
-        Base directory used to store intermediate files and outputs related to
-        the EEX auction price dataset. The final dataset is written to the
-        ``output`` subdirectory of this folder.
-    prices_filename : str, optional
-        Name of the Excel file containing the consolidated auction price time
-        series. Defaults to ``"eex_auction_prices.xlsx"``.
-    meta_filename : str, optional
-        Name of the JSON metadata file used to track the previously downloaded
-        version of the Excel source (ETag, Last-Modified, content hash).
-        Defaults to ``"eex_top_xlsx_meta.json"``.
-    download_zip : bool, optional
-        If ``True``, the function also downloads the first ZIP archive found on
-        the EEX page, extracts any Excel files contained within it, and deletes
-        the archive afterwards. This is intended for historical backfills and
-        is disabled by default.
 
-    Returns
-    -------
-    pandas.DataFrame
-        A DataFrame containing the consolidated EUA primary auction price time
-        series with the following columns:
 
-        - ``Date`` : datetime.date  
-          Auction date (time component removed).
-        - ``Auction Price €/tCO2`` : float  
-          Auction clearing price in EUR per tonne of CO₂.
+    Args:
+        eex_url (str): URL of the EEX web page that hosts the EUA primary auction
+            data downloads. The function automatically discovers the current Excel
+            download link.
+        data_dir (str): Base directory used to store intermediate files and outputs
+            related to the EEX auction price dataset. The final dataset is written to the
+            the EEX auction price dataset. The final dataset is written to the
+            ``output`` subdirectory of this folder.
+        prices_filename (str, optional): Name of the Excel file containing the
+            consolidated auction price time series. Defaults to ``"eex_auction_prices.xlsx"``.
+        meta_filename (str, optional): Name of the JSON metadata file used to track
+            the previously downloaded version of the Excel source (ETag, Last-Modified,
+            content hash).
+            Defaults to ``"eex_top_xlsx_meta.json"``.
+        download_zip (bool, optional): If ``True``, the function also downloads
+            the first ZIP archive found on the EEX page, extracts any Excel files
+            contained within it, and deletes the archive afterwards. This is intended
+            for historical backfills and is disabled by default.
 
-        The returned DataFrame is sorted by date in ascending order.
+    Returns:
+        pandas.DataFrame
+            A DataFrame containing the consolidated EUA primary auction price time
+            series with the following columns:
+
+            - ``Date`` : datetime.date
+            Auction date (time component removed).
+            - ``Auction Price €/tCO2`` : float
+            Auction clearing price in EUR per tonne of CO₂.
+
+            The returned DataFrame is sorted by date in ascending order.
     """
 
     # -------------------------
@@ -189,19 +186,22 @@ def update_eex_auction_prices(
                 )
 
                 # Clean column names
-                df.columns = (
-                    df.columns.astype(str)
-                    .str.strip()
-                    .str.replace("\n", " ")
-                )
+                df.columns = df.columns.astype(str).str.strip().str.replace("\n", " ")
 
                 # Normalise known column header variant
-                df.columns = [c.replace("Auction Price EUR/tCO2", "Auction Price €/tCO2") for c in df.columns]
+                df.columns = [
+                    c.replace("Auction Price EUR/tCO2", "Auction Price €/tCO2")
+                    for c in df.columns
+                ]
 
                 # Date column
-                date_col = next((c for c in df.columns if str(c).strip().lower() == "date"), None)
+                date_col = next(
+                    (c for c in df.columns if str(c).strip().lower() == "date"), None
+                )
                 if date_col is None:
-                    date_col = next((c for c in df.columns if "date" in str(c).lower()), None)
+                    date_col = next(
+                        (c for c in df.columns if "date" in str(c).lower()), None
+                    )
 
                 # Price column
                 if "Auction Price €/tCO2" in df.columns:
@@ -218,10 +218,14 @@ def update_eex_auction_prices(
                     continue
 
                 out = df[[date_col, price_col]].copy()
-                out = out.rename(columns={date_col: "Date", price_col: "Auction Price €/tCO2"})
+                out = out.rename(
+                    columns={date_col: "Date", price_col: "Auction Price €/tCO2"}
+                )
 
                 out["Date"] = pd.to_datetime(out["Date"], errors="coerce").dt.date
-                out["Auction Price €/tCO2"] = pd.to_numeric(out["Auction Price €/tCO2"], errors="coerce")
+                out["Auction Price €/tCO2"] = pd.to_numeric(
+                    out["Auction Price €/tCO2"], errors="coerce"
+                )
                 out = out.dropna(subset=["Date", "Auction Price €/tCO2"])
 
                 if len(out) == 0:
@@ -238,7 +242,9 @@ def update_eex_auction_prices(
         )
 
     def parse_all_raw_excel(folder: str) -> pd.DataFrame:
-        excel_files = [f for f in os.listdir(folder) if f.lower().endswith((".xlsx", ".xls"))]
+        excel_files = [
+            f for f in os.listdir(folder) if f.lower().endswith((".xlsx", ".xls"))
+        ]
         print(f"Raw Excel files found: {len(excel_files)}")
 
         all_dfs = []
@@ -256,7 +262,9 @@ def update_eex_auction_prices(
             return pd.DataFrame(columns=["Date", "Auction Price €/tCO2", "source_file"])
 
         combined = pd.concat(all_dfs, ignore_index=True)
-        combined = combined.drop_duplicates(subset=["Date"], keep="last").sort_values("Date")
+        combined = combined.drop_duplicates(subset=["Date"], keep="last").sort_values(
+            "Date"
+        )
         return combined
 
     # -------------------------
@@ -322,7 +330,9 @@ def update_eex_auction_prices(
         latest_df = extract_prices_from_excel(latest_raw_path)
         latest_df["source_file"] = os.path.basename(latest_raw_path)
         consolidated = pd.concat([consolidated, latest_df], ignore_index=True)
-        consolidated = consolidated.drop_duplicates(subset=["Date"], keep="last").sort_values("Date")
+        consolidated = consolidated.drop_duplicates(
+            subset=["Date"], keep="last"
+        ).sort_values("Date")
     except Exception as e:
         print("Warning: failed to re-apply latest XLSX overwrite logic:", e)
 
