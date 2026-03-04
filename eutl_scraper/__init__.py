@@ -1,6 +1,13 @@
 from . import download, extract, normalize
+from .fetch_coordinates import geocode_installations
 
-__all__ = ["download", "normalize", "extract", "download_and_normalize_data"]
+__all__ = [
+    "download",
+    "normalize",
+    "extract",
+    "download_and_normalize_data",
+    "geocode_installations",
+]
 
 
 def download_and_normalize_data(dir_out: str) -> None:

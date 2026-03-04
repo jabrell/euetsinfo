@@ -1,7 +1,9 @@
 import pandas as pd
+from pathlib import Path
 
-from eutl_scraper import download_and_normalize_data, extract
+from eutl_scraper import download, extract, download_and_normalize_data
 from eutl_scraper.nace_assignments import extract_nace_by_installation
+from eutl_scraper.extract_accounts import create_account_table_with_holders
 
 
 def extract_tables(dir_normalized: str, dir_out: str) -> None:
@@ -27,10 +29,28 @@ def extract_tables(dir_normalized: str, dir_out: str) -> None:
 
 
 if __name__ == "__main__":
-    dir_normalized = "data/normalized"
-    dir_extracted = "data/extracted"
+    dir_source = Path("data/source")
+    dir_out = Path("data/extracted")
+    dir_normalized = Path("data/normalized")
+    dir_extracted = Path("data/extracted")
+
+    # download and normalize data
+    download.all_data(dir_out=dir_source / "automatic")
     download_and_normalize_data(dir_out=dir_normalized)
     extract_tables(dir_normalized=dir_normalized, dir_out=dir_extracted)
-    # also extract the current NACE assignments
-    extract_nace_by_installation(fn_out=f"{dir_extracted}/installation_to_nace.csv")
-    print("done")
+
+    # based on the extracted tables, create the account table with holders
+    create_account_table_with_holders(
+        fn_direct=dir_source / "automatic" / "eutl_accounts.csv",
+        fn_bi=dir_source / "manual" / "accounts.xlsx",
+        fn_trans=dir_source / "automatic" / "eutl_transactions.csv",
+        dir_out=dir_out,
+    )
+
+    # extract NACE classifications by installation
+    extract_nace_by_installation(
+        fn_out=dir_out / "nace_by_installation.csv",
+        fn_leakage_2015=dir_source / "manual" / "leakage_2015.xlsx",
+        fn_leakage_2020=dir_source / "manual" / "leakage_2020.xlsx",
+    )
+    # print("done")
