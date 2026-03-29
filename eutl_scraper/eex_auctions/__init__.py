@@ -47,6 +47,10 @@ def download_auction_data(
         raise ValueError("No valid data extracted from the downloaded files")
     df = parse_auctions(df) if df is not None else None
 
+    # add a timestamp column with the current date and time
+    if df is not None:
+        df["created_at"] = pd.Timestamp.now()
+
     if fn_out is not None and df is not None:
         fn_out = Path(fn_out)
         fn_out.parent.mkdir(parents=True, exist_ok=True)
