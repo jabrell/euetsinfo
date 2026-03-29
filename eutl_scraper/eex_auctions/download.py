@@ -1,5 +1,6 @@
 """Module for downloading the current and historical auction price data from the EEX website."""
 
+import re
 from pathlib import Path
 from urllib.parse import urljoin
 
@@ -13,6 +14,15 @@ HEADERS = {
     "Accept-Language": "en-US,en;q=0.9",
 }
 EEX_URL = "https://www.eex.com/en/market-data/market-data-hub/environmentals/eex-eua-primary-auction-spot-download"
+
+# patterns to match the relevant XLSX and ZIP files based on their naming convention
+# on the EEX website.
+XLSX_PATTERN = re.compile(
+    r"emission-spot-primary-market-auction-report-\d{4}-data\.xlsx$", re.IGNORECASE
+)
+ZIP_PATTERN = re.compile(
+    r"emission-spot-primary-market-auction-report-.*data\.zip$", re.IGNORECASE
+)
 
 
 def download_auction_reports(
@@ -75,14 +85,8 @@ def find_first_xlsx_and_zip(page_url: str) -> tuple[str | None, str | None]:
     Args:
         page_url: The URL of the webpage to search.
     """
-    # todo narrow to the relevant section of the page instead of searching all links
     resp = requests.get(page_url, headers=HEADERS, timeout=30)
-    try:
-        resp.raise_for_status()
-    except Exception as e:
-        raise ValueError(
-            f"Failed to fetch page {page_url}: {resp.status_code} {resp.reason}"
-        ) from e
+    resp.raise_for_status()
 
     soup = BeautifulSoup(resp.text, "html.parser")
 
@@ -90,15 +94,17 @@ def find_first_xlsx_and_zip(page_url: str) -> tuple[str | None, str | None]:
     zip_url = None
 
     for a in soup.find_all("a", href=True):
-        href_raw = a["href"].strip()
-        href = href_raw.lower()
+        href = a["href"].strip()
 
-        if href.endswith(".xlsx") and xlsx_url is None:
-            xlsx_url = urljoin(page_url, href_raw)
-        elif href.endswith(".zip") and zip_url is None:
-            zip_url = urljoin(page_url, href_raw)
+        if xlsx_url is None and XLSX_PATTERN.search(href):
+            xlsx_url = urljoin(page_url, href)
+        elif zip_url is None and ZIP_PATTERN.search(href):
+            zip_url = urljoin(page_url, href)
 
         if xlsx_url and zip_url:
             break
+
+    if xlsx_url is None:
+        raise FileNotFoundError(f"No XLSX link found on {page_url}")
 
     return xlsx_url, zip_url
