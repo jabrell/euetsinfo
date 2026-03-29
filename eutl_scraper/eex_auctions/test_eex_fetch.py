@@ -1,6 +1,8 @@
-import os
 import importlib
+import os
+
 import eex_fetch
+
 importlib.reload(eex_fetch)
 
 from eex_fetch import update_eex_auction_prices
@@ -15,7 +17,5 @@ eex_url = "https://www.eex.com/en/market-data/market-data-hub/environmentals/eex
 
 
 prices = update_eex_auction_prices(
-    eex_url=eex_url,
-    data_dir=data_dir,
-    download_zip=False
+    eex_url=eex_url, data_dir=data_dir, download_zip=False
 )

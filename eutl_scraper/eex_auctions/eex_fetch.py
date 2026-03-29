@@ -1,11 +1,12 @@
-from bs4 import BeautifulSoup
-from urllib.parse import urljoin, urlparse
-import requests
+import hashlib
+import json
 import os
 import zipfile
+from urllib.parse import urljoin, urlparse
+
 import pandas as pd
-import json
-import hashlib
+import requests
+from bs4 import BeautifulSoup
 
 
 def update_eex_auction_prices(
