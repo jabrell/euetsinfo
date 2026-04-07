@@ -23,7 +23,7 @@ class EUTLPipelineSteps(StrEnum):
     EXTRACT = "extract"
 
 
-def eutl_pipeline(
+def pipeline_eutl(
     dir_out: str | Path | None = None,
     steps: list[EUTLPipelineSteps] | None = None,
     fn_manual_accounts: str | Path | None = None,
@@ -62,7 +62,9 @@ def eutl_pipeline(
         steps = list(EUTLPipelineSteps)
 
     if EUTLPipelineSteps.DOWNLOAD in steps:
+        print("Download EUTL data...")
         download_all_data(dir_out=DIR_SOURCE_AUTOMATIC)
+        print("Normalize EUTL data...")
         normalize_all_data(dir_in=DIR_SOURCE_AUTOMATIC, dir_out=DIR_NORMALIZED)
 
     if EUTLPipelineSteps.EXTRACT in steps:
@@ -70,6 +72,7 @@ def eutl_pipeline(
             raise ValueError(
                 "fn_manual_accounts must be provided for account holder extraction."
             )
+        print("Extract EUTL data...")
         extract_all_data(
             dir_in=DIR_NORMALIZED,
             dir_out=dir_out,

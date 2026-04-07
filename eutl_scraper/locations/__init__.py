@@ -20,7 +20,7 @@ __all__ = [
 def pipeline_installation_coordinates(
     api_key: str,
     fn_installations: str | Path | None = None,
-    fn_out: str | Path | None = None,
+    dir_out: Path | None = None,
     rate_limit_seconds: float = 0.25,
     max_installations: int | None = None,
 ) -> pd.DataFrame:
@@ -33,9 +33,9 @@ def pipeline_installation_coordinates(
             Path to file with the installation.
             If None, the default path will be used
             (./data/extracted/eutl_installations.csv).
-        fn_out: Path to the output CSV file for the geocoded data.
-            If None, the default path will be used
-            (./data/extracted/eutl_installations_geocoded.csv).
+        dir_out: Directory to save the output CSV file for the geocoded data.
+            If None, the default directory will be used
+            (./data/extracted).
         rate_limit_seconds: Number of seconds to wait between API calls to respect
             rate limits.
         max_installations: Optional limit on the number of installations to process
@@ -50,11 +50,6 @@ def pipeline_installation_coordinates(
         fn_installations = DIR_EXTRACTED / "eutl_installations.csv"
     else:
         fn_installations = Path(fn_installations)
-    # output file for geocoded data
-    if fn_out is None:
-        fn_out = DIR_EXTRACTED / "installation_locations.csv"
-    else:
-        fn_out = Path(fn_out)
 
     # get and prepare the installation file
     df_inst = load_installations(input_csv=fn_installations)
@@ -68,6 +63,10 @@ def pipeline_installation_coordinates(
     )
 
     # save to disk
+    if dir_out is not None:
+        dir_out = Path(dir_out)
+        fn_out = dir_out / "installation_locations.csv"
+        df.to_csv(fn_out, index=False)
     df.to_csv(fn_out, index=False)
 
     return df

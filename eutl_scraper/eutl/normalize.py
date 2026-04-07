@@ -12,9 +12,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from eutl_scraper.mappings import map_account_type_inv
-
-from .mappings import map_registryCode_inv
+from .mappings import map_account_type_inv, map_registryCode_inv
 
 
 def _strip_str(df: pd.DataFrame) -> pd.DataFrame:

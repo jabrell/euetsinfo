@@ -1,0 +1,54 @@
+primaryKey: id
+foreignKeys:
+  - fields:
+      - holder_id
+    reference:
+      resource: account_holders
+      fields:
+        - id
+missingValues:
+  - ""
+  - "NA"
+fields:
+  - name: id
+    title: Account ID
+    description: Unique identifier for the account.
+    type: string
+    constraints:
+      required: true
+  - name: name
+    title: Account Name
+    description: Name of the account.
+    type: string
+    constraints:
+      required: true
+  - name: account_type
+    title: Account Type
+    description: Type of the account.
+    type: string
+  - name: holder_id
+    title: Account Holder ID
+    description: Identifier of the account holder.
+    type: string
+  - name: openingDate
+    title: Opening Date
+    description: Date the account was opened.
+    type: datetime
+  - name: closingDate
+    title: Closing Date
+    description: Date the account was closed.
+    type: datetime
+    constraints:
+      required: true
+  - name: isClosurePending
+    title: Closure Pending
+    description: Whether the account has a pending closure.
+    type: boolean
+    constraints:
+      required: true
+  - name: snapshotDate
+    title: Snapshot Date
+    description: Date of the data snapshot as provided by the EUTL.
+    type: datetime
+    constraints:
+      required: true

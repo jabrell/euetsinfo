@@ -1,0 +1,39 @@
+primaryKey: id
+missingValues:
+  - ""
+  - "NA"
+fields:
+  - name: id
+    title: Project ID
+    description: Unique identifier for the offset project.
+    type: integer
+    constraints:
+      required: true
+  - name: project_identifier
+    title: Project Identifier
+    description: Numeric identifier of the offset project.
+    type: number
+    constraints:
+      required: true
+  - name: project_type
+    title: Project Type
+    description: Type of the offset project (e.g., CDM, JI).
+    type: string
+  - name: originating_registry_id
+    title: Originating Registry ID
+    description: Identifier of the registry where the project originated.
+    type: string
+    constraints:
+      required: true
+  - name: lulucf_code_description
+    title: LULUCF Code Description
+    description: Land Use, Land-Use Change and Forestry classification description.
+    type: string
+  - name: track
+    title: Track
+    description: JI project track number.
+    type: number
+  - name: expiry_date
+    title: Expiry Date
+    description: Expiry date of the project credits.
+    type: datetime
