@@ -1,3 +1,9 @@
+"""Module for downloading the current and historical auction price data from the
+EEX website.
+
+The first version of this module was provided by: Thomas Mramor (Bruegel)
+"""
+
 from pathlib import Path
 
 import pandas as pd
@@ -5,14 +11,18 @@ import pandas as pd
 from eutl_scraper import settings
 
 from .download import download_auction_reports
-from .eex_fetch import update_eex_auction_prices
 from .extraction import extract_data
 from .parsing import parse_auctions
 
-__all__ = ["update_eex_auction_prices", "download_auction_data"]
+__all__ = [
+    "pipeline_eex_auction_data",
+    "download_auction_reports",
+    "extract_data",
+    "parse_auctions",
+]
 
 
-def download_auction_data(
+def pipeline_eex_auction_data(
     fn_out: str | Path | None,
     download_history: bool = False,
     dir_tmp: str | Path = None,
@@ -21,7 +31,8 @@ def download_auction_data(
     into a DataFrame.
 
     Args:
-        fn_out (str | Path | None): The path where the extracted data should be saved as CSV.
+        fn_out (str | Path | None): The path where the extracted data should be
+            saved as CSV.
             If None, the data will not be saved to a file.
         download_history (bool): Whether to also download the historical data ZIP file.
         dir_tmp (str | Path): The directory where the temporary files should be saved.

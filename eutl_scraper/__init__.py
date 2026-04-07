@@ -1,5 +1,5 @@
 from . import download, extract, normalize
-from .fetch_coordinates import geocode_installations
+from .locations.fetch_coordinates import geocode_installations
 
 __all__ = [
     "download",

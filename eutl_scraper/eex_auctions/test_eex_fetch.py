@@ -1,9 +1,4 @@
-import importlib
 import os
-
-import eex_fetch
-
-importlib.reload(eex_fetch)
 
 from eex_fetch import update_eex_auction_prices
 

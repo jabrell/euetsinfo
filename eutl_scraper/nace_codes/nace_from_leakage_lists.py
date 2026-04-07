@@ -7,46 +7,48 @@ from pathlib import Path
 
 import pandas as pd
 
-
 # Directory containing manual source data files relative to this module
-MANUAL_DATA_DIR = Path(__file__).resolve().parent.parent / "data" / "source" / "manual"
+MY_DIR = Path(__file__).resolve().parent
 
 
 def extract_nace_by_installation(
-    fn_out: str | Path | None = None,
-    fn_leakage_2015: str | Path | None = None,
-    fn_leakage_2020: str | Path | None = None,
+    fn_leakage_2015: Path,
+    fn_leakage_2020: Path,
+    df_nace_codes: pd.DataFrame,
 ) -> pd.DataFrame:
     """Parse leakage lists and extract NACE classifications
 
     Args:
-
         fn_out (str | Path): output file name
             If none is provided, the data frame is not saved to disk.
             Default is None.
-        fn_leakage_2015 (str | Path | None): path to 2015 leakage list
-        fn_leakage_2020 (str | Path | None): path to 2020 leakage list
+        fn_leakage_2015 (Path): path to 2015 leakage list
+        fn_leakage_2020 (Path): path to 2020 leakage list
+        df_nace_codes (pd.DataFrame): DataFrame containing NACE classification
+            scheme
 
+    Returns:
+        pd.DataFrame: with nace classification by installation
+            columns: installation_id, nace_2015, nace_2020
     """
-    fn_leakage_2015 = fn_leakage_2015 or MANUAL_DATA_DIR / "leakage_2015.xlsx"
-    fn_leakage_2020 = fn_leakage_2020 or MANUAL_DATA_DIR / "leakage_2020.xlsx"
+    # set path to input files
+    if fn_leakage_2015 is None:
+        fn_leakage_2015 = MY_DIR / "leakage_2015.xlsx"
+    if fn_leakage_2020 is None:
+        fn_leakage_2020 = MY_DIR / "leakage_2020.xlsx"
+    fn_leakage_2015 = Path(fn_leakage_2015)
+    fn_leakage_2020 = Path(fn_leakage_2020)
 
     df_15 = extract_leakage_2015(fn_leakage_2015=fn_leakage_2015)
     df_20 = extract_leakage_2020(fn_leakage_2020=fn_leakage_2020)
-    df_nace = extract_nace_scheme(
-        fn_in=MANUAL_DATA_DIR / "NACE_REV2_20200427_154248.htm"
-    )
 
     # merge the two leakage lists and normalize NACE codes
     df = df_15.merge(df_20, on="installation_id", how="outer")
 
     # normalized NACE codes
     df = normalize_nace_codes(
-        df=df, columns=["nace_2015", "nace_2020"], df_nace_codes=df_nace
+        df=df, columns=["nace_2015", "nace_2020"], df_nace_codes=df_nace_codes
     )
-
-    if fn_out:
-        df.to_csv(fn_out, index=False)
     return df
 
 
@@ -69,10 +71,9 @@ def normalize_nace_codes(
 
     valid_ids = set(df_nace_codes["id"].astype(str).tolist())
     for column in columns:
-        df[column].where(
+        df[column] = df[column].where(
             df[column].isin(valid_ids),
             df[column].str.rstrip(".0"),
-            inplace=True,
         )
     return df
 
@@ -139,17 +140,12 @@ def extract_leakage_2020(
     return df
 
 
-def extract_nace_scheme(
-    fn_in: str | Path, fn_out: str | Path | None = None
-) -> pd.DataFrame:
+def extract_nace_scheme(fn_in: str | Path) -> pd.DataFrame:
     """Extract NACE codes with sub-classification from html
     file provided by Eurostat RAMON
 
     Args:
         fn_in (str | Path): input html file path
-        fn_out (str | Path): output csv file path
-            If none is provided, the data frame is not saved to disk.
-            Default is None.
 
     Returns:
         pd.DataFrame: with NACE classification scheme
@@ -182,8 +178,6 @@ def extract_nace_scheme(
             new_rows.append(r)
     df_ = pd.DataFrame(new_rows)
 
-    # save to disk
+    # return combined dataframe with all levels
     df_out = pd.concat([df_all, df_])
-    if fn_out:
-        df_out.to_csv(fn_out, index=False)
     return df_out

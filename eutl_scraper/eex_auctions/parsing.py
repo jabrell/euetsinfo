@@ -33,9 +33,13 @@ MAP_COLUMN_NAMES = {
     "Average number of bids per bidder": "average_bids_per_bidder",
     "Average bid size": "average_bid_size",
     "Average volume bid per bidder": "average_volume_bid_per_bidder",
-    "Standard deviation of bid volume per bidder": "standard_deviation_bid_volume_per_bidder",
+    "Standard deviation of bid volume per bidder": (
+        "standard_deviation_bid_volume_per_bidder"
+    ),
     "Average volume won per bidder": "average_volume_won_per_bidder",
-    "Standard deviation of volume won per bidder": "standard_deviation_volume_won_per_bidder",
+    "Standard deviation of volume won per bidder": (
+        "standard_deviation_volume_won_per_bidder"
+    ),
     "Cover Ratio": "cover_ratio",
     # --- Bidders ---
     "Total Number of Bidders": "total_number_of_bidders",

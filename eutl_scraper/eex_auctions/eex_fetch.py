@@ -30,7 +30,7 @@ def update_eex_auction_prices(
     - If new or revised data are detected, only the affected rows are merged
       into the existing dataset.
 
-    Column headers and file formats are normalised automatically to account
+    Column headers and file formats are normalized automatically to account
     for historical inconsistencies in EEX data exports.
 
 
@@ -39,11 +39,12 @@ def update_eex_auction_prices(
             data downloads. The function automatically discovers the current Excel
             download link.
         data_dir (str): Base directory used to store intermediate files and outputs
-            related to the EEX auction price dataset. The final dataset is written to the
-            the EEX auction price dataset. The final dataset is written to the
+            related to the EEX auction price dataset. The final dataset is written to
+            the the EEX auction price dataset. The final dataset is written to the
             ``output`` subdirectory of this folder.
         prices_filename (str, optional): Name of the Excel file containing the
-            consolidated auction price time series. Defaults to ``"eex_auction_prices.xlsx"``.
+            consolidated auction price time series.
+            Defaults to ``"eex_auction_prices.xlsx"``.
         meta_filename (str, optional): Name of the JSON metadata file used to track
             the previously downloaded version of the Excel source (ETag, Last-Modified,
             content hash).
@@ -189,7 +190,7 @@ def update_eex_auction_prices(
                 # Clean column names
                 df.columns = df.columns.astype(str).str.strip().str.replace("\n", " ")
 
-                # Normalise known column header variant
+                # Normalize known column header variant
                 df.columns = [
                     c.replace("Auction Price EUR/tCO2", "Auction Price €/tCO2")
                     for c in df.columns
@@ -239,7 +240,8 @@ def update_eex_auction_prices(
                 continue
 
         raise RuntimeError(
-            f"Could not extract Date/Auction Price from {os.path.basename(file_path)}; last_error={last_error}"
+            f"Could not extract Date/Auction Price from {os.path.basename(file_path)}"
+            f"; last_error={last_error}"
         )
 
     def parse_all_raw_excel(folder: str) -> pd.DataFrame:
