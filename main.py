@@ -1,9 +1,10 @@
-import pandas as pd
 from pathlib import Path
 
-from eutl_scraper import download, extract, download_and_normalize_data
-from eutl_scraper.nace_assignments import extract_nace_by_installation
+import pandas as pd
+
+from eutl_scraper import download, download_and_normalize_data, extract
 from eutl_scraper.extract_accounts import create_account_table_with_holders
+from eutl_scraper.nace_assignments import extract_nace_by_installation
 
 
 def extract_tables(dir_normalized: str, dir_out: str) -> None:

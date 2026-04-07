@@ -12,9 +12,7 @@ from pathlib import Path
 import httpx
 import pandas as pd
 
-from ..settings import DIR_SOURCE_AUTOMATIC
-
-url_source = {
+URL_SOURCE = {
     "accounts": "https://dlsclimabi.blob.core.windows.net/public-data/eutlpublic/extracts/_all_extracts/account/accounts_daily.csv.gz",
     "installations": "https://dlsclimabi.blob.core.windows.net/public-data/eutlpublic/extracts/_all_extracts/operator/operators_daily.csv.gz",
     "compliance": "https://dlsclimabi.blob.core.windows.net/public-data/eutlpublic/extracts/_all_extracts/operators_yearly_activity/operators_yearly_activity_daily.csv.gz",
@@ -39,7 +37,9 @@ def _download_data(url: str, fn_out: str | None = None) -> pd.DataFrame:
     return df
 
 
-def accounts(url: str | None = None, fn_out: str | None = None) -> pd.DataFrame:
+def download_accounts(
+    url: str | None = None, fn_out: str | None = None
+) -> pd.DataFrame:
     """Extract account data from the given URL or default URL.
 
     Args:
@@ -51,12 +51,14 @@ def accounts(url: str | None = None, fn_out: str | None = None) -> pd.DataFrame:
         pd.DataFrame: DataFrame containing account data.
     """
     if url is None:
-        url = url_source["accounts"]
+        url = URL_SOURCE["accounts"]
     df = _download_data(url, fn_out)
     return df
 
 
-def compliance(url: str | None = None, fn_out: str | None = None) -> pd.DataFrame:
+def download_compliance(
+    url: str | None = None, fn_out: str | None = None
+) -> pd.DataFrame:
     """Download compliance data from the given URL or default URL.
 
     Args:
@@ -68,12 +70,14 @@ def compliance(url: str | None = None, fn_out: str | None = None) -> pd.DataFram
         pd.DataFrame: DataFrame containing compliance data.
     """
     if url is None:
-        url = url_source["compliance"]
+        url = URL_SOURCE["compliance"]
     df = _download_data(url, fn_out)
     return df
 
 
-def installations(url: str | None = None, fn_out: str | None = None) -> pd.DataFrame:
+def download_installations(
+    url: str | None = None, fn_out: str | None = None
+) -> pd.DataFrame:
     """Download installation data from the given URL or default URL.
 
     Args:
@@ -85,12 +89,14 @@ def installations(url: str | None = None, fn_out: str | None = None) -> pd.DataF
         pd.DataFrame: DataFrame containing installation data.
     """
     if url is None:
-        url = url_source["installations"]
+        url = URL_SOURCE["installations"]
     df = _download_data(url, fn_out)
     return df
 
 
-def transactions(url: str | None = None, fn_out: str | None = None) -> pd.DataFrame:
+def download_transactions(
+    url: str | None = None, fn_out: str | None = None
+) -> pd.DataFrame:
     """Download transaction data from the given URL or default URL.
 
     Args:
@@ -102,7 +108,7 @@ def transactions(url: str | None = None, fn_out: str | None = None) -> pd.DataFr
         pd.DataFrame: DataFrame containing transaction data.
     """
     if url is None:
-        url = url_source["transactions"]
+        url = URL_SOURCE["transactions"]
 
     # Download the zip file to memory
     response = httpx.get(url)
@@ -122,28 +128,23 @@ def transactions(url: str | None = None, fn_out: str | None = None) -> pd.DataFr
     return df
 
 
-def download_all_data(dir_out: str | Path | None = None) -> None:
+def download_all_data(dir_out: Path) -> None:
     """Download all datasets:
     accounts, compliance, installations, and transactions.
 
     Args:
-        dir_out (str | Path | None): Directory to save the downloaded datasets.
-            If None, the default directory will be used (./data/source/automatic).
+        dir_out (Path): Directory to save the downloaded datasets.
     """
-    # enforce the default output directory if not provided
-    if dir_out is None:
-        dir_out = DIR_SOURCE_AUTOMATIC
-    elif isinstance(dir_out, str):
-        dir_out = Path(dir_out)
-    accounts(
+    dir_out = Path(dir_out)
+    download_accounts(
         fn_out=f"{dir_out}/eutl_accounts.csv",
     )
-    compliance(
+    download_compliance(
         fn_out=f"{dir_out}/eutl_compliance.csv",
     )
-    installations(
+    download_installations(
         fn_out=f"{dir_out}/eutl_installations.csv",
     )
-    transactions(
+    download_transactions(
         fn_out=f"{dir_out}/eutl_transactions.csv",
     )

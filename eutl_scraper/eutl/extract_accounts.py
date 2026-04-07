@@ -39,9 +39,9 @@ def load_account_data(
     """
     # get automatically downloaded account data
     df_direct = pd.read_csv(fn_direct).assign(
-        account_id=lambda df: df["REGISTRY_CODE"]
-        + "_"
-        + df["ACCOUNT_IDENTIFIER"].astype(str),
+        account_id=lambda df: (
+            df["REGISTRY_CODE"] + "_" + df["ACCOUNT_IDENTIFIER"].astype(str)
+        ),
     )
 
     # create mapping of registry names to codes
@@ -60,9 +60,9 @@ def load_account_data(
         .rename(columns={"..1": "registry_id"})
         .drop(columns=".")
         .assign(
-            account_id=lambda df: df["registry_id"]
-            + "_"
-            + df["Account Identifier"].astype(str),
+            account_id=lambda df: (
+                df["registry_id"] + "_" + df["Account Identifier"].astype(str)
+            ),
         )
     )
 
@@ -88,9 +88,9 @@ def load_account_data(
         .drop_duplicates()
         .reset_index(drop=True)
         .assign(
-            registry_id=lambda df: df["REGISTRY_NAME"]
-            .str.strip()
-            .map(map_registry_names),
+            registry_id=lambda df: (
+                df["REGISTRY_NAME"].str.strip().map(map_registry_names)
+            ),
             account_id=lambda df: df.apply(assign_account_id, axis=1),
         )
     )
@@ -220,7 +220,8 @@ def create_basic_account_table(
     """Unify account data from different sources into a single DataFrame.
 
     Args:
-        df_direct (pd.DataFrame): DataFrame containing account data from direct download.
+        df_direct (pd.DataFrame): DataFrame containing account data from direct
+            download.
 
     Returns:
         pd.DataFrame: Unified DataFrame containing account data from all sources.
