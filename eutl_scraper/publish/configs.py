@@ -48,6 +48,9 @@ class InstallationsConfig(BaseConfig):
             description=(
                 "Information about the installations that are part of the European"
                 " Union Emissions Trading System (EU ETS)."
+                " Note that for euets installations, the account_id is mandatory "
+                "However, ETS2 accounts are currently derived as they appear in the "
+                "compliance data. They do not relate to an account_id"
             ),
             sources=[
                 {
@@ -86,6 +89,8 @@ class InstallationsConfig(BaseConfig):
             "snapshot_date": self._to_datetime("snapshot_date"),
             "permit_revocation_date": self._to_datetime("permit_revocation_date"),
             "year_of_last_emissions": self._to_nullable_int("year_of_last_emissions"),
+            "activity_type_code": self._to_nullable_int("activity_type_code"),
+            "year_of_first_emissions": self._to_nullable_int("year_of_first_emissions"),
         }
 
 

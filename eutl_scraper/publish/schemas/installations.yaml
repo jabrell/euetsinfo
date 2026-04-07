@@ -23,8 +23,6 @@ fields:
   - name: account_id
     title: Account ID
     description: Identifier of the account associated with the installation.
-    constraints:
-      required: true
     type: string
   - name: permitID
     title: Permit Identifier
@@ -56,14 +54,10 @@ fields:
     title: Activity Type Code
     description: Numeric code of the installation activity type.
     type: integer
-    constraints:
-      required: true
   - name: activity_name
     title: Activity Type
     description: Name of the installation activity type.
     type: string
-    constraints:
-      required: true
   - name: permit_revocation_date
     title: Permit Revocation Date
     description: Date the permit was revoked, if applicable.
@@ -80,8 +74,6 @@ fields:
     title: Address Line 1
     description: Primary address of the installation.
     type: string
-    constraints:
-      required: true
   - name: addressSecondary
     title: Address Line 2
     description: Secondary address of the installation.
@@ -90,8 +82,6 @@ fields:
     title: Year of First Emissions
     description: First year emissions were reported.
     type: integer
-    constraints:
-      required: true
   - name: year_of_last_emissions
     title: Year of Last Emissions
     description: Last year emissions were reported, if applicable.
@@ -100,5 +90,3 @@ fields:
     title: Snapshot Date
     description: Date of the data snapshot as provided by the EUTL.
     type: datetime
-    constraints:
-      required: true

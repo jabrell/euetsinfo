@@ -1,5 +1,6 @@
 """The module for extracting the basic tables from the EUTL data downloads."""
 
+import logging
 from pathlib import Path
 
 import pandas as pd
@@ -274,6 +275,46 @@ def extract_accounts_from_transactions(
     return df_accounts
 
 
+def create_missing_installations(
+    fn_compliance: Path, fn_installations: Path
+) -> pd.DataFrame:
+    """Create a DataFrame containing the missing installations based on the
+    compliance data. These are accounts related to ETS2 installations that are
+    present in the compliance data but not in the installation data.
+
+    Note: That modifies the installation table by adding the missing installations.
+
+
+    Args:
+        fn_compliance (Path): Path to the CSV file containing the compliance data.
+        fn_installations (Path): Path to the CSV file containing the installation data.
+
+    Returns:
+        pd.DataFrame: DataFrame containing the missing installations.
+    """
+    df_compliance = pd.read_csv(fn_compliance, low_memory=False)
+    df_installations = pd.read_csv(fn_installations, low_memory=False)
+    missing_ids = set(df_compliance["installation_id"]) - set(
+        df_installations["installation_id"]
+    )
+    logging.info(
+        f"{len(missing_ids)} missing installation IDs found in compliance data."
+        " Added to installation data under ETS2 system."
+    )
+    df_missing = (
+        df_compliance[df_compliance["installation_id"].isin(missing_ids)]
+        .drop_duplicates(subset=["installation_id"])[
+            ["installation_id", "installation_name", "registry_id", "registry_name"]
+        ]
+        .assign(ets_id="ets2")
+    )
+
+    # add the missing installations to the installation table
+    df_inst_new = pd.concat([df_installations, df_missing], ignore_index=True)
+    df_inst_new.to_csv(fn_installations, index=False)
+    return df_missing
+
+
 def extract_all_data(
     dir_in: Path, dir_out: Path, fn_manual_accounts: Path, dir_source: Path
 ) -> None:
@@ -293,10 +334,12 @@ def extract_all_data(
     dir_out = Path(dir_out)
     dir_source = Path(dir_source)
     df_installations = pd.read_csv(dir_in / "eutl_installations.csv", low_memory=False)
-    extract_installations(df_installations, fn_out=dir_out / "eutl_installations.csv")
+    df_inst = extract_installations(
+        df_installations, fn_out=dir_out / "eutl_installations.csv"
+    )
 
     df_compliance = pd.read_csv(dir_in / "eutl_compliance.csv", low_memory=False)
-    extract_compliance(df_compliance, fn_out=dir_out / "eutl_compliance.csv")
+    df_comp = extract_compliance(df_compliance, fn_out=dir_out / "eutl_compliance.csv")
 
     df_transactions = pd.read_csv(dir_in / "eutl_transactions.csv", low_memory=False)
     extract_transactions(df_transactions, dir_out=dir_out)
@@ -311,3 +354,5 @@ def extract_all_data(
         fn_trans=fn_trans,
         dir_out=dir_out,
     )
+
+    create_missing_installations(df_compliance=df_comp, df_installations=df_inst)
