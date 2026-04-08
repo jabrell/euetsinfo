@@ -334,12 +334,10 @@ def extract_all_data(
     dir_out = Path(dir_out)
     dir_source = Path(dir_source)
     df_installations = pd.read_csv(dir_in / "eutl_installations.csv", low_memory=False)
-    df_inst = extract_installations(
-        df_installations, fn_out=dir_out / "eutl_installations.csv"
-    )
+    extract_installations(df_installations, fn_out=dir_out / "eutl_installations.csv")
 
     df_compliance = pd.read_csv(dir_in / "eutl_compliance.csv", low_memory=False)
-    df_comp = extract_compliance(df_compliance, fn_out=dir_out / "eutl_compliance.csv")
+    extract_compliance(df_compliance, fn_out=dir_out / "eutl_compliance.csv")
 
     df_transactions = pd.read_csv(dir_in / "eutl_transactions.csv", low_memory=False)
     extract_transactions(df_transactions, dir_out=dir_out)
@@ -355,4 +353,7 @@ def extract_all_data(
         dir_out=dir_out,
     )
 
-    create_missing_installations(df_compliance=df_comp, df_installations=df_inst)
+    create_missing_installations(
+        fn_compliance=dir_out / "eutl_compliance.csv",
+        fn_installations=dir_out / "eutl_installations.csv",
+    )

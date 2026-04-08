@@ -111,7 +111,7 @@ def download_transactions(
         url = URL_SOURCE["transactions"]
 
     # Download the zip file to memory
-    response = httpx.get(url)
+    response = httpx.get(url, timeout=500)
     zip_content = io.BytesIO(response.content)
 
     # Extract the CSV file that starts with "transactions_EUTL_PUBLIC_NOTESD"
