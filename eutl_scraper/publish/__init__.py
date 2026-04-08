@@ -11,7 +11,10 @@ from eutl_scraper.publish.configs import (
     ProjectsConfig,
     TransactionsConfig,
 )
-from eutl_scraper.publish.configs_additional_data import InstallationLocations
+from eutl_scraper.publish.configs_additional_data import (
+    InstallationLocations,
+    NaceMappings,
+)
 
 from .prepare_tables import prepare_table
 from .resources import create_data_package, create_resource
@@ -34,4 +37,5 @@ TABLE_REGISTRY = {
     "projects": ProjectsConfig(),
     "transactions": TransactionsConfig(),
     "installation_locations": InstallationLocations(),
+    "nace_mappings": NaceMappings(),
 }

@@ -43,6 +43,17 @@ class BaseConfig:
         """Return a function that drops rows where all specified columns are NA."""
         return lambda df: df.dropna(subset=cols, how="all")
 
+    @staticmethod
+    def _float_to_nace(col: str, format: str = ".2f") -> Callable:
+        return lambda df: df[col].apply(
+            lambda x: f"{x:{format}}" if pd.notna(x) else None
+        )
+
+    @staticmethod
+    def _drop_duplicates_subset(cols: list[str]) -> Callable:
+        """Return a function that drops duplicate rows based on specified columns."""
+        return lambda df: df.drop_duplicates(subset=cols)
+
 
 @dataclass
 class InstallationsConfig(BaseConfig):

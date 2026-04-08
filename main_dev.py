@@ -38,6 +38,7 @@ def publish_data_package(
         "projects": dir_source / "eutl_projects.csv",
         # "transactions": dir_source / "eutl_transactions.csv",
         "installation_locations": dir_source / "installation_locations.csv",
+        "nace_mappings": dir_source / "nace_from_leakage_lists.csv",
     }
 
     # loop over the tables, prepare the data and create resources
@@ -64,10 +65,13 @@ def publish_data_package(
         my_package = Package(fn_out)
         report = my_package.validate()
         if not report.valid:
-            logging.error(
-                "Validation failed for the created data package. See the provided "
-                "report for details."
-            )
+            for task in report.tasks:
+                if not task.valid:
+                    logging.error(
+                        f"Resource '{task.name}': "
+                        f"{task.stats['errors']} errors found."
+                        "Check the validation report for details."
+                    )
         else:
             logging.info("Data package validated successfully.")
     return package, report
