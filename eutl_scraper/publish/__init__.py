@@ -12,6 +12,7 @@ from eutl_scraper.publish.configs import (
     TransactionsConfig,
 )
 from eutl_scraper.publish.configs_additional_data import (
+    EEXAuctions,
     InstallationLocations,
     NaceMappings,
 )
@@ -38,4 +39,5 @@ TABLE_REGISTRY = {
     "transactions": TransactionsConfig(),
     "installation_locations": InstallationLocations(),
     "nace_mappings": NaceMappings(),
+    "eex_auctions": EEXAuctions(),
 }

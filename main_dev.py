@@ -36,9 +36,10 @@ def publish_data_package(
         "holders": dir_source / "eutl_account_holders.csv",
         "compliance": dir_source / "eutl_compliance.csv",
         "projects": dir_source / "eutl_projects.csv",
-        # "transactions": dir_source / "eutl_transactions.csv",
+        "transactions": dir_source / "eutl_transactions.csv",
         "installation_locations": dir_source / "installation_locations.csv",
         "nace_mappings": dir_source / "nace_from_leakage_lists.csv",
+        "eex_auctions": dir_source / "eex_auctions.csv",
     }
 
     # loop over the tables, prepare the data and create resources
