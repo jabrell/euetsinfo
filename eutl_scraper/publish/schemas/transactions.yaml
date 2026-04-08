@@ -1,0 +1,83 @@
+missingValues:
+  - ""
+  - "NA"
+foreignKeys:
+  - fields:
+      - acquiring_account_id
+    reference:
+      resource: accounts
+      fields:
+        - id
+  - fields:
+      - transferring_account_id
+    reference:
+      resource: accounts
+      fields:
+        - id
+fields:
+  - name: id
+    title: Transaction ID
+    description: Identifier of the transaction.
+    type: string
+    constraints:
+      required: true
+  - name: date
+    title: Transaction Date
+    description: Date of the transaction.
+    type: datetime
+    constraints:
+      required: true
+  - name: ets_id
+    title: ETS ID
+    description: Emissions Trading System identifier.
+    type: string
+    constraints:
+      required: true
+  - name: transaction_type
+    title: Transaction Type
+    description: Type of the transaction.
+    type: string
+    constraints:
+      required: true
+  - name: originating_registry_id
+    title: Originating Registry ID
+    description: Identifier of the registry where the transaction originated.
+    type: string
+  - name: acquiring_registry_id
+    title: Acquiring Registry ID
+    description: Identifier of the registry of the acquiring account.
+    type: string
+  - name: acquiring_account_id
+    title: Acquiring Account ID
+    description: Identifier of the account acquiring the units.
+    type: string
+  - name: acquiring_installation_id
+    title: Acquiring Installation ID
+    description: Identifier of the installation associated with the acquiring account.
+    type: string
+  - name: transferring_registry_id
+    title: Transferring Registry ID
+    description: Identifier of the registry of the transferring account.
+    type: string
+  - name: transferring_account_id
+    title: Transferring Account ID
+    description: Identifier of the account transferring the units.
+    type: string
+  - name: transferring_installation_id
+    title: Transferring Installation ID
+    description: Identifier of the installation associated with the transferring account.
+    type: string
+  - name: unit_type_description
+    title: Unit Type
+    description: Description of the unit type being transacted.
+    type: string
+  - name: supp_unit_type_description
+    title: Supplementary Unit Type
+    description: Supplementary description of the unit type.
+    type: string
+  - name: amount
+    title: Amount
+    description: Number of units transacted.
+    type: integer
+    constraints:
+      required: true

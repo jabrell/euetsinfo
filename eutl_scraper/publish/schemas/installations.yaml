@@ -1,0 +1,92 @@
+primaryKey: id
+foreignKeys:
+  - fields:
+      - account_id
+    reference:
+      resource: accounts
+      fields:
+        - id
+missingValues:
+  - ""
+  - "NA"
+fields:
+  - name: id
+    title: Installation ID
+    description: Unique identifier for the installation.
+    type: string
+    constraints:
+      required: true
+  - name: name
+    title: Installation Name
+    description: Name of the installation.
+    type: string
+  - name: account_id
+    title: Account ID
+    description: Identifier of the account associated with the installation.
+    type: string
+  - name: permitID
+    title: Permit Identifier
+    description: Identifier of the installation permit.
+    type: string
+  - name: eperID
+    title: EPER Identification
+    description: European Pollutant Emission Register identification.
+    type: string
+  - name: ets_id
+    title: ETS ID
+    description: EU Emissions Trading System identifier.
+    type: string
+    constraints:
+      required: true
+  - name: registry_id
+    title: Registry ID
+    description: Identifier of the national registry.
+    type: string
+    constraints:
+      required: true
+  - name: registry_name
+    title: Registry Name
+    description: Name of the national registry.
+    type: string
+    constraints:
+      required: true
+  - name: activity_id
+    title: Activity Type Code
+    description: Numeric code of the installation activity type.
+    type: integer
+  - name: activity_name
+    title: Activity Type
+    description: Name of the installation activity type.
+    type: string
+  - name: permit_revocation_date
+    title: Permit Revocation Date
+    description: Date the permit was revoked, if applicable.
+    type: datetime
+  - name: city
+    title: City
+    description: City where the installation is located.
+    type: string
+  - name: postalCode
+    title: Postal Code
+    description: Postal code of the installation location.
+    type: string
+  - name: addressMain
+    title: Address Line 1
+    description: Primary address of the installation.
+    type: string
+  - name: addressSecondary
+    title: Address Line 2
+    description: Secondary address of the installation.
+    type: string
+  - name: year_of_first_emissions
+    title: Year of First Emissions
+    description: First year emissions were reported.
+    type: integer
+  - name: year_of_last_emissions
+    title: Year of Last Emissions
+    description: Last year emissions were reported, if applicable.
+    type: integer
+  - name: snapshot_date
+    title: Snapshot Date
+    description: Date of the data snapshot as provided by the EUTL.
+    type: datetime

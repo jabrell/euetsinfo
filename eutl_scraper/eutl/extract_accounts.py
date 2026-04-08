@@ -39,9 +39,9 @@ def load_account_data(
     """
     # get automatically downloaded account data
     df_direct = pd.read_csv(fn_direct).assign(
-        account_id=lambda df: df["REGISTRY_CODE"]
-        + "_"
-        + df["ACCOUNT_IDENTIFIER"].astype(str),
+        account_id=lambda df: (
+            df["REGISTRY_CODE"] + "_" + df["ACCOUNT_IDENTIFIER"].astype(str)
+        ),
     )
 
     # create mapping of registry names to codes
@@ -60,9 +60,9 @@ def load_account_data(
         .rename(columns={"..1": "registry_id"})
         .drop(columns=".")
         .assign(
-            account_id=lambda df: df["registry_id"]
-            + "_"
-            + df["Account Identifier"].astype(str),
+            account_id=lambda df: (
+                df["registry_id"] + "_" + df["Account Identifier"].astype(str)
+            ),
         )
     )
 
@@ -88,9 +88,9 @@ def load_account_data(
         .drop_duplicates()
         .reset_index(drop=True)
         .assign(
-            registry_id=lambda df: df["REGISTRY_NAME"]
-            .str.strip()
-            .map(map_registry_names),
+            registry_id=lambda df: (
+                df["REGISTRY_NAME"].str.strip().map(map_registry_names)
+            ),
             account_id=lambda df: df.apply(assign_account_id, axis=1),
         )
     )
@@ -167,9 +167,8 @@ def extract_holders(
     df_holder_trans = (
         df_trans[["account_id"] + list(trans_holder_cols.keys())]
         # drop holder if the name is missing
-        .loc[lambda df: pd.notnull(df["ACCOUNT_HOLDER"])].rename(
-            columns=trans_holder_cols
-        )
+        .loc[lambda df: pd.notnull(df["ACCOUNT_HOLDER"])]
+        .rename(columns=trans_holder_cols)
         # assign unique id
         .assign(
             holder_id=lambda df: df.apply(generate_account_holder_id, axis=1),
@@ -194,9 +193,8 @@ def extract_holders(
         # drop holder if the name is missing
         .loc[lambda df: pd.notnull(df["Account Holder Name"])]
         # exclude accounts that are already in the transaction holders
-        .loc[lambda df: ~df["account_id"].isin(df_holder_trans["account_id"])].rename(
-            columns=bi_holder_cols
-        )
+        .loc[lambda df: ~df["account_id"].isin(df_holder_trans["account_id"])]
+        .rename(columns=bi_holder_cols)
         # assign unique id
         .assign(
             holder_id=lambda df: df.apply(generate_account_holder_id, axis=1),
@@ -222,7 +220,8 @@ def create_basic_account_table(
     """Unify account data from different sources into a single DataFrame.
 
     Args:
-        df_direct (pd.DataFrame): DataFrame containing account data from direct download.
+        df_direct (pd.DataFrame): DataFrame containing account data from direct
+            download.
 
     Returns:
         pd.DataFrame: Unified DataFrame containing account data from all sources.
@@ -292,9 +291,9 @@ def create_account_table_with_holders(
     )
 
     # add the account holder IDs to the account table
-    assert df_link_account_holder[
-        "account_id"
-    ].is_unique, "Account IDs in link table are not unique"
+    assert df_link_account_holder["account_id"].is_unique, (
+        "Account IDs in link table are not unique"
+    )
 
     df_accounts = df_accounts.merge(df_link_account_holder, on="account_id", how="left")
 

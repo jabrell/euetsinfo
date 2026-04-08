@@ -1,0 +1,30 @@
+primaryKey: installation_id
+missingValues:
+  - ""
+  - "NA"
+foreignKeys:
+  - fields:
+      - installation_id
+    reference:
+      resource: installations
+      fields:
+        - id
+fields:
+  - name: installation_id
+    title: Installation ID
+    description: Identifier of the installation.
+    type: string
+    constraints:
+      required: true
+  - name: latitude
+    title: Latitude
+    description: Latitude coordinate of the installation.
+    type: number
+    constraints:
+      required: true
+  - name: longitude
+    title: Longitude
+    description: Longitude coordinate of the installation.
+    type: number
+    constraints:
+      required: true

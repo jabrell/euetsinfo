@@ -1,0 +1,57 @@
+primaryKey: id
+missingValues:
+  - ""
+  - "NA"
+fields:
+  - name: id
+    title: Account Holder ID
+    description: Stable hash-based identifier derived from the account holder name and company registration number.
+    type: string
+    constraints:
+      required: true
+  - name: name
+    title: Account Holder Name
+    description: Name of the account holder.
+    type: string
+    constraints:
+      required: true
+  - name: companyRegistrationNumber
+    title: Company Registration Number
+    description: Company registration number of the account holder.
+    type: string
+  - name: legalEntityIdentifier
+    title: Legal Entity Identifier
+    description: Legal Entity Identifier (LEI) of the account holder.
+    type: string
+  - name: addressMain
+    title: Address Line 1
+    description: Primary address of the account holder.
+    type: string
+  - name: addressSecondary
+    title: Address Line 2
+    description: Secondary address of the account holder.
+    type: string
+  - name: postalCode
+    title: Postal Code
+    description: Postal code of the account holder.
+    type: string
+  - name: city
+    title: City
+    description: City of the account holder.
+    type: string
+  - name: country
+    title: Country
+    description: Country of the account holder.
+    type: string
+  - name: telephone1
+    title: Telephone 1
+    description: Primary telephone number of the account holder.
+    type: string
+  - name: telephone2
+    title: Telephone 2
+    description: Secondary telephone number of the account holder.
+    type: string
+  - name: email
+    title: Email
+    description: Email address of the account holder.
+    type: string

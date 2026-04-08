@@ -1,3 +1,4 @@
+import logging
 import time
 from typing import Any
 
@@ -114,13 +115,38 @@ def geocode_address(
     return lat, lon
 
 
+def load_installations(input_csv: str) -> pd.DataFrame:
+    """
+    Load the installations CSV into a DataFrame and prepare it for geocoding.
+
+    Args:
+        input_csv: Path to the input CSV file.
+
+    Returns:
+        A pandas DataFrame containing the installations data.
+    """
+    df = pd.read_csv(input_csv)
+
+    # Ensure columns exist
+    for col in ["lat", "lon"]:
+        if col not in df.columns:
+            df[col] = None
+
+    # Filter out activity types 10 and 50 (aircraft and shipping)
+    mask = ~df["activity_type_code"].isin([10, 50])
+    df = df[mask]
+
+    # add the full address column
+    df["full_address"] = df.apply(build_full_address, axis=1)
+    return df
+
+
 def geocode_installations(
-    input_csv: str,
-    output_csv: str,
-    output_coordinates_csv: str,
+    df: pd.DataFrame,
     api_key: str,
     rate_limit_seconds: float = 0.25,
-) -> None:
+    max_installations: int | None = None,
+) -> pd.DataFrame:
     """
     Main processing function that reads installations, geocodes their addresses,
     and writes full and coordinates-only CSV outputs.
@@ -134,26 +160,16 @@ def geocode_installations(
     - Save the enriched dataset and a coordinates-only CSV
 
     Args:
-        input_csv: Path to the input CSV file with installations.
-        output_csv: Path to the output CSV file with full data (including lat/lon).
-        output_coordinates_csv: Path to the output CSV file with only ID and coordinates.
+        df (pd.DataFrame): DataFrame containing the installations data prepared
+            for geocoding (see `load_installations` function).
         api_key: Geoapify API key used for geocoding.
         rate_limit_seconds: Delay between API calls to respect rate limits.
+        max_installations: Optional limit on the number of installations to process
+            (useful for testing).
+
+    Returns:
+        A pandas DataFrame containing the geocoded installations data.
     """
-    # --- Load CSV ---
-    df = pd.read_csv(input_csv)
-
-    # Ensure columns exist
-    for col in ["lat", "lon"]:
-        if col not in df.columns:
-            df[col] = None
-
-    # Build full address for each row
-    df["full_address"] = df.apply(build_full_address, axis=1)
-
-    # Filter out activity types 10 and 50
-    df = df[df["activity_type_code"] != 10]
-    df = df[df["activity_type_code"] != 50]
 
     # Optional cache to avoid duplicate calls
     cache: dict[str, tuple[float | None, float | None]] = {}
@@ -161,12 +177,11 @@ def geocode_installations(
     new_rows: list[dict[str, Any]] = []
     coordinates_rows: list[dict[str, Any]] = []
 
+    rows = df.to_dict("records")
+    if max_installations is not None:
+        rows = rows[:max_installations]
     try:
-        for row in tqdm(df.to_dict("records")):
-            # exclude activity types 10 and 50 (aviation and shipping)
-            if str(row.get("activity_type_code")) in ["10", "50"]:
-                continue
-
+        for row in tqdm(rows):
             address = row.get("full_address", "")
 
             if address in cache:
@@ -177,7 +192,7 @@ def geocode_installations(
                     cache[address] = (lat, lon)
                     time.sleep(rate_limit_seconds)  # rate-limit safety
                 except Exception as exc:  # noqa: BLE001
-                    print(f"✖ Failed: {address} → {exc}")
+                    logging.error(f"✖ Failed: {address} → {exc}")
                     continue
 
             new_rows.append(
@@ -194,13 +209,11 @@ def geocode_installations(
                     "lon": lon,
                 }
             )
-            print(f"✔ Geocoded: {address}")
+            logging.info(f"✔ Geocoded: {address}")
     except Exception as exc:  # noqa: BLE001
         print(exc)
         print("Exiting...")
     finally:
-        # --- Save result ---
-        pd.DataFrame(new_rows).to_csv(output_csv, index=False)
-        pd.DataFrame(coordinates_rows).to_csv(output_coordinates_csv, index=False)
+        df = pd.DataFrame(coordinates_rows)
 
-    print("Done.")
+    return df

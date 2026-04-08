@@ -1,4 +1,5 @@
-"""Module for downloading the current and historical auction price data from the EEX website."""
+"""Module for downloading the current and historical auction price data from the
+EEX website."""
 
 import re
 from pathlib import Path

@@ -1,4 +1,5 @@
-"""Module for extracting price data from Excel and ZIP files downloaded from the EEX website."""
+"""Module for extracting price data from Excel and ZIP files downloaded from the
+EEX website."""
 
 import warnings
 from io import BytesIO

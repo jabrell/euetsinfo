@@ -1,5 +1,6 @@
 # custom ignores
 _jab*
+*.zip
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -219,4 +220,4 @@ __marimo__/
 .streamlit/secrets.toml
 
 eutl_installations*
-!eutl_installations_coordinates.csv
+!eutl_installations_coordinates.csv"data/source/"

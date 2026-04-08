@@ -7,6 +7,7 @@ requires-python = ">=3.13"
 dependencies = [
     "beautifulsoup4>=4.14.2",
     "dotenv>=0.9.9",
+    "frictionless>=5.18.1",
     "httpx>=0.28.1",
     "ipykernel>=6.30.1",
     "jupyter>=1.1.1",
@@ -14,6 +15,8 @@ dependencies = [
     "notebook>=7.4.7",
     "openpyxl>=3.1.5",
     "pandas>=2.3.3",
+    "pyarrow>=23.0.1",
+    "python-calamine>=0.6.2",
     "tqdm>=4.67.1",
     "xlrd>=2.0.2",
 ]
@@ -26,3 +29,18 @@ dev = [
     "mkdocstrings-python>=1.19.0",
     "pre-commit>=4.4.0",
 ]
+
+[tool.ruff]
+line-length = 88
+
+[tool.ruff.lint]
+# Select rules for PEP8 and import sorting
+select = [
+    "E", # pycodestyle errors
+    "W", # pycodestyle warnings
+    "F", # pyflakes
+    "I", # isort
+]
+ignore = []
+# Prevent ruff from deleting unused imports on save
+unfixable = ["F401"]

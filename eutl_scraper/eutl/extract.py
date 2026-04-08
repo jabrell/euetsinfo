@@ -1,15 +1,20 @@
 """The module for extracting the basic tables from the EUTL data downloads."""
 
+import logging
+from pathlib import Path
+
 import pandas as pd
 
+from .extract_accounts import create_account_table_with_holders
 
-def installations(df: pd.DataFrame, fn_out: str | None = None) -> pd.DataFrame:
+
+def extract_installations(df: pd.DataFrame, fn_out: Path | None = None) -> pd.DataFrame:
     """Extract installation data from the given DataFrame.
 
     Args:
         df (pd.DataFrame): DataFrame containing the installations data after
             the normalization step.
-        fn_out (str | None, optional): Output filename to save the data.
+        fn_out (Path | None, optional): Output filename to save the data.
             Defaults to None.
 
     Returns:
@@ -51,7 +56,7 @@ def installations(df: pd.DataFrame, fn_out: str | None = None) -> pd.DataFrame:
     return df_installation
 
 
-def compliance(df: pd.DataFrame, fn_out: str | None = None) -> pd.DataFrame:
+def extract_compliance(df: pd.DataFrame, fn_out: Path | None = None) -> pd.DataFrame:
     """Extract compliance data from the given DataFrame.
 
     Args:
@@ -106,19 +111,28 @@ def compliance(df: pd.DataFrame, fn_out: str | None = None) -> pd.DataFrame:
     return df_comp
 
 
-def transactions(df: pd.DataFrame, dir_out: str) -> None:
+def extract_transactions(
+    df: pd.DataFrame, dir_out: Path | None
+) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """Extract transaction data from the given DataFrame.
 
     Args:
-        df (pd.DataFrame): DataFrame containing the transactions data after normalization.
-        dir_out (str): Output directory to save the data. As we extract several tables
-            here, we need the directory instead of a single filename. The files will be named
-            'transactions.csv': Contains the transaction data (without details on the parties).
-            'projects.csv': Contains data on the projects involved in transactions.
-            'transaction_parties.csv': Contains data on the parties involved in transactions.
+        df (pd.DataFrame): DataFrame containing the transactions data after
+            normalization.
+        dir_out (Path | None): Output directory to save the data. As we extract
+            several tables here, we need the directory instead of a single filename.
+                The files will be named
+                - 'transactions.csv': Contains the transaction data
+                    (without details on the parties).
+                - 'projects.csv': Contains data on the projects involved in
+                    transactions.
+                - 'transaction_parties.csv': Contains data on the parties involved in
+                    transactions.
+            If none, the extracted dataframes will not be saved to disk.
 
     Returns:
-        pd.DataFrame: DataFrame containing transaction data.
+        tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]: DataFrames containing
+            transaction data, project data, and account data.
     """
     # separate out the project and account data from the transactions
     df_projects = extract_projects_from_transactions(df)
@@ -146,17 +160,23 @@ def transactions(df: pd.DataFrame, dir_out: str) -> None:
         transaction_date=lambda df: pd.to_datetime(df.transaction_date)
     )
     # save the dataframes
-    df_trans.to_csv(f"{dir_out}/eutl_transactions.csv", index=False)
-    df_projects.to_csv(f"{dir_out}/eutl_projects.csv", index=False)
-    df_accounts.to_csv(f"{dir_out}/eutl_transaction_parties.csv", index=False)
-    return
+    if dir_out is not None:
+        dir_out = Path(dir_out)
+        df_trans.to_csv(dir_out / "eutl_transactions.csv", index=False)
+        df_projects.to_csv(dir_out / "eutl_projects.csv", index=False)
+        df_accounts.to_csv(dir_out / "eutl_transaction_parties.csv", index=False)
+    return df_trans, df_projects, df_accounts
 
 
-def extract_projects_from_transactions(df: pd.DataFrame) -> pd.DataFrame:
+def extract_projects_from_transactions(
+    df: pd.DataFrame, fn_out: str | None = None
+) -> pd.DataFrame:
     """Extract unique projects from the transaction DataFrame.
 
     Args:
         df (pd.DataFrame): DataFrame containing transaction data.
+        fn_out (str | None, optional): Output filename to save the data.
+            Defaults to None.
 
     Returns:
         pd.DataFrame: DataFrame containing unique project data.
@@ -193,14 +213,20 @@ def extract_projects_from_transactions(df: pd.DataFrame) -> pd.DataFrame:
         )
         .drop(columns=["unit_type_description"])
     )
+    if fn_out is not None:
+        df_projects.to_csv(fn_out, index=False)
     return df_projects
 
 
-def extract_accounts_from_transactions(df: pd.DataFrame) -> pd.DataFrame:
+def extract_accounts_from_transactions(
+    df: pd.DataFrame, fn_out: Path | None = None
+) -> pd.DataFrame:
     """Extract account information from transactions DataFrame.
 
     Args:
         df (pd.DataFrame): DataFrame containing transaction data.
+        fn_out (Path | None, optional): Output filename to save the data.
+            Defaults to None.
 
     Returns:
         pd.DataFrame: DataFrame containing unique account information.
@@ -244,4 +270,90 @@ def extract_accounts_from_transactions(df: pd.DataFrame) -> pd.DataFrame:
         df_ = df[list(_cols.keys())].rename(columns=_cols).drop_duplicates()
         lst_df.append(df_)
     df_accounts = pd.concat(lst_df).drop_duplicates()
+    if fn_out is not None:
+        df_accounts.to_csv(fn_out, index=False)
     return df_accounts
+
+
+def create_missing_installations(
+    fn_compliance: Path, fn_installations: Path
+) -> pd.DataFrame:
+    """Create a DataFrame containing the missing installations based on the
+    compliance data. These are accounts related to ETS2 installations that are
+    present in the compliance data but not in the installation data.
+
+    Note: That modifies the installation table by adding the missing installations.
+
+
+    Args:
+        fn_compliance (Path): Path to the CSV file containing the compliance data.
+        fn_installations (Path): Path to the CSV file containing the installation data.
+
+    Returns:
+        pd.DataFrame: DataFrame containing the missing installations.
+    """
+    df_compliance = pd.read_csv(fn_compliance, low_memory=False)
+    df_installations = pd.read_csv(fn_installations, low_memory=False)
+    missing_ids = set(df_compliance["installation_id"]) - set(
+        df_installations["installation_id"]
+    )
+    logging.info(
+        f"{len(missing_ids)} missing installation IDs found in compliance data."
+        " Added to installation data under ETS2 system."
+    )
+    df_missing = (
+        df_compliance[df_compliance["installation_id"].isin(missing_ids)]
+        .drop_duplicates(subset=["installation_id"])[
+            ["installation_id", "installation_name", "registry_id", "registry_name"]
+        ]
+        .assign(ets_id="ets2")
+    )
+
+    # add the missing installations to the installation table
+    df_inst_new = pd.concat([df_installations, df_missing], ignore_index=True)
+    df_inst_new.to_csv(fn_installations, index=False)
+    return df_missing
+
+
+def extract_all_data(
+    dir_in: Path, dir_out: Path, fn_manual_accounts: Path, dir_source: Path
+) -> None:
+    """Extract all tables from the normalized EUTL data.
+
+    Args:
+        dir_in (Path): Directory containing the normalized EUTL data.
+        dir_out (Path): Directory to save the extracted tables.
+        fn_manual_accounts (Path): Filename of the manually downloaded account data.
+            This is required for the account holder extraction step. If not provided,
+            an error will be raised in that step. Note that the account holder
+            extraction step also requires the extracted transactions to be present
+            in the extracted directory.
+        dir_source (Path ): Directory containing the source data.
+    """
+    dir_in = Path(dir_in)
+    dir_out = Path(dir_out)
+    dir_source = Path(dir_source)
+    df_installations = pd.read_csv(dir_in / "eutl_installations.csv", low_memory=False)
+    extract_installations(df_installations, fn_out=dir_out / "eutl_installations.csv")
+
+    df_compliance = pd.read_csv(dir_in / "eutl_compliance.csv", low_memory=False)
+    extract_compliance(df_compliance, fn_out=dir_out / "eutl_compliance.csv")
+
+    df_transactions = pd.read_csv(dir_in / "eutl_transactions.csv", low_memory=False)
+    extract_transactions(df_transactions, dir_out=dir_out)
+
+    # extract accounts together with the account holders based on the transactions
+    # and the manually downloaded account data
+    fn_direct = dir_source / "eutl_accounts.csv"
+    fn_trans = dir_source / "eutl_transactions.csv"
+    create_account_table_with_holders(
+        fn_direct=fn_direct,
+        fn_bi=fn_manual_accounts,
+        fn_trans=fn_trans,
+        dir_out=dir_out,
+    )
+
+    create_missing_installations(
+        fn_compliance=dir_out / "eutl_compliance.csv",
+        fn_installations=dir_out / "eutl_installations.csv",
+    )

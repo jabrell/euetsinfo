@@ -40,7 +40,9 @@ map_account_type = {
     "411-0": "tCER Replacement Account for Expiry (Type 1)",
     "421-0": "lCER Replacement Account for Expiry (Type 1)",
     "422-0": "lCER Replacement Account for Reversal in Storage (Type 2)",
-    "423-0": "lCER Replacement Account for Non-submission of Certification Report (Type 3)",
+    "423-0": (
+        "lCER Replacement Account for Non-submission of Certification Report (Type 3)"
+    ),
     "100-27": "EU AAU Account",
     "100-31": "ETS Central Clearing Account for CP2",
     "100-29": "ESD Central Clearing Account",
