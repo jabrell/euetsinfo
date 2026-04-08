@@ -23,9 +23,10 @@ class BaseConfig:
 
     name: str
     schema_path: Path
-    column_mapping: dict[str, str]
-    type_convertors: dict[str, Callable]
     resource_metadata: ResourceMetadata
+    column_mapping: dict[str, str]
+    type_convertors: dict[str, Callable] = field(default_factory=dict)
+    transformers: list[Callable] = field(default_factory=list)
 
     @staticmethod
     def _to_datetime(col: str) -> Callable:
@@ -36,6 +37,11 @@ class BaseConfig:
     def _to_nullable_int(col: str) -> Callable:
         """Return a function that converts a column to nullable integer format."""
         return lambda df: df[col].astype("Int64")
+
+    @staticmethod
+    def _dropna_subset(cols: list[str]) -> Callable:
+        """Return a function that drops rows where all specified columns are NA."""
+        return lambda df: df.dropna(subset=cols, how="all")
 
 
 @dataclass

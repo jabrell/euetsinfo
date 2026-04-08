@@ -19,6 +19,10 @@ def prepare_table(table_config: BaseConfig, df: pd.DataFrame) -> pd.DataFrame:
     for column, convertor in type_convertors.items():
         df[column] = convertor(df)
 
+    # apply any additional transformations defined in the config
+    for transformer in table_config.transformers:
+        df = transformer(df)
+
     # rename columns and select only the columns defined in the schema
     map_installation_columns = table_config.column_mapping
 

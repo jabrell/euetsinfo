@@ -2,6 +2,7 @@ import logging
 from pathlib import Path
 
 import pandas as pd
+from frictionless import Package, Report
 
 from eutl_scraper.publish import (
     TABLE_REGISTRY,
@@ -10,17 +11,36 @@ from eutl_scraper.publish import (
     prepare_table,
 )
 
-if __name__ == "__main__":
-    dir_source = Path("data/extracted/")
+
+def publish_data_package(
+    dir_source: str | Path, fn_out: str | Path, validate_package: bool = False
+) -> tuple[Package, Report | None]:
+    """Create and save a frictionlessdata package from the given input directory
+    containing the extracted CSV files.
+
+    Args:
+        dir_source (str | Path): Directory containing the extracted CSV files.
+        fn_out (str | Path): Output filename for the created data package (ZIP file).
+        validate_package (bool): Whether to validate the created data package.
+            Defaults to False. If True, the created package will be validated
+            using the frictionless data library and any validation errors will be
+            logged.
+
+    Returns:
+        tuple[Package, Report | None]: The created data package and the validation
+            report (if validation is enabled).
+    """
     data_paths = {
         "installations": dir_source / "eutl_installations.csv",
         "accounts": dir_source / "eutl_accounts.csv",
         "holders": dir_source / "eutl_account_holders.csv",
         "compliance": dir_source / "eutl_compliance.csv",
         "projects": dir_source / "eutl_projects.csv",
-        "transactions": dir_source / "eutl_transactions.csv",
+        # "transactions": dir_source / "eutl_transactions.csv",
+        "installation_locations": dir_source / "installation_locations.csv",
     }
 
+    # loop over the tables, prepare the data and create resources
     resources = []
     for table_name, path in data_paths.items():
         config = TABLE_REGISTRY[table_name]
@@ -32,9 +52,31 @@ if __name__ == "__main__":
         logging.info(f"Resource for {table_name} created successfully.")
         resources.append(resource)
 
+    # create the data package
     print("Creating data package...")
     logging.info("Creating data package with all resources...")
-    create_data_package(
-        resources=resources, fn_out="test.zip", name="eutl_data_package"
+    package = create_data_package(
+        resources=resources, fn_out=fn_out, name="eutl_data_package"
     )
-    print("Data package created successfully in data/published/")
+    report = None
+    if validate_package:
+        logging.info("Validating the created data package...")
+        my_package = Package(fn_out)
+        report = my_package.validate()
+        if not report.valid:
+            logging.error(
+                "Validation failed for the created data package. See the provided "
+                "report for details."
+            )
+        else:
+            logging.info("Data package validated successfully.")
+    return package, report
+
+
+if __name__ == "__main__":
+    dir_source = Path("data/extracted")
+    fn_out = Path("test.zip")
+    package, report = publish_data_package(
+        dir_source=dir_source, fn_out=fn_out, validate_package=True
+    )
+    print("here")
