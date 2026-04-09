@@ -1,6 +1,6 @@
-from pathlib import Path
-
 import pandas as pd
+
+from eutl_scraper.settings import Settings
 
 from .utils import _strip_str
 
@@ -94,20 +94,22 @@ def _rename_and_check(df: pd.DataFrame) -> pd.DataFrame:
     return df_comp
 
 
-def extract_compliance(
-    fn_source: Path, fn_out: str | Path | None = None
-) -> pd.DataFrame:
+def extract_compliance(settings: Settings, save_to_disk: bool = True) -> pd.DataFrame:
     """Extract compliance data from the given source file.
 
     Args:
-        fn_source (Path): Path to the source file containing raw compliance data.
-        fn_out (str | Path | None): Optional output filename to save the extracted
-            data.
+        settings (Settings): Settings object containing configuration.
+        save_to_disk (bool): Whether to save the extracted data to disk.
+            Defaults to True.
 
     Returns:
         pd.DataFrame: DataFrame containing extracted compliance data.
     """
-    df = pd.read_csv(fn_source).pipe(_clean_and_create_ids).pipe(_rename_and_check)
-    if fn_out is not None:
-        df.to_csv(fn_out, index=False)
+    df = (
+        pd.read_csv(settings.fp("compliance", settings.dir_source))
+        .pipe(_clean_and_create_ids)
+        .pipe(_rename_and_check)
+    )
+    if save_to_disk:
+        df.to_csv(settings.fp("compliance", settings.dir_extracted), index=False)
     return df

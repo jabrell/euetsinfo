@@ -1,6 +1,6 @@
-from pathlib import Path
-
 import pandas as pd
+
+from eutl_scraper.settings import Settings
 
 from ..mappings import map_registryCode_inv
 from .utils import _strip_str
@@ -137,45 +137,32 @@ def _create_projects(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def extract_transactions(
-    fn_source: Path, fn_out: str | Path | None = None
-) -> pd.DataFrame:
+    settings: Settings, save_to_disk: bool = True
+) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Extract transaction data
 
     Args:
-        fn_source (Path): Path to the source file containing raw transaction data.
-        fn_out (str | Path | None): Optional output filename to save the data.
+        settings (Settings): Settings object containing configuration
+            for the file paths.
+        save_to_disk (bool): Whether to save the extracted data to disk.
+            Defaults to True.
 
     Returns:
-        pd.DataFrame: DataFrame containing transaction data.
+        tuple[pd.DataFrame, pd.DataFrame]: DataFrames containing transaction and
+            project data.
     """
-    df = (
-        pd.read_csv(fn_source, low_memory=False)
-        .pipe(_clean_and_create_ids)
-        .pipe(_rename_and_check_transactions)
-    )
+    df = pd.read_csv(
+        settings.fp("transactions", settings.dir_source), low_memory=False
+    ).pipe(_clean_and_create_ids)
+    df_trans = _rename_and_check_transactions(df)
+    df_projects = _create_projects(df)
 
-    if fn_out is not None:
-        df.to_csv(fn_out, index=False)
+    if save_to_disk:
+        df_trans.to_csv(
+            settings.fp("transactions", directory=settings.dir_extracted), index=False
+        )
+        df_projects.to_csv(
+            settings.fp("projects", directory=settings.dir_extracted), index=False
+        )
 
-    return df
-
-
-def extract_projects(fn_source: Path, fn_out: str | Path | None = None) -> pd.DataFrame:
-    """Extract unique project data from the transaction DataFrame.
-
-    Args:
-        fn_source (Path): Path to the source file containing raw transaction data.
-        fn_out (str | Path | None): Optional output filename to save the data.
-
-    Returns:
-        pd.DataFrame: DataFrame containing unique project data.
-    """
-    df = (
-        pd.read_csv(fn_source, low_memory=False)
-        .pipe(_clean_and_create_ids)
-        .pipe(_create_projects)
-    )
-
-    if fn_out is not None:
-        df.to_csv(fn_out, index=False)
-    return df
+    return df_trans, df_projects

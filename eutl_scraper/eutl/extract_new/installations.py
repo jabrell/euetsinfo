@@ -1,6 +1,6 @@
-from pathlib import Path
-
 import pandas as pd
+
+from eutl_scraper.settings import Settings
 
 from .utils import _strip_str
 
@@ -86,19 +86,23 @@ def _rename_and_check(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def extract_installations(
-    fn_source: Path, fn_out: str | Path | None = None
+    settings: Settings, save_to_disk: bool = True
 ) -> pd.DataFrame:
     """Extract installation data from the given source file and save to output file.
 
     Args:
-        fn_source (Path): Path to the source CSV file containing raw installation data.
-        fn_out (str | Path | None): Optional output filename to save the extracted
-            data. If None, the extracted data will not be saved to a file.
+        settings (Settings): Settings object containing configuration.
+        save_to_disk (bool): Whether to save the extracted data to disk.
+            Defaults to True.
 
     Returns:
         pd.DataFrame: DataFrame containing extracted installation data.
     """
-    df = pd.read_csv(fn_source).pipe(_clean_and_create_ids).pipe(_rename_and_check)
-    if fn_out is not None:
-        df.to_csv(fn_out, index=False)
+    df = (
+        pd.read_csv(settings.fp("installations", settings.dir_source))
+        .pipe(_clean_and_create_ids)
+        .pipe(_rename_and_check)
+    )
+    if save_to_disk:
+        df.to_csv(settings.fp("installations", settings.dir_extracted), index=False)
     return df

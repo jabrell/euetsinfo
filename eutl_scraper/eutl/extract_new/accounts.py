@@ -1,8 +1,7 @@
-from pathlib import Path
-
 import pandas as pd
 
 from eutl_scraper.eutl.extract_new.utils import _strip_str
+from eutl_scraper.settings import Settings
 
 
 def _clean_and_create_ids(df: pd.DataFrame) -> pd.DataFrame:
@@ -57,18 +56,22 @@ def _rename_and_check(df: pd.DataFrame) -> pd.DataFrame:
     return df_accounts
 
 
-def extract_accounts(fn_source: Path, fn_out: Path | None = None) -> pd.DataFrame:
+def extract_accounts(settings: Settings, save_to_disk: bool = True) -> pd.DataFrame:
     """Create a unified account DataFrame from the raw data.
 
     Args:
-        fn_source (Path): Path to the raw account data file.
-        fn_out (Path | None): Optional output filename to save the normalized
-            data.
+        settings (Settings): Settings object containing configuration.
+        save_to_disk (bool): Whether to save the extracted data to disk.
+            Defaults to True.
 
     Returns:
         pd.DataFrame: Unified DataFrame containing account data from all sources.
     """
-    df = pd.read_csv(fn_source).pipe(_clean_and_create_ids).pipe(_rename_and_check)
-    if fn_out is not None:
-        df.to_csv(fn_out, index=False)
+    df = (
+        pd.read_csv(settings.fp("accounts", settings.dir_source))
+        .pipe(_clean_and_create_ids)
+        .pipe(_rename_and_check)
+    )
+    if save_to_disk:
+        df.to_csv(settings.fp("accounts", settings.dir_extracted), index=False)
     return df
