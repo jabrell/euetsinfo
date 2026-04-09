@@ -90,5 +90,5 @@ if __name__ == "__main__":
     fn_direct = dir_source / "eutl_accounts.csv"
     fn_trans = dir_source / "eutl_transactions.csv"
     fn_manual_accounts = Path("data/manual/") / "accounts.xlsx"
-    extract_all(dir_data=Path("data/"))
+    extract_all(dir_data=Path("data/"), fn_manual_account_data=fn_manual_accounts)
     print("here")

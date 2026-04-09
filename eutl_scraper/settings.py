@@ -21,6 +21,7 @@ class Settings:
         "transactions": "eutl_transactions.csv",
         "projects": "eutl_projects.csv",
         "account_holders": "eutl_account_holders.csv",
+        "link_accounts_holders": "eutl_link_accounts_holders.csv",
     }
 
     def __post_init__(self):
