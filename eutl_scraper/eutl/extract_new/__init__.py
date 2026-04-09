@@ -2,6 +2,7 @@ from pathlib import Path
 
 from eutl_scraper.settings import Settings
 
+from .accounts import extract_accounts
 from .compliance import extract_compliance
 from .installations import extract_installations
 from .transactions import extract_projects, extract_transactions
@@ -11,6 +12,7 @@ __all__ = [
     "extract_installations",
     "extract_projects",
     "extract_transactions",
+    "extract_accounts",
 ]
 
 
@@ -37,4 +39,8 @@ def extract_all(dir_data: Path) -> None:
     extract_projects(
         fn_source=settings.fp("transactions", settings.dir_source),
         fn_out=settings.fp("projects", settings.dir_extracted),
+    )
+    extract_accounts(
+        fn_source=settings.fp("accounts", settings.dir_source),
+        fn_out=settings.fp("accounts", settings.dir_extracted),
     )
