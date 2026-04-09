@@ -4,9 +4,7 @@ from pathlib import Path
 import pandas as pd
 from frictionless import Package, Report
 
-from eutl_scraper.eutl.create_account_holders import (
-    create_account_holders,
-)
+from eutl_scraper.eutl.extract_new import extract_all
 from eutl_scraper.publish import (
     TABLE_REGISTRY,
     create_data_package,
@@ -92,10 +90,5 @@ if __name__ == "__main__":
     fn_direct = dir_source / "eutl_accounts.csv"
     fn_trans = dir_source / "eutl_transactions.csv"
     fn_manual_accounts = Path("data/manual/") / "accounts.xlsx"
-
-    create_account_holders(
-        fn_transactions=fn_trans,
-        fn_manual_account_data=fn_manual_accounts,
-        dir_out=dir_extracted,
-    )
+    extract_all(dir_data=Path("data/"))
     print("here")
