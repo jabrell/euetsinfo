@@ -4,6 +4,9 @@ from pathlib import Path
 import pandas as pd
 from frictionless import Package, Report
 
+from eutl_scraper.eutl.create_account_holders import (
+    create_account_holders,
+)
 from eutl_scraper.publish import (
     TABLE_REGISTRY,
     create_data_package,
@@ -79,9 +82,20 @@ def publish_data_package(
 
 
 if __name__ == "__main__":
-    dir_source = Path("data/extracted")
-    fn_out = Path("test.zip")
-    package, report = publish_data_package(
-        dir_source=dir_source, fn_out=fn_out, validate_package=True
+    # dir_source = Path("data/extracted")
+    # fn_out = Path("test.zip")
+    # package, report = publish_data_package(
+    #     dir_source=dir_source, fn_out=fn_out, validate_package=True
+    # )
+    dir_source = Path("data/source/")
+    dir_extracted = Path("data/extracted/")
+    fn_direct = dir_source / "eutl_accounts.csv"
+    fn_trans = dir_source / "eutl_transactions.csv"
+    fn_manual_accounts = Path("data/manual/") / "accounts.xlsx"
+
+    create_account_holders(
+        fn_transactions=fn_trans,
+        fn_manual_account_data=fn_manual_accounts,
+        dir_out=dir_extracted,
     )
     print("here")
