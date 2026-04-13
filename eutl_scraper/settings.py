@@ -4,18 +4,10 @@ from typing import ClassVar
 
 import httpx
 
-DIR_DATA = Path(__file__).parent / "data"
-
-DIR_SOURCE = DIR_DATA / "source"
-DIR_SOURCE_AUTOMATIC = DIR_SOURCE
-
-DIR_EXTRACTED = DIR_DATA / "extracted"
-DIR_NORMALIZED = DIR_DATA / "normalized"
-
 
 @dataclass
 class Settings:
-    dir_data: Path = DIR_DATA
+    dir_data: Path
 
     FILENAMES: ClassVar[dict[str, str]] = {
         "accounts": "eutl_accounts",
@@ -33,6 +25,10 @@ class Settings:
 
     def __post_init__(self):
         self.dir_data = Path(self.dir_data)
+
+        # create directories if they don't exist
+        self.dir_source.mkdir(parents=True, exist_ok=True)
+        self.dir_extracted.mkdir(parents=True, exist_ok=True)
 
         self.client = httpx.Client(
             timeout=httpx.Timeout(60.0, read=300.0),

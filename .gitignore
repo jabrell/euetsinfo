@@ -1,7 +1,7 @@
 # custom ignores
 _jab*
 *.zip
-
+data_tmp/
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]

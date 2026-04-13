@@ -101,7 +101,7 @@ if __name__ == "__main__":
     # fn_trans = dir_source / "eutl_transactions.csv"
     fn_manual_accounts = Path("data/manual/") / "accounts.xlsx"
     # extract_all(dir_data=Path("data/"), fn_manual_account_data=fn_manual_accounts)
-    settings = Settings(dir_data="data/")
+    settings = Settings(dir_data="data_tmp/")
     setup_logging("INFO")
     # load environment variables from .env fil: GEOAPIFY_API_KEY
     load_dotenv()
@@ -109,9 +109,9 @@ if __name__ == "__main__":
     get_all_data(
         settings=settings,
         pipelines=[
-            # Pipelines.EUTL,
-            # Pipelines.NACE_FROM_LEAKAGE_LISTS,
-            # Pipelines.EEX_AUCTIONS,
+            Pipelines.EUTL,
+            Pipelines.NACE_FROM_LEAKAGE_LISTS,
+            Pipelines.EEX_AUCTIONS,
             Pipelines.INSTALLATION_COORDINATES,
         ],
         fn_manual_accounts=fn_manual_accounts,
