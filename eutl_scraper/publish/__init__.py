@@ -4,9 +4,9 @@ processed by the scraper."""
 import warnings
 
 from eutl_scraper.publish.configs import (
+    AccountHoldersConfig,
     AccountsConfig,
     ComplianceConfig,
-    HoldersConfig,
     InstallationsConfig,
     ProjectsConfig,
     TransactionsConfig,
@@ -33,7 +33,7 @@ __all__ = ["TABLE_REGISTRY", "prepare_table", "create_resource", "create_data_pa
 TABLE_REGISTRY = {
     "installations": InstallationsConfig(),
     "accounts": AccountsConfig(),
-    "holders": HoldersConfig(),
+    "account_holders": AccountHoldersConfig(),
     "compliance": ComplianceConfig(),
     "projects": ProjectsConfig(),
     "transactions": TransactionsConfig(),

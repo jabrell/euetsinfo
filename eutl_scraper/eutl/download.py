@@ -5,18 +5,10 @@ for further processing. The module currently only supports download of the
 data given under the "download data" section but not from the PowerBi app itself.
 """
 
-import io
 import zipfile
 
-import httpx
 import pandas as pd
 from loguru import logger
-from tenacity import (
-    retry,
-    retry_if_exception_type,
-    stop_after_attempt,
-    wait_exponential,
-)
 
 from eutl_scraper.settings import Settings
 
@@ -106,25 +98,13 @@ def download_installations(
     return df
 
 
-@retry(
-    retry=retry_if_exception_type(httpx.RemoteProtocolError),
-    stop=stop_after_attempt(5),
-    wait=wait_exponential(min=2, max=60),
-    reraise=True,
-    before_sleep=lambda retry_state: logger.warning(
-        "Attempt {}/{} failed, retrying in {:.0f}s...",
-        retry_state.attempt_number,
-        5,
-        retry_state.next_action.sleep,
-    ),
-)
 def download_transactions(
-    client: httpx.Client, url: str | None = None, fn_out: str | None = None
+    settings: Settings, url: str | None = None, fn_out: str | None = None
 ) -> pd.DataFrame:
     """Download transaction data from the given URL or default URL.
 
     Args:
-        client (httpx.Client): httpx.Client to use for downloading the data.
+        settings (Settings): The settings object containing configuration values.
         url (str | None, optional): URL to download data from. Defaults to None.
         fn_out (str | None, optional): Output filename to save the data.
             Defaults to None.
@@ -136,9 +116,7 @@ def download_transactions(
         url = URL_SOURCE["transactions"]
     logger.info("Downloading transactions data...", filter="eutl_download")
     # Download the zip file to memory
-    response = client.get(url)
-    zip_content = io.BytesIO(response.content)
-
+    zip_content = settings.download_with_resume(url=url)
     # Extract the CSV file that starts with "transactions_EUTL_PUBLIC_NOTESD"
     with zipfile.ZipFile(zip_content) as zf:
         csv_filename = [
@@ -170,6 +148,6 @@ def download_all(settings: Settings) -> None:
         fn_out=settings.fp("installations", settings.dir_source),
     )
     download_transactions(
-        client=settings.client,
+        settings=settings,
         fn_out=settings.fp("transactions", settings.dir_source),
     )

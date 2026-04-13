@@ -1,12 +1,9 @@
-import os
 from pathlib import Path
 
 import pandas as pd
-from dotenv import load_dotenv
 from frictionless import Package, Report
 from loguru import logger
 
-from eutl_scraper import Pipelines, get_all_data
 from eutl_scraper.logger import setup_logging
 from eutl_scraper.publish import (
     TABLE_REGISTRY,
@@ -18,13 +15,13 @@ from eutl_scraper.settings import Settings
 
 
 def publish_data_package(
-    dir_source: str | Path, fn_out: str | Path, validate_package: bool = False
+    settings: Settings, fn_out: str | Path, validate_package: bool = False
 ) -> tuple[Package, Report | None]:
     """Create and save a frictionless data package from the given input directory
     containing the extracted CSV files.
 
     Args:
-        dir_source (str | Path): Directory containing the extracted CSV files.
+        settings (Settings): Settings object containing configuration.
         fn_out (str | Path): Output filename for the created data package (ZIP file).
         validate_package (bool): Whether to validate the created data package.
             Defaults to False. If True, the created package will be validated
@@ -36,15 +33,17 @@ def publish_data_package(
             report (if validation is enabled).
     """
     data_paths = {
-        "installations": dir_source / "eutl_installations.csv",
-        "accounts": dir_source / "eutl_accounts.csv",
-        "holders": dir_source / "eutl_account_holders.csv",
-        "compliance": dir_source / "eutl_compliance.csv",
-        "projects": dir_source / "eutl_projects.csv",
-        "transactions": dir_source / "eutl_transactions.csv",
-        "installation_locations": dir_source / "installation_locations.csv",
-        "nace_mappings": dir_source / "nace_from_leakage_lists.csv",
-        "eex_auctions": dir_source / "eex_auctions.csv",
+        "installations": settings.fp("installations", settings.dir_extracted),
+        "accounts": settings.fp("accounts", settings.dir_extracted),
+        "account_holders": settings.fp("account_holders", settings.dir_extracted),
+        "compliance": settings.fp("compliance", settings.dir_extracted),
+        "projects": settings.fp("projects", settings.dir_extracted),
+        "transactions": settings.fp("transactions", settings.dir_extracted),
+        "installation_locations": settings.fp(
+            "installation_locations", settings.dir_extracted
+        ),
+        "nace_mappings": settings.fp("nace_from_leakage_lists", settings.dir_extracted),
+        "eex_auctions": settings.fp("eex_auctions", settings.dir_extracted),
     }
 
     # loop over the tables, prepare the data and create resources
@@ -90,32 +89,7 @@ def publish_data_package(
 
 
 if __name__ == "__main__":
-    # dir_source = Path("data/extracted")
-    # fn_out = Path("test.zip")
-    # package, report = publish_data_package(
-    #     dir_source=dir_source, fn_out=fn_out, validate_package=True
-    # )
-    # dir_source = Path("data/source/")
-    # dir_extracted = Path("data/extracted/")
-    # fn_direct = dir_source / "eutl_accounts.csv"
-    # fn_trans = dir_source / "eutl_transactions.csv"
-    fn_manual_accounts = Path("data/manual/") / "accounts.xlsx"
-    # extract_all(dir_data=Path("data/"), fn_manual_account_data=fn_manual_accounts)
     settings = Settings(dir_data="data_tmp/")
     setup_logging("INFO")
-    # load environment variables from .env fil: GEOAPIFY_API_KEY
-    load_dotenv()
-    GEOAPIFY_API_KEY = os.environ.get("GEOAPIFY_API_KEY", "")
-    get_all_data(
-        settings=settings,
-        pipelines=[
-            Pipelines.EUTL,
-            Pipelines.NACE_FROM_LEAKAGE_LISTS,
-            Pipelines.EEX_AUCTIONS,
-            Pipelines.INSTALLATION_COORDINATES,
-        ],
-        fn_manual_accounts=fn_manual_accounts,
-        geoapify_api_key=GEOAPIFY_API_KEY,
-        max_installations=10,  # for testing the installation coordinates pipeline
-    )
+    publish_data_package(settings=settings, fn_out="test.zip", validate_package=True)
     print("here")

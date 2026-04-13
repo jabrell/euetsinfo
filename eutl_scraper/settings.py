@@ -1,8 +1,11 @@
+import io
+import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import ClassVar
 
 import httpx
+from loguru import logger
 
 
 @dataclass
@@ -31,7 +34,7 @@ class Settings:
         self.dir_extracted.mkdir(parents=True, exist_ok=True)
 
         self.client = httpx.Client(
-            timeout=httpx.Timeout(60.0, read=300.0),
+            timeout=httpx.Timeout(120.0, read=300.0),
             limits=httpx.Limits(max_keepalive_connections=5),
             headers={
                 "User-Agent": "Mozilla/5.0",
@@ -82,3 +85,46 @@ class Settings:
 
     def __exit__(self, *exc):
         self.close()
+
+    def download_with_resume(
+        self, url: str, chunk_size: int = 1024 * 1024, attempts: int = 5
+    ) -> io.BytesIO:
+        """Download data with automatic resume on connection drop.
+
+        Args:
+            url (str): URL to download data from.
+            chunk_size (int): Size of chunks to download at a time (in bytes).
+                Default is 1 MB.
+            attempts (int): Number of attempts to retry downloading on failure.
+                Default is 5.
+
+        Returns:
+            io.BytesIO: Buffer containing the downloaded data."""
+        buffer = io.BytesIO()
+
+        for attempt in range(attempts):
+            downloaded = buffer.tell()
+            headers = {}
+
+            if downloaded > 0:
+                headers["Range"] = f"bytes={downloaded}-"
+                logger.info("Resuming download from {:.1f} MB...", downloaded / 1e6)
+
+            try:
+                with self.client.stream("GET", url, headers=headers) as response:
+                    if response.status_code == 416:
+                        break
+                    for chunk in response.iter_bytes(chunk_size=chunk_size):
+                        buffer.write(chunk)
+
+                break  # success
+
+            except httpx.RemoteProtocolError:
+                wait = 2 ** (attempt + 1)
+                logger.warning("Connection dropped, resuming in {}s...", wait)
+                time.sleep(wait)
+        else:
+            raise RuntimeError(f"Failed to download {url} after {attempts} attempts")
+
+        buffer.seek(0)
+        return buffer

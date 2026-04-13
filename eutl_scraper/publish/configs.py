@@ -153,9 +153,9 @@ class AccountsConfig(BaseConfig):
 
 
 @dataclass
-class HoldersConfig(BaseConfig):
-    name: str = "holders"
-    schema_path: Path = SCHEMA_PATH / "holders.yaml"
+class AccountHoldersConfig(BaseConfig):
+    name: str = "account_holders"
+    schema_path: Path = SCHEMA_PATH / "account_holders.yaml"
     resource_metadata: ResourceMetadata = field(
         default_factory=lambda: ResourceMetadata(
             title="EU ETS AccountHolders",
