@@ -26,6 +26,8 @@ class Settings:
         "account_holders": "eutl_account_holders",
         "link_accounts_holders": "eutl_link_accounts_holders",
         "eex_auctions": "eex_auctions",
+        "nace_from_leakage_lists": "nace_from_leakage_lists",
+        "nace_scheme": "nace_scheme",
     }
 
     def __post_init__(self):

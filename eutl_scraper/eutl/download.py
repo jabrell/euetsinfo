@@ -10,6 +10,7 @@ import zipfile
 
 import httpx
 import pandas as pd
+from loguru import logger
 from tenacity import (
     retry,
     retry_if_exception_type,
@@ -58,6 +59,7 @@ def download_accounts(
     Returns:
         pd.DataFrame: DataFrame containing account data.
     """
+    logger.info("Downloading accounts data...", filter="eutl_download")
     if url is None:
         url = URL_SOURCE["accounts"]
     df = _download_data(url, fn_out)
@@ -79,6 +81,7 @@ def download_compliance(
     """
     if url is None:
         url = URL_SOURCE["compliance"]
+    logger.info("Downloading compliance data...", filter="eutl_download")
     df = _download_data(url, fn_out)
     return df
 
@@ -98,6 +101,7 @@ def download_installations(
     """
     if url is None:
         url = URL_SOURCE["installations"]
+    logger.info("Downloading installations data...", filter="eutl_download")
     df = _download_data(url, fn_out)
     return df
 
@@ -107,6 +111,12 @@ def download_installations(
     stop=stop_after_attempt(5),
     wait=wait_exponential(min=2, max=60),
     reraise=True,
+    before_sleep=lambda retry_state: logger.warning(
+        "Attempt {}/{} failed, retrying in {:.0f}s...",
+        retry_state.attempt_number,
+        5,
+        retry_state.next_action.sleep,
+    ),
 )
 def download_transactions(
     client: httpx.Client, url: str | None = None, fn_out: str | None = None
@@ -114,7 +124,7 @@ def download_transactions(
     """Download transaction data from the given URL or default URL.
 
     Args:
-        Client: httpx.Client to use for downloading the data.
+        client (httpx.Client): httpx.Client to use for downloading the data.
         url (str | None, optional): URL to download data from. Defaults to None.
         fn_out (str | None, optional): Output filename to save the data.
             Defaults to None.
@@ -124,7 +134,7 @@ def download_transactions(
     """
     if url is None:
         url = URL_SOURCE["transactions"]
-
+    logger.info("Downloading transactions data...", filter="eutl_download")
     # Download the zip file to memory
     response = client.get(url)
     zip_content = io.BytesIO(response.content)

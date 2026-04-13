@@ -18,6 +18,7 @@ import re
 from pathlib import Path
 
 import pandas as pd
+from loguru import logger
 
 from eutl_scraper.settings import Settings
 
@@ -207,6 +208,7 @@ def extract_account_holders(
         tuple[pd.DataFrame, pd.DataFrame]: A tuple containing the account holders
             DataFrame and the link accounts holders DataFrame.
     """
+    logger.info("Extracting account holders...", filter="eutl_extract")
     df_holder_trans = _get_holders_from_transactions(
         fn_transactions=settings.fp("transactions", settings.dir_source)
     ).assign(holder_id=lambda df: df.apply(generate_account_holder_id, axis=1))
@@ -231,6 +233,10 @@ def extract_account_holders(
 
     # save if output directory is given
     if save_to_disk:
+        logger.info(
+            "Saving extracted account holders and link accounts holders to disk...",
+            filter="eutl_extract",
+        )
         df_link_accounts_holders.to_csv(
             settings.fp("link_accounts_holders", settings.dir_extracted), index=False
         )

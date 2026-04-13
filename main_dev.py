@@ -1,11 +1,11 @@
-import logging
 from pathlib import Path
 
 import pandas as pd
 from frictionless import Package, Report
+from loguru import logger
 
-from eutl_scraper.eex_auctions import pipeline_eex_auctions
-from eutl_scraper.eutl import pipeline_eutl
+from eutl_scraper import Pipelines, get_all_data
+from eutl_scraper.logger import setup_logging
 from eutl_scraper.publish import (
     TABLE_REGISTRY,
     create_data_package,
@@ -18,7 +18,7 @@ from eutl_scraper.settings import Settings
 def publish_data_package(
     dir_source: str | Path, fn_out: str | Path, validate_package: bool = False
 ) -> tuple[Package, Report | None]:
-    """Create and save a frictionlessdata package from the given input directory
+    """Create and save a frictionless data package from the given input directory
     containing the extracted CSV files.
 
     Args:
@@ -49,35 +49,41 @@ def publish_data_package(
     resources = []
     for table_name, path in data_paths.items():
         config = TABLE_REGISTRY[table_name]
-        logging.info(f"Processing {table_name} from {path}...")
+        logger.info(
+            f"Processing {table_name} from {path}...", filter="publish_data_package"
+        )
         print(f"Create resources for {table_name} from {path}...")
         df_source = pd.read_csv(path, low_memory=False)
         df = prepare_table(table_config=config, df=df_source)
         resource = create_resource(table_config=config, df=df)
-        logging.info(f"Resource for {table_name} created successfully.")
+        logger.info(
+            f"Resource for {table_name} created successfully.",
+            filter="publish_data_package",
+        )
         resources.append(resource)
 
     # create the data package
-    print("Creating data package...")
-    logging.info("Creating data package with all resources...")
+    logger.info(
+        "Creating data package with all resources...", filter="publish_data_package"
+    )
     package = create_data_package(
         resources=resources, fn_out=fn_out, name="eutl_data_package"
     )
     report = None
     if validate_package:
-        logging.info("Validating the created data package...")
+        logger.info("Validating the created data package...")
         my_package = Package(fn_out)
         report = my_package.validate()
         if not report.valid:
             for task in report.tasks:
                 if not task.valid:
-                    logging.error(
+                    logger.error(
                         f"Resource '{task.name}': "
                         f"{task.stats['errors']} errors found."
                         "Check the validation report for details."
                     )
         else:
-            logging.info("Data package validated successfully.")
+            logger.info("Data package validated successfully.")
     return package, report
 
 
@@ -94,10 +100,15 @@ if __name__ == "__main__":
     fn_manual_accounts = Path("data/manual/") / "accounts.xlsx"
     # extract_all(dir_data=Path("data/"), fn_manual_account_data=fn_manual_accounts)
     settings = Settings(dir_data="data/")
-    pipeline_eutl(
-        settings=settings, steps=None, fn_manual_accounts="data/manual/accounts.xlsx"
-    )
-    df = pipeline_eex_auctions(
-        settings=settings, download_history=True, save_extracted=True
+    setup_logging("INFO")
+    get_all_data(
+        settings=settings,
+        pipelines=[
+            # Pipelines.EUTL,
+            Pipelines.NACE_FROM_LEAKAGE_LISTS,
+            Pipelines.EEX_AUCTIONS,
+            # Pipelines.INSTALLATION_COORDINATES,
+        ],
+        fn_manual_accounts=fn_manual_accounts,
     )
     print("here")

@@ -1,4 +1,5 @@
 import pandas as pd
+from loguru import logger
 
 from eutl_scraper.settings import Settings
 
@@ -151,6 +152,7 @@ def extract_transactions(
         tuple[pd.DataFrame, pd.DataFrame]: DataFrames containing transaction and
             project data.
     """
+    logger.info("Extracting transactions data...", filter="eutl_extract")
     df = pd.read_csv(
         settings.fp("transactions", settings.dir_source), low_memory=False
     ).pipe(_clean_and_create_ids)
@@ -158,6 +160,10 @@ def extract_transactions(
     df_projects = _create_projects(df)
 
     if save_to_disk:
+        logger.info(
+            "Saving extracted transactions and projects data to disk...",
+            filter="eutl_extract",
+        )
         df_trans.to_csv(
             settings.fp("transactions", directory=settings.dir_extracted), index=False
         )

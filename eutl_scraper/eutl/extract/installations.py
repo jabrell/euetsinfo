@@ -1,4 +1,5 @@
 import pandas as pd
+from loguru import logger
 
 from eutl_scraper.settings import Settings
 
@@ -98,11 +99,15 @@ def extract_installations(
     Returns:
         pd.DataFrame: DataFrame containing extracted installation data.
     """
+    logger.info("Extracting installations data...", filter="eutl_extract")
     df = (
         pd.read_csv(settings.fp("installations", settings.dir_source))
         .pipe(_clean_and_create_ids)
         .pipe(_rename_and_check)
     )
     if save_to_disk:
+        logger.info(
+            "Saving extracted installations data to disk...", filter="eutl_extract"
+        )
         df.to_csv(settings.fp("installations", settings.dir_extracted), index=False)
     return df

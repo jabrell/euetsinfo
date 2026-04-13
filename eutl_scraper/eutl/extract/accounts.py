@@ -1,4 +1,5 @@
 import pandas as pd
+from loguru import logger
 
 from eutl_scraper.eutl.extract.utils import _strip_str
 from eutl_scraper.settings import Settings
@@ -67,11 +68,13 @@ def extract_accounts(settings: Settings, save_to_disk: bool = True) -> pd.DataFr
     Returns:
         pd.DataFrame: Unified DataFrame containing account data from all sources.
     """
+    logger.info("Extracting accounts data...", filter="eutl_extract")
     df = (
         pd.read_csv(settings.fp("accounts", settings.dir_source))
         .pipe(_clean_and_create_ids)
         .pipe(_rename_and_check)
     )
     if save_to_disk:
+        logger.info("Saving extracted accounts data to disk...", filter="eutl_extract")
         df.to_csv(settings.fp("accounts", settings.dir_extracted), index=False)
     return df

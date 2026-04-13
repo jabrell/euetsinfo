@@ -1,4 +1,5 @@
 import pandas as pd
+from loguru import logger
 
 from eutl_scraper.settings import Settings
 
@@ -29,8 +30,12 @@ def pipeline_eex_auctions(
     Raises:
         ValueError: If no valid data is extracted from the downloaded files.
     """
+    logger.info("Starting EEX auctions pipeline...", filter="eex_auctions_pipeline")
     fn_xls, fn_zip = download_auction_reports(
         settings=settings, download_history=download_history
+    )
+    logger.info(
+        "Download completed. Extracting data...", filter="eex_auctions_pipeline"
     )
     df = extract_data(fn_xls) if fn_xls else None
     if download_history and fn_zip:

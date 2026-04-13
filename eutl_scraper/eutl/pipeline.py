@@ -6,6 +6,8 @@ by the European Commission: https://union-registry-data.ec.europa.eu/report/welc
 from enum import StrEnum
 from pathlib import Path
 
+from loguru import logger
+
 from eutl_scraper.settings import Settings
 
 from .download import download_all
@@ -51,7 +53,7 @@ def pipeline_eutl(
         steps = list(EUTLPipelineSteps)
 
     if EUTLPipelineSteps.DOWNLOAD in steps:
-        print("Download EUTL data...")
+        logger.info("Download EUTL data...", filter="eutl_pipeline")
         download_all(settings=settings)
 
     if EUTLPipelineSteps.EXTRACT in steps:
@@ -59,7 +61,7 @@ def pipeline_eutl(
             raise ValueError(
                 "fn_manual_accounts must be provided for account holder extraction."
             )
-        print("Extract EUTL data...")
+        logger.info("Extract EUTL data...", filter="eutl_pipeline")
         extract_all(
             settings=settings,
             fn_manual_account_data=fn_manual_accounts,
