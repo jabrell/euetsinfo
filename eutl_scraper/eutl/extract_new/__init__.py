@@ -18,15 +18,13 @@ __all__ = [
 ]
 
 
-def extract_all(dir_data: Path, fn_manual_account_data: Path) -> None:
+def extract_all(settings: Settings, fn_manual_account_data: Path) -> None:
     """Extract all EUTL data given the source data
 
     Args:
-        dir_data (Path): Data directory. This points to the root of the data
-            directory (e.g. /data/)
+        settings (Settings): The settings object containing configuration values.
         fn_manual_account_data (Path): Path to the manual account data Excel file.
     """
-    settings = Settings(dir_data=dir_data)
     extract_installations(settings=settings)
     extract_compliance(settings=settings)
     extract_transactions(settings=settings)

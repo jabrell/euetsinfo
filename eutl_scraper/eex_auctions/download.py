@@ -8,7 +8,7 @@ from urllib.parse import urljoin
 import requests
 from bs4 import BeautifulSoup
 
-from eutl_scraper.settings import DIR_SOURCE_AUTOMATIC
+from ..settings import Settings
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0",
@@ -27,41 +27,38 @@ ZIP_PATTERN = re.compile(
 
 
 def download_auction_reports(
-    dir_out: str | None = None, download_history: bool = False
+    settings: Settings, download_history: bool = False
 ) -> tuple[Path | None, Path | None]:
     """Download the current auction price data (XLSX) and optionally the historical
     data (ZIP) from the EEX website.
 
     Args:
-        dir_out: The directory where the files should be saved.
-            If None the default directory will be used (./data/source/automatic).
+        settings (Settings): The settings object containing configuration values.
         download_history: Whether to download the historical data ZIP file.
 
     Returns:
         A tuple of (xlsx_path, zip_path) where each is a Path to the downloaded
         file or None if the corresponding file was not found or downloaded.
     """
-    dir_out = Path(dir_out) if dir_out else DIR_SOURCE_AUTOMATIC
-
     xlsx_url, zip_url = find_first_xlsx_and_zip(EEX_URL)
 
     xlsx_path = None
     zip_path = None
 
     if xlsx_url:
-        xlsx_path = dir_out / "eex_auction_prices.xlsx"
+        xlsx_path = settings.fp("eex_auctions", settings.dir_source, ending="xlsx")
         _download_file(xlsx_url, xlsx_path)
     else:
         raise ValueError("Could not find XLSX URL on the page")
 
     if download_history and zip_url:
-        zip_path = dir_out / "eex_auction_prices_history.zip"
+        zip_path = settings.fp("eex_auctions", settings.dir_source, ending="zip")
         _download_file(zip_url, zip_path)
 
     return xlsx_path, zip_path
 
 
-def _download_file(url: str, dest_path: str):
+def _download_file(url: str, dest_path: str | Path):
     """Download a file from a URL and save it to a destination path.
 
     Args:

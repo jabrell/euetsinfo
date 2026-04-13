@@ -7,10 +7,17 @@ data given under the "download data" section but not from the PowerBi app itself
 
 import io
 import zipfile
-from pathlib import Path
 
 import httpx
 import pandas as pd
+from tenacity import (
+    retry,
+    retry_if_exception_type,
+    stop_after_attempt,
+    wait_exponential,
+)
+
+from eutl_scraper.settings import Settings
 
 URL_SOURCE = {
     "accounts": "https://dlsclimabi.blob.core.windows.net/public-data/eutlpublic/extracts/_all_extracts/account/accounts_daily.csv.gz",
@@ -24,6 +31,7 @@ def _download_data(url: str, fn_out: str | None = None) -> pd.DataFrame:
     """Download data from the given URL.
 
     Args:
+        client (httpx.Client): HTTP client to use for downloading the data.
         url (str): URL to download data from.
         fn_out (str | None, optional): Output filename to save the data.
             Defaults to None.
@@ -94,12 +102,19 @@ def download_installations(
     return df
 
 
+@retry(
+    retry=retry_if_exception_type(httpx.RemoteProtocolError),
+    stop=stop_after_attempt(5),
+    wait=wait_exponential(min=2, max=60),
+    reraise=True,
+)
 def download_transactions(
-    url: str | None = None, fn_out: str | None = None
+    client: httpx.Client, url: str | None = None, fn_out: str | None = None
 ) -> pd.DataFrame:
     """Download transaction data from the given URL or default URL.
 
     Args:
+        Client: httpx.Client to use for downloading the data.
         url (str | None, optional): URL to download data from. Defaults to None.
         fn_out (str | None, optional): Output filename to save the data.
             Defaults to None.
@@ -111,7 +126,7 @@ def download_transactions(
         url = URL_SOURCE["transactions"]
 
     # Download the zip file to memory
-    response = httpx.get(url, timeout=500)
+    response = client.get(url)
     zip_content = io.BytesIO(response.content)
 
     # Extract the CSV file that starts with "transactions_EUTL_PUBLIC_NOTESD"
@@ -128,23 +143,23 @@ def download_transactions(
     return df
 
 
-def download_all_data(dir_out: Path) -> None:
+def download_all_data(settings: Settings) -> None:
     """Download all datasets:
     accounts, compliance, installations, and transactions.
 
     Args:
-        dir_out (Path): Directory to save the downloaded datasets.
+        settings (Settings): The settings object containing configuration values.
     """
-    dir_out = Path(dir_out)
     download_accounts(
-        fn_out=f"{dir_out}/eutl_accounts.csv",
+        fn_out=settings.fp("accounts", settings.dir_source),
     )
     download_compliance(
-        fn_out=f"{dir_out}/eutl_compliance.csv",
+        fn_out=settings.fp("compliance", settings.dir_source),
     )
     download_installations(
-        fn_out=f"{dir_out}/eutl_installations.csv",
+        fn_out=settings.fp("installations", settings.dir_source),
     )
     download_transactions(
-        fn_out=f"{dir_out}/eutl_transactions.csv",
+        client=settings.client,
+        fn_out=settings.fp("transactions", settings.dir_source),
     )

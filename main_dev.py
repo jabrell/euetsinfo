@@ -4,13 +4,15 @@ from pathlib import Path
 import pandas as pd
 from frictionless import Package, Report
 
-from eutl_scraper.eutl.extract_new import extract_all
+from eutl_scraper.eex_auctions import pipeline_eex_auctions
+from eutl_scraper.eutl import pipeline_eutl
 from eutl_scraper.publish import (
     TABLE_REGISTRY,
     create_data_package,
     create_resource,
     prepare_table,
 )
+from eutl_scraper.settings import Settings
 
 
 def publish_data_package(
@@ -85,10 +87,17 @@ if __name__ == "__main__":
     # package, report = publish_data_package(
     #     dir_source=dir_source, fn_out=fn_out, validate_package=True
     # )
-    dir_source = Path("data/source/")
-    dir_extracted = Path("data/extracted/")
-    fn_direct = dir_source / "eutl_accounts.csv"
-    fn_trans = dir_source / "eutl_transactions.csv"
+    # dir_source = Path("data/source/")
+    # dir_extracted = Path("data/extracted/")
+    # fn_direct = dir_source / "eutl_accounts.csv"
+    # fn_trans = dir_source / "eutl_transactions.csv"
     fn_manual_accounts = Path("data/manual/") / "accounts.xlsx"
-    extract_all(dir_data=Path("data/"), fn_manual_account_data=fn_manual_accounts)
+    # extract_all(dir_data=Path("data/"), fn_manual_account_data=fn_manual_accounts)
+    settings = Settings(dir_data="data/")
+    pipeline_eutl(
+        settings=settings, steps=None, fn_manual_accounts="data/manual/accounts.xlsx"
+    )
+    df = pipeline_eex_auctions(
+        settings=settings, download_history=True, save_extracted=True
+    )
     print("here")
