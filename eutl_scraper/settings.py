@@ -28,6 +28,7 @@ class Settings:
         "eex_auctions": "eex_auctions",
         "nace_from_leakage_lists": "nace_from_leakage_lists",
         "nace_scheme": "nace_scheme",
+        "installation_locations": "installation_locations",
     }
 
     def __post_init__(self):

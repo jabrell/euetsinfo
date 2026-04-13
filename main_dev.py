@@ -1,6 +1,8 @@
+import os
 from pathlib import Path
 
 import pandas as pd
+from dotenv import load_dotenv
 from frictionless import Package, Report
 from loguru import logger
 
@@ -101,14 +103,19 @@ if __name__ == "__main__":
     # extract_all(dir_data=Path("data/"), fn_manual_account_data=fn_manual_accounts)
     settings = Settings(dir_data="data/")
     setup_logging("INFO")
+    # load environment variables from .env fil: GEOAPIFY_API_KEY
+    load_dotenv()
+    GEOAPIFY_API_KEY = os.environ.get("GEOAPIFY_API_KEY", "")
     get_all_data(
         settings=settings,
         pipelines=[
             # Pipelines.EUTL,
-            Pipelines.NACE_FROM_LEAKAGE_LISTS,
-            Pipelines.EEX_AUCTIONS,
-            # Pipelines.INSTALLATION_COORDINATES,
+            # Pipelines.NACE_FROM_LEAKAGE_LISTS,
+            # Pipelines.EEX_AUCTIONS,
+            Pipelines.INSTALLATION_COORDINATES,
         ],
         fn_manual_accounts=fn_manual_accounts,
+        geoapify_api_key=GEOAPIFY_API_KEY,
+        max_installations=10,  # for testing the installation coordinates pipeline
     )
     print("here")
