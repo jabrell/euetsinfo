@@ -8,8 +8,8 @@ from pathlib import Path
 
 from eutl_scraper.settings import Settings
 
-from .download import download_all_data
-from .extract_new import extract_all
+from .download import download_all
+from .extract import extract_all
 
 
 class EUTLPipelineSteps(StrEnum):
@@ -52,7 +52,7 @@ def pipeline_eutl(
 
     if EUTLPipelineSteps.DOWNLOAD in steps:
         print("Download EUTL data...")
-        download_all_data(settings=settings)
+        download_all(settings=settings)
 
     if EUTLPipelineSteps.EXTRACT in steps:
         if fn_manual_accounts is None:

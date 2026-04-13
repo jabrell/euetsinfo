@@ -1,6 +1,6 @@
 import pandas as pd
 
-from eutl_scraper.eutl.extract_new.utils import _strip_str
+from eutl_scraper.eutl.extract.utils import _strip_str
 from eutl_scraper.settings import Settings
 
 

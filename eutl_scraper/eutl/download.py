@@ -143,7 +143,7 @@ def download_transactions(
     return df
 
 
-def download_all_data(settings: Settings) -> None:
+def download_all(settings: Settings) -> None:
     """Download all datasets:
     accounts, compliance, installations, and transactions.
 
