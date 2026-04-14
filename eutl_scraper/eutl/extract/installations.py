@@ -35,7 +35,7 @@ def _clean_and_create_ids(df: pd.DataFrame) -> pd.DataFrame:
             ets_id="euets",
             snapshot_date=pd.to_datetime(df.SNAPSHOT_DATE, format="%Y-%m-%d"),
         )
-        .drop(columns=["INSTALLATION_IDENTIFIER"])
+        .drop(columns=["INSTALLATION_IDENTIFIER", "SNAPSHOT_DATE"])
         .rename(columns=map_col)
         .rename(columns=lambda x: x.lower())
     )
@@ -104,6 +104,7 @@ def extract_installations(
         pd.read_csv(settings.fp("installations", settings.dir_source))
         .pipe(_clean_and_create_ids)
         .pipe(_rename_and_check)
+        .assign(created_at=pd.Timestamp.now())
     )
     if save_to_disk:
         logger.info(

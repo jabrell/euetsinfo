@@ -48,7 +48,7 @@ def extract_nace_by_installation(
     # normalized NACE codes
     df = normalize_nace_codes(
         df=df, columns=["nace_2015", "nace_2020"], df_nace_codes=df_nace_codes
-    )
+    ).assign(created_at=pd.Timestamp.now())
     return df
 
 
@@ -179,5 +179,5 @@ def extract_nace_scheme(fn_in: str | Path) -> pd.DataFrame:
     df_ = pd.DataFrame(new_rows)
 
     # return combined dataframe with all levels
-    df_out = pd.concat([df_all, df_])
+    df_out = pd.concat([df_all, df_]).assign(created_at=pd.Timestamp.now())
     return df_out

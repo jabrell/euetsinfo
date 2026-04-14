@@ -111,6 +111,7 @@ def extract_compliance(settings: Settings, save_to_disk: bool = True) -> pd.Data
         pd.read_csv(settings.fp("compliance", settings.dir_source))
         .pipe(_clean_and_create_ids)
         .pipe(_rename_and_check)
+        .assign(created_at=pd.Timestamp.now())
     )
     if save_to_disk:
         logger.info(

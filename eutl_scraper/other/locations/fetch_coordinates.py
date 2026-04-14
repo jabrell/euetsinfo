@@ -214,6 +214,6 @@ def geocode_installations(
         print(exc)
         print("Exiting...")
     finally:
-        df = pd.DataFrame(coordinates_rows)
+        df = pd.DataFrame(coordinates_rows).assign(created_at=pd.Timestamp.now())
 
     return df

@@ -73,6 +73,7 @@ def extract_accounts(settings: Settings, save_to_disk: bool = True) -> pd.DataFr
         pd.read_csv(settings.fp("accounts", settings.dir_source))
         .pipe(_clean_and_create_ids)
         .pipe(_rename_and_check)
+        .assign(created_at=pd.Timestamp.now())
     )
     if save_to_disk:
         logger.info("Saving extracted accounts data to disk...", filter="eutl_extract")

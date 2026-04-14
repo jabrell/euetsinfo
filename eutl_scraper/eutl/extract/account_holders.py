@@ -147,9 +147,9 @@ def _load_accounts_from_transactions(fn_transactions: Path) -> pd.DataFrame:
             return registry_id + "_" + str(int(row["ACCOUNT_IDENTIFIER"]))
 
     df_trans = df_trans.assign(
-        registry_id=lambda df: df["REGISTRY_NAME"]
-        .str.strip()
-        .map(map_registryCode_inv),
+        registry_id=lambda df: (
+            df["REGISTRY_NAME"].str.strip().map(map_registryCode_inv)
+        ),
         account_id=lambda df: df.apply(assign_account_id, axis=1),
     )
     return df_trans
@@ -226,9 +226,13 @@ def extract_account_holders(
     )
 
     # get the link and the holders only tables
-    df_link_accounts_holders = df_holders[["account_id", "holder_id"]]
-    df_holders = df_holders.drop_duplicates(subset=["holder_id"]).drop(
-        columns=["account_id"]
+    df_link_accounts_holders = df_holders[["account_id", "holder_id"]].assign(
+        created_at=pd.Timestamp.now()
+    )
+    df_holders = (
+        df_holders.drop_duplicates(subset=["holder_id"])
+        .drop(columns=["account_id"])
+        .assign(created_at=pd.Timestamp.now())
     )
 
     # save if output directory is given

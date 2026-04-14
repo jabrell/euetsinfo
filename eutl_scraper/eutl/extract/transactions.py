@@ -156,8 +156,8 @@ def extract_transactions(
     df = pd.read_csv(
         settings.fp("transactions", settings.dir_source), low_memory=False
     ).pipe(_clean_and_create_ids)
-    df_trans = _rename_and_check_transactions(df)
-    df_projects = _create_projects(df)
+    df_trans = _rename_and_check_transactions(df).assign(created_at=pd.Timestamp.now())
+    df_projects = _create_projects(df).assign(created_at=pd.Timestamp.now())
 
     if save_to_disk:
         logger.info(
