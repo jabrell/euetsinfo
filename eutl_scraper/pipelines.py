@@ -4,10 +4,12 @@ from pathlib import Path
 
 from eutl_scraper.settings import Settings
 
-from .eex_auctions import pipeline_eex_auctions
 from .eutl import pipeline_eutl
-from .locations import pipeline_installation_coordinates
-from .nace_codes import pipeline_nace_from_leakage_lists
+from .other import (
+    pipeline_eex_auctions,
+    pipeline_installation_coordinates,
+    pipeline_nace_from_leakage_lists,
+)
 
 
 class Pipelines(StrEnum):

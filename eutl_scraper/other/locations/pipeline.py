@@ -6,7 +6,7 @@ The first version of this module was provided by: Roberto Rossini (Bruegel)"""
 import pandas as pd
 from loguru import logger
 
-from ..settings import Settings
+from ...settings import Settings
 from .fetch_coordinates import geocode_installations, load_installations
 
 
