@@ -55,3 +55,9 @@ fields:
     title: Email
     description: Email address of the account holder.
     type: string
+  - name: created_at
+    title: Date when the data was created
+    description: Date when data have been downloaded and processed
+    type: datetime
+    constraints:
+      required: true

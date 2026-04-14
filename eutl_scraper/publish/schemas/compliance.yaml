@@ -114,3 +114,9 @@ fields:
     type: datetime
     constraints:
       required: true
+  - name: created_at
+    title: Date when the data was created
+    description: Date when data have been downloaded and processed
+    type: datetime
+    constraints:
+      required: true

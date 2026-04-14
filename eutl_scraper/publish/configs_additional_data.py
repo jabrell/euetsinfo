@@ -32,10 +32,14 @@ class InstallationLocations(BaseConfig):
             "installation_id": "installation_id",
             "lat": "latitude",
             "lon": "longitude",
+            "created_at": "created_at",
         }
     )
 
     def __post_init__(self):
+        self.type_convertors = {
+            "created_at": self._to_datetime("created_at"),
+        }
         self.transformers = [
             self._dropna_subset(["lat", "lon"]),
         ]
@@ -65,6 +69,7 @@ class NaceMappings(BaseConfig):
             "installation_id": "installation_id",
             "nace_2015": "nace_2015",
             "nace_2020": "nace_2020",
+            "created_at": "created_at",
         }
     )
 
@@ -72,6 +77,7 @@ class NaceMappings(BaseConfig):
         self.type_convertors = {
             "nace_2015": self._float_to_nace("nace_2015"),
             "nace_2020": self._float_to_nace("nace_2020"),
+            "created_at": self._to_datetime("created_at"),
         }
 
         self.transformers = [

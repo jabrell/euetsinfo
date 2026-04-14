@@ -24,3 +24,9 @@ fields:
     title: NACE Code (2020)
     description: NACE Rev. 2 activity code assigned in the 2020 leakage list.
     type: string
+  - name: created_at
+    title: Date when the data was created
+    description: Date when data have been downloaded and processed
+    type: datetime
+    constraints:
+      required: true

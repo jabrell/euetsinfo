@@ -21,8 +21,9 @@ if __name__ == "__main__":
             Pipelines.EUTL,
             Pipelines.NACE_FROM_LEAKAGE_LISTS,
             Pipelines.EEX_AUCTIONS,
-            # Pipelines.INSTALLATION_COORDINATES,
+            Pipelines.INSTALLATION_COORDINATES,
         ],
         fn_manual_accounts=fn_manual_accounts,
         geoapify_api_key=GEOAPIFY_API_KEY,
+        max_installations=10,
     )

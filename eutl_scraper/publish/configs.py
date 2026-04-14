@@ -81,7 +81,6 @@ class InstallationsConfig(BaseConfig):
         default_factory=lambda: {
             "installation_id": "id",
             "installation_name": "name",
-            "account_id": "account_id",
             "permit_identifier": "permitID",
             "eper_identification": "eperID",
             "ets_id": "ets_id",
@@ -97,6 +96,7 @@ class InstallationsConfig(BaseConfig):
             "year_of_first_emissions": "year_of_first_emissions",
             "year_of_last_emissions": "year_of_last_emissions",
             "snapshot_date": "snapshot_date",
+            "created_at": "created_at",
         }
     )
     type_convertors: dict[str, Callable] = field(default_factory=dict)
@@ -108,6 +108,7 @@ class InstallationsConfig(BaseConfig):
             "year_of_last_emissions": self._to_nullable_int("year_of_last_emissions"),
             "activity_type_code": self._to_nullable_int("activity_type_code"),
             "year_of_first_emissions": self._to_nullable_int("year_of_first_emissions"),
+            "created_at": self._to_datetime("created_at"),
         }
 
 
@@ -135,11 +136,11 @@ class AccountsConfig(BaseConfig):
             "account_id": "id",
             "accountName": "name",
             "account_type": "account_type",
-            "holder_id": "holder_id",
-            "openingDate": "openingDate",
-            "closingDate": "closingDate",
-            "isClosurePending": "isClosurePending",
-            "snapshotDate": "snapshotDate",
+            "openingDate": "opening_date",
+            "closingDate": "closing_date",
+            "isClosurePending": "is_closure_pending",
+            "snapshotDate": "snapshot_date",
+            "created_at": "created_at",
         }
     )
     type_convertors: dict[str, Callable] = field(default_factory=dict)
@@ -149,6 +150,7 @@ class AccountsConfig(BaseConfig):
             "openingDate": self._to_datetime("openingDate"),
             "closingDate": self._to_datetime("closingDate"),
             "snapshotDate": self._to_datetime("snapshotDate"),
+            "created_at": self._to_datetime("created_at"),
         }
 
 
@@ -190,9 +192,15 @@ class AccountHoldersConfig(BaseConfig):
             "telephone1": "telephone1",
             "telephone2": "telephone2",
             "email": "email",
+            "created_at": "created_at",
         }
     )
     type_convertors: dict[str, Callable] = field(default_factory=dict)
+
+    def __post_init__(self):
+        self.type_convertors = {
+            "created_at": self._to_datetime("created_at"),
+        }
 
 
 @dataclass
@@ -239,6 +247,7 @@ class ComplianceConfig(BaseConfig):
             "excluded": "excluded",
             "ch_excluded": "ch_excluded",
             "snapshot_date": "snapshot_date",
+            "created_at": "created_at",
         }
     )
     type_convertors: dict[str, Callable] = field(default_factory=dict)
@@ -246,6 +255,7 @@ class ComplianceConfig(BaseConfig):
     def __post_init__(self):
         self.type_convertors = {
             "snapshot_date": self._to_datetime("snapshot_date"),
+            "created_at": self._to_datetime("created_at"),
         }
 
 
@@ -281,6 +291,7 @@ class ProjectsConfig(BaseConfig):
             "lulucf_code_description": "lulucf_code_description",
             "track": "track",
             "expiry_date": "expiry_date",
+            "created_at": "created_at",
         }
     )
     type_convertors: dict[str, Callable] = field(default_factory=dict)
@@ -288,6 +299,7 @@ class ProjectsConfig(BaseConfig):
     def __post_init__(self):
         self.type_convertors = {
             "expiry_date": self._to_datetime("expiry_date"),
+            "created_at": self._to_datetime("created_at"),
         }
 
 
@@ -326,6 +338,7 @@ class TransactionsConfig(BaseConfig):
             "unit_type_description": "unit_type_description",
             "supp_unit_type_description": "supp_unit_type_description",
             "amount": "amount",
+            "created_at": "created_at",
         }
     )
     type_convertors: dict[str, Callable] = field(default_factory=dict)
@@ -333,4 +346,5 @@ class TransactionsConfig(BaseConfig):
     def __post_init__(self):
         self.type_convertors = {
             "transaction_date": self._to_datetime("transaction_date"),
+            "created_at": self._to_datetime("created_at"),
         }

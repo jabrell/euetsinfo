@@ -1,0 +1,27 @@
+primaryKey: id
+missingValues:
+  - ""
+  - "NA"
+fields:
+  - name: installation_id
+    title: Installation ID
+    description: Unique identifier for the installation.
+    type: string
+    constraints:
+      required: true
+  - name: account_id
+    title: Installation Name
+    description: Name of the installation.
+    type: string
+    constraints:
+      required: true
+  - name: snapshot_date
+    title: Snapshot Date
+    description: Date of the data snapshot as provided by the EUTL.
+    type: datetime
+  - name: created_at
+    title: Date when the data was created
+    description: Date when data have been downloaded and processed
+    type: datetime
+    constraints:
+      required: true
