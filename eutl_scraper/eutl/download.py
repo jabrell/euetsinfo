@@ -7,104 +7,58 @@ data given under the "download data" section but not from the PowerBi app itself
 
 import zipfile
 
+import httpx
 import pandas as pd
 from loguru import logger
 
-from eutl_scraper.settings import Settings
+from eutl_scraper.settings import DownloadClient, Settings
 
 URL_SOURCE = {
     "accounts": "https://dlsclimabi.blob.core.windows.net/public-data/eutlpublic/extracts/_all_extracts/account/accounts_daily.csv.gz",
     "installations": "https://dlsclimabi.blob.core.windows.net/public-data/eutlpublic/extracts/_all_extracts/operator/operators_daily.csv.gz",
     "compliance": "https://dlsclimabi.blob.core.windows.net/public-data/eutlpublic/extracts/_all_extracts/operators_yearly_activity/operators_yearly_activity_daily.csv.gz",
-    "transactions": "https://climate.ec.europa.eu/document/download/0cda99f1-16f6-41e7-b190-887cd71339a4_en?filename=transactions_eutl_2024_0.zip",
 }
+URL_TRANSACTIONS = "https://climate.ec.europa.eu/document/download/0cda99f1-16f6-41e7-b190-887cd71339a4_en?filename=transactions_eutl_2024_0.zip"
 
 
-def _download_data(url: str, fn_out: str | None = None) -> pd.DataFrame:
-    """Download data from the given URL.
+def _download_csv(
+    key: str, fn_out: str | None = None, client: DownloadClient | None = None
+) -> pd.DataFrame:
+    """Download a CSV file corresponding to the given key.
 
-    Args:
-        client (httpx.Client): HTTP client to use for downloading the data.
-        url (str): URL to download data from.
-        fn_out (str | None, optional): Output filename to save the data.
-            Defaults to None.
+     The key is used to look up the URL in the URL_SOURCE dictionary. The file is
+     downloaded using the provided client or a default DownloadClient if none is
+     provided.
+
+     Args:
+        key (str): Key for the dataset to download. Must be one of the keys in
+            URL_SOURCE.
+        fn_out (str | None, optional): Output filename to save the data. Defaults to
+            None.
+        client (DownloadClient | None, optional): HTTP client to use for downloading
 
     Returns:
         pd.DataFrame: DataFrame containing the downloaded data.
     """
-    df = pd.read_csv(url, compression="gzip")
-    if fn_out is not None:
-        df.to_csv(fn_out, index=False)
-    return df
-
-
-def download_accounts(
-    url: str | None = None, fn_out: str | None = None
-) -> pd.DataFrame:
-    """Extract account data from the given URL or default URL.
-
-    Args:
-        url (str | None, optional): URL to extract data from. Defaults to None.
-        fn_out (str | None, optional): Output filename to save the data.
-            Defaults to None.
-
-    Returns:
-        pd.DataFrame: DataFrame containing account data.
-    """
-    logger.info("Downloading accounts data...", filter="eutl_download")
+    url = URL_SOURCE.get(key)
     if url is None:
-        url = URL_SOURCE["accounts"]
-    df = _download_data(url, fn_out)
-    return df
-
-
-def download_compliance(
-    url: str | None = None, fn_out: str | None = None
-) -> pd.DataFrame:
-    """Download compliance data from the given URL or default URL.
-
-    Args:
-        url (str | None, optional): URL to download data from. Defaults to None.
-        fn_out (str | None, optional): Output filename to save the data.
-            Defaults to None.
-
-    Returns:
-        pd.DataFrame: DataFrame containing compliance data.
-    """
-    if url is None:
-        url = URL_SOURCE["compliance"]
-    logger.info("Downloading compliance data...", filter="eutl_download")
-    df = _download_data(url, fn_out)
-    return df
-
-
-def download_installations(
-    url: str | None = None, fn_out: str | None = None
-) -> pd.DataFrame:
-    """Download installation data from the given URL or default URL.
-
-    Args:
-        url (str | None, optional): URL to download data from. Defaults to None.
-        fn_out (str | None, optional): Output filename to save the data.
-            Defaults to None.
-
-    Returns:
-        pd.DataFrame: DataFrame containing installation data.
-    """
-    if url is None:
-        url = URL_SOURCE["installations"]
-    logger.info("Downloading installations data...", filter="eutl_download")
-    df = _download_data(url, fn_out)
+        raise ValueError(
+            f"Invalid key '{key}'. Valid keys are: {list(URL_SOURCE.keys())}"
+        )
+    client = client or DownloadClient()
+    logger.info(f"Downloading {key} data...", filter="eutl_download")
+    df = client.download_csv(url=url, fn_out=fn_out)
     return df
 
 
 def download_transactions(
-    settings: Settings, url: str | None = None, fn_out: str | None = None
+    url: str | None = None,
+    fn_out: str | None = None,
+    client: DownloadClient | httpx.Client | None = None,
 ) -> pd.DataFrame:
     """Download transaction data from the given URL or default URL.
 
     Args:
-        settings (Settings): The settings object containing configuration values.
         url (str | None, optional): URL to download data from. Defaults to None.
         fn_out (str | None, optional): Output filename to save the data.
             Defaults to None.
@@ -112,11 +66,11 @@ def download_transactions(
     Returns:
         pd.DataFrame: DataFrame containing transaction data.
     """
-    if url is None:
-        url = URL_SOURCE["transactions"]
+    url = url or URL_TRANSACTIONS
+    client = client or DownloadClient()
     logger.info("Downloading transactions data...", filter="eutl_download")
     # Download the zip file to memory
-    zip_content = settings.download_with_resume(url=url)
+    zip_content = client.download_with_resume(url=url)
     # Extract the CSV file that starts with "transactions_EUTL_PUBLIC_NOTESD"
     with zipfile.ZipFile(zip_content) as zf:
         csv_filename = [
@@ -138,16 +92,11 @@ def download_all(settings: Settings) -> None:
     Args:
         settings (Settings): The settings object containing configuration values.
     """
-    download_accounts(
-        fn_out=settings.fp("accounts", settings.dir_source),
-    )
-    download_compliance(
-        fn_out=settings.fp("compliance", settings.dir_source),
-    )
-    download_installations(
-        fn_out=settings.fp("installations", settings.dir_source),
-    )
-    download_transactions(
-        settings=settings,
-        fn_out=settings.fp("transactions", settings.dir_source),
-    )
+    with DownloadClient() as client:
+        for key in URL_SOURCE.keys():
+            _download_csv(
+                key=key, fn_out=settings.fp(key, settings.dir_source), client=client
+            )
+        download_transactions(
+            fn_out=settings.fp("transactions", settings.dir_source), client=client
+        )
