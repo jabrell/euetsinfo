@@ -37,7 +37,13 @@ def publish_data_package(
     data_paths = {
         "installations": settings.fp("installations", settings.dir_extracted),
         "accounts": settings.fp("accounts", settings.dir_extracted),
+        "link_installation_account": settings.fp(
+            "link_installation_account", settings.dir_extracted
+        ),
         "account_holders": settings.fp("account_holders", settings.dir_extracted),
+        "link_account_holder": settings.fp(
+            "link_account_holder", settings.dir_extracted
+        ),
         "compliance": settings.fp("compliance", settings.dir_extracted),
         "projects": settings.fp("projects", settings.dir_extracted),
         "transactions": settings.fp("transactions", settings.dir_extracted),
@@ -94,5 +100,7 @@ if __name__ == "__main__":
     settings = Settings(dir_data="data_tmp/")
     setup_logging("INFO")
     # extract_installations(settings=settings, save_to_disk=True)
-    publish_data_package(settings=settings, fn_out="test.zip", validate_package=True)
+    package, report = publish_data_package(
+        settings=settings, fn_out="test.zip", validate_package=True
+    )
     print("here")

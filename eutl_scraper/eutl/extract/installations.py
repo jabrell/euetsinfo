@@ -122,7 +122,7 @@ def extract_installations(
             settings.fp("installations", settings.dir_extracted), index=False
         )
         df_link.to_csv(
-            settings.fp("link_installations_accounts", settings.dir_extracted),
+            settings.fp("link_installation_account", settings.dir_extracted),
             index=False,
         )
     return df_inst, df_link

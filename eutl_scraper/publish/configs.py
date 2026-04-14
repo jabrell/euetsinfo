@@ -348,3 +348,73 @@ class TransactionsConfig(BaseConfig):
             "transaction_date": self._to_datetime("transaction_date"),
             "created_at": self._to_datetime("created_at"),
         }
+
+
+@dataclass
+class LinkInstallationAccountConfig(BaseConfig):
+    name: str = "link_installation_account"
+    schema_path: Path = SCHEMA_PATH / "link_installation_account.yaml"
+    resource_metadata: ResourceMetadata = field(
+        default_factory=lambda: ResourceMetadata(
+            title="EU ETS Link Installation Account",
+            description=(
+                "Information about the link between installations and accounts in "
+                "the European Union Emissions Trading System (EU ETS)."
+            ),
+            sources=[
+                {
+                    "title": "European Commission, EUTL database",
+                    "path": "https://union-registry-data.ec.europa.eu/report/welcome",
+                }
+            ],
+        )
+    )
+    column_mapping: dict[str, str] = field(
+        default_factory=lambda: {
+            "installation_id": "installation_id",
+            "account_id": "account_id",
+            "snapshot_date": "snapshot_date",
+            "created_at": "created_at",
+        }
+    )
+    type_convertors: dict[str, Callable] = field(default_factory=dict)
+
+    def __post_init__(self):
+        self.type_convertors = {
+            "snapshot_date": self._to_datetime("snapshot_date"),
+            "created_at": self._to_datetime("created_at"),
+        }
+
+
+@dataclass
+class LinkAccountHolderConfig(BaseConfig):
+    name: str = "link_account_holder"
+    schema_path: Path = SCHEMA_PATH / "link_account_holder.yaml"
+    resource_metadata: ResourceMetadata = field(
+        default_factory=lambda: ResourceMetadata(
+            title="EU ETS Link Account Holder",
+            description=(
+                "Information about the link between account holders and accounts in "
+                "the European Union Emissions Trading System (EU ETS)."
+            ),
+            sources=[
+                {
+                    "title": "European Commission, EUTL database",
+                    "path": "https://union-registry-data.ec.europa.eu/report/welcome",
+                }
+            ],
+        )
+    )
+    column_mapping: dict[str, str] = field(
+        default_factory=lambda: {
+            "account_id": "account_id",
+            "holder_id": "holder_id",
+            "created_at": "created_at",
+        }
+    )
+    type_convertors: dict[str, Callable] = field(default_factory=dict)
+
+    def __post_init__(self):
+        self.type_convertors = {
+            "created_at": self._to_datetime("created_at"),
+        }

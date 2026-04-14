@@ -8,6 +8,8 @@ from eutl_scraper.publish.configs import (
     AccountsConfig,
     ComplianceConfig,
     InstallationsConfig,
+    LinkAccountHolderConfig,
+    LinkInstallationAccountConfig,
     ProjectsConfig,
     TransactionsConfig,
 )
@@ -40,4 +42,6 @@ TABLE_REGISTRY = {
     "installation_locations": InstallationLocations(),
     "nace_mappings": NaceMappings(),
     "eex_auctions": EEXAuctions(),
+    "link_installation_account": LinkInstallationAccountConfig(),
+    "link_account_holder": LinkAccountHolderConfig(),
 }

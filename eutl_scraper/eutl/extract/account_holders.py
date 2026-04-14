@@ -242,7 +242,7 @@ def extract_account_holders(
             filter="eutl_extract",
         )
         df_link_accounts_holders.to_csv(
-            settings.fp("link_accounts_holders", settings.dir_extracted), index=False
+            settings.fp("link_account_holder", settings.dir_extracted), index=False
         )
         df_holders.to_csv(
             settings.fp("account_holders", settings.dir_extracted), index=False

@@ -1,39 +1,35 @@
 primaryKey:
-  - installation_id
   - account_id
+  - holder_id
 missingValues:
   - ""
   - "NA"
 foreignKeys:
-  - fields:
-      - installation_id
-    reference:
-      resource: installations
-      fields:
-        - id
   - fields:
       - account_id
     reference:
       resource: accounts
       fields:
         - id
+  - fields:
+      - holder_id
+    reference:
+      resource: account_holders
+      fields:
+        - id
 fields:
-  - name: installation_id
-    title: Installation ID
-    description: Unique identifier for the installation.
-    type: string
-    constraints:
-      required: true
   - name: account_id
     title: Account ID
     description: Unique identifier for the account.
     type: string
     constraints:
       required: true
-  - name: snapshot_date
-    title: Snapshot Date
-    description: Date of the data snapshot as provided by the EUTL.
-    type: datetime
+  - name: holder_id
+    title: Holder ID
+    description: Unique identifier for the account holder.
+    type: string
+    constraints:
+      required: true
   - name: created_at
     title: Date when the data was created
     description: Date when data have been downloaded and processed
