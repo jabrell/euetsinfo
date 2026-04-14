@@ -25,5 +25,5 @@ if __name__ == "__main__":
         ],
         fn_manual_accounts=fn_manual_accounts,
         geoapify_api_key=GEOAPIFY_API_KEY,
-        max_installations=10,
+        # max_installations=10,
     )

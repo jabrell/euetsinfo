@@ -8,6 +8,7 @@ from pathlib import Path
 
 from loguru import logger
 
+from eutl_scraper.eutl.augment.installations import create_ets2_installations
 from eutl_scraper.settings import Settings
 
 from .download import download_all
@@ -17,6 +18,7 @@ from .extract import extract_all
 class EUTLPipelineSteps(StrEnum):
     DOWNLOAD = "download"
     EXTRACT = "extract"
+    AUGMENT = "augment"
 
 
 def pipeline_eutl(
@@ -45,8 +47,9 @@ def pipeline_eutl(
                 account data are needed.
                 Note that the extraction step requires the normalized data to be
                 present in the normalized directory.
-
-
+            - EUTLPipelineSteps.AUGMENT: Augment the data with additional information.
+                This step requires the extracted data to be present in the extracted
+                directory.
     """
     # pipeline steps
     if steps is None:
@@ -66,3 +69,7 @@ def pipeline_eutl(
             settings=settings,
             fn_manual_account_data=fn_manual_accounts,
         )
+
+    if EUTLPipelineSteps.AUGMENT in steps:
+        logger.info("Augment EUTL data...", filter="eutl_pipeline")
+        create_ets2_installations(settings=settings)

@@ -6,6 +6,7 @@ from loguru import logger
 
 from eutl_scraper import Settings
 
+# from eutl_scraper.eutl.augment.installations import create_ets2_installations
 # from eutl_scraper.eutl.extract.installations import extract_installations
 from eutl_scraper.logger import setup_logging
 from eutl_scraper.publish import (
@@ -100,6 +101,7 @@ if __name__ == "__main__":
     settings = Settings(dir_data="data_tmp/")
     setup_logging("INFO")
     # extract_installations(settings=settings, save_to_disk=True)
+    # create_ets2_installations(settings=settings)
     package, report = publish_data_package(
         settings=settings, fn_out="test.zip", validate_package=True
     )
