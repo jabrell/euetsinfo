@@ -4,6 +4,8 @@ import pandas as pd
 from frictionless import Package, Report
 from loguru import logger
 
+from eutl_scraper import Settings
+from eutl_scraper.eutl.extract.installations import extract_installations
 from eutl_scraper.logger import setup_logging
 from eutl_scraper.publish import (
     TABLE_REGISTRY,
@@ -11,7 +13,6 @@ from eutl_scraper.publish import (
     create_resource,
     prepare_table,
 )
-from eutl_scraper.settings import Settings
 
 
 def publish_data_package(
@@ -91,5 +92,6 @@ def publish_data_package(
 if __name__ == "__main__":
     settings = Settings(dir_data="data_tmp/")
     setup_logging("INFO")
-    publish_data_package(settings=settings, fn_out="test.zip", validate_package=True)
-    print("here")
+    extract_installations(settings=settings, save_to_disk=True)
+    # publish_data_package(settings=settings, fn_out="test.zip", validate_package=True)
+    # print("here")

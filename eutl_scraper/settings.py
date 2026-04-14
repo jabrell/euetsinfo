@@ -16,6 +16,7 @@ class Settings:
     FILENAMES: ClassVar[dict[str, str]] = {
         "accounts": "eutl_accounts",
         "installations": "eutl_installations",
+        "link_installations_accounts": "eutl_link_installations_accounts",
         "compliance": "eutl_compliance",
         "transactions": "eutl_transactions",
         "projects": "eutl_projects",

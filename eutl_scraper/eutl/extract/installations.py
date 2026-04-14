@@ -88,7 +88,7 @@ def _rename_and_check(df: pd.DataFrame) -> pd.DataFrame:
 
 def extract_installations(
     settings: Settings, save_to_disk: bool = True
-) -> pd.DataFrame:
+) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Extract installation data from the given source file and save to output file.
 
     Args:
@@ -97,7 +97,8 @@ def extract_installations(
             Defaults to True.
 
     Returns:
-        pd.DataFrame: DataFrame containing extracted installation data.
+        tuple[pd.DataFrame, pd.DataFrame]: DataFrames containing extracted installation
+            data and the link between installations and accounts.
     """
     logger.info("Extracting installations data...", filter="eutl_extract")
     df = (
@@ -106,9 +107,22 @@ def extract_installations(
         .pipe(_rename_and_check)
         .assign(created_at=pd.Timestamp.now())
     )
+
+    # separate link between installations and accounts from the installation data
+    df_link = df.loc[
+        :, ["installation_id", "account_id", "snapshot_date", "created_at"]
+    ]
+    df_inst = df.drop(columns=["account_id"])
+
     if save_to_disk:
         logger.info(
             "Saving extracted installations data to disk...", filter="eutl_extract"
         )
-        df.to_csv(settings.fp("installations", settings.dir_extracted), index=False)
-    return df
+        df_inst.to_csv(
+            settings.fp("installations", settings.dir_extracted), index=False
+        )
+        df_link.to_csv(
+            settings.fp("link_installations_accounts", settings.dir_extracted),
+            index=False,
+        )
+    return df_inst, df_link
