@@ -65,7 +65,10 @@ class Settings:
         """
         fn = self.FILENAMES.get(key)
         if fn is None:
-            raise KeyError(f"Key {key} not found in FILENAMES.")
+            raise KeyError(
+                f"Key {key} not found in FILENAMES."
+                f"Valid keys are: {list(self.FILENAMES.keys())}"
+            )
         return directory / f"{fn}.{ending}"
 
 
