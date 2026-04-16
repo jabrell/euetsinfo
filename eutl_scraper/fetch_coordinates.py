@@ -1,57 +1,28 @@
-import os
-import time
-from typing import Any, Dict, List, Optional, Tuple
-
-import pandas as pd
+import time, os
 import requests
+import pandas as pd
 from tqdm import tqdm
 
 GEOAPIFY_URL = "https://api.geoapify.com/v1/geocode/search"
 
-def clean_part(value: Any) -> Optional[str]:
-    """
-    Clean a single address component.
+DIRNAME = os.path.dirname(__file__)
+INPUT_CSV = os.path.join(DIRNAME, "data", "eutl_installations.csv")
+OUTPUT_CSV = os.path.join(DIRNAME, "data", "eutl_installations-output.csv")
 
-    - Converts the value to string
-    - Strips whitespace
-    - Returns None for NaN, empty strings, or '-'.
-
-    Args:
-        value: The raw value from the DataFrame row.
-
-    Returns:
-        The cleaned string or None if the value is considered empty.
-    """
+def clean_part(value):
     if pd.isna(value):
         return None
-    value_str = str(value).strip()
-    if value_str == "" or value_str == "-":
+    value = str(value).strip()
+    if value == "" or value == "-":
         return None
-    return value_str
+    return value
 
-
-def build_full_address(row: dict) -> str:
-    """
-    Build a full address string from a row containing address parts.
-
-    The function expects the row to have the following keys/columns:
-    - 'address_1'
-    - 'address_2'
-    - 'postal_code'
-    - 'city'
-    - 'country'
-
-    Args:
-        row: A pandas Series or dictionary-like object representing a row.
-
-    Returns:
-        A single comma-separated address string.
-    """
-    parts: List[str] = []
+def build_full_address(row):
+    parts = []
 
     # Address lines
-    addr1 = clean_part(row.get("address_1"))
-    addr2 = clean_part(row.get("address_2"))
+    addr1 = clean_part(row.get("address1"))
+    addr2 = clean_part(row.get("address2"))
 
     if addr1:
         parts.append(addr1)
@@ -61,9 +32,9 @@ def build_full_address(row: dict) -> str:
     # Location details
     postal_code = clean_part(row.get("postal_code"))
     city = clean_part(row.get("city"))
-    country = clean_part(row.get("country"))
+    country = clean_part(row.get("registry_id"))
 
-    city_block = ", ".join(part for part in (postal_code, city) if part)
+    city_block = ", ".join(p for p in [postal_code, city] if p)
     if city_block:
         parts.append(city_block)
 
@@ -73,24 +44,7 @@ def build_full_address(row: dict) -> str:
     return ", ".join(parts)
 
 
-def geocode_address(
-    address: str,
-    api_key: str,
-    base_url: str = GEOAPIFY_URL,
-    timeout: int = 10,
-) -> Tuple[Optional[float], Optional[float]]:
-    """
-    Geocode a single address using the Geoapify API.
-
-    Args:
-        address: The full address string to geocode.
-        api_key: Geoapify API key.
-        base_url: Base URL for the Geoapify geocoding endpoint.
-        timeout: Request timeout in seconds.
-
-    Returns:
-        A tuple (lat, lon) where both elements are floats or None if not found.
-    """
+def geocode_address(address: str):
     if pd.isna(address) or not address.strip():
         return None, None
 
@@ -98,133 +52,68 @@ def geocode_address(
         "text": address,
         "limit": 1,
         "format": "json",
-        "apiKey": api_key,
+        "apiKey": GEOAPIFY_API_KEY,
     }
 
-    response = requests.get(base_url, params=params, timeout=timeout)
-    response.raise_for_status()
+    r = requests.get(GEOAPIFY_URL, params=params, timeout=10)
+    r.raise_for_status()
 
-    data = response.json()
+    data = r.json()
     if not data.get("results"):
         return None, None
 
     res = data["results"][0]
-    lat = res.get("lat")
-    lon = res.get("lon")
-    return lat, lon
+    return res.get("lat"), res.get("lon")
 
 
-def geocode_installations(
-    input_csv: str,
-    output_csv: str,
-    output_coordinates_csv: str,
-    api_key: str,
-    rate_limit_seconds: float = 0.25,
-) -> None:
-    """
-    Main processing function that reads installations, geocodes their addresses,
-    and writes full and coordinates-only CSV outputs.
+# --- Load CSV ---
+df = pd.read_csv(INPUT_CSV)
 
-    Steps:
-    - Load input CSV
-    - Ensure 'lat' and 'lon' columns exist
-    - Build full address strings
-    - Filter out certain activity types (10 and 50)
-    - Geocode missing coordinates (with a cache to avoid duplicate calls)
-    - Save the enriched dataset and a coordinates-only CSV
+# Ensure columns exist
+for col in ["lat", "lon"]:
+    if col not in df.columns:
+        df[col] = None
 
-    Args:
-        input_csv: Path to the input CSV file with installations.
-        output_csv: Path to the output CSV file with full data (including lat/lon).
-        output_coordinates_csv: Path to the output CSV file with only ID and coordinates.
-        api_key: Geoapify API key used for geocoding.
-        rate_limit_seconds: Delay between API calls to respect rate limits.
-    """
-    # --- Load CSV ---
-    df = pd.read_csv(input_csv)
+# Rows that need geocoding
+mask = df["lat"].isna() | df["lon"].isna()
 
-    # Ensure columns exist
-    for col in ["lat", "lon"]:
-        if col not in df.columns:
-            df[col] = None
+# Optional cache to avoid duplicate calls
+cache = {}
 
-    # Build full address for each row
-    df["full_address"] = df.apply(build_full_address, axis=1)
+df["full_address"] = df.apply(build_full_address, axis=1)
+df = df[df["activity_type_code"] != 10]
+df = df[df["activity_type_code"] != 50]
 
-    # Filter out activity types 10 and 50
-    df = df[df["activity_type_code"] != 10]
-    df = df[df["activity_type_code"] != 50]
+new_rows = []
+try:
 
-    # Optional cache to avoid duplicate calls
-    cache: Dict[str, Tuple[Optional[float], Optional[float]]] = {}
+    for row in tqdm(df.to_dict('records')):
+        if str(row["activity_type_code"]) in ["10", "50"]:
+            continue
+        address = row["full_address"]
 
-    new_rows: List[Dict[str, Any]] = []
-    coordinates_rows: List[Dict[str, Any]] = []
-
-    try:
-        for row in tqdm(df.to_dict("records")):
-            # Extra safety check, in case codes are strings
-            if str(row.get("activity_type_code")) in ["10", "50"]:
+        if address in cache:
+            lat, lon = cache[address]
+        else:
+            try:
+                lat, lon = geocode_address(address)
+                cache[address] = (lat, lon)
+                time.sleep(0.25)  # rate-limit safety
+            except Exception as e:
+                print(f"✖ Failed: {address} → {e}")
                 continue
 
-            address = row.get("full_address", "")
+        new_rows.append({
+            **row,
+            "lat": lat,
+            "lon": lon
+        })
+        print(f"✔ Geocoded: {address}")
+except e:
+    print(e)
+    print("Exiting...")
+finally:
+    # --- Save result ---
+    pd.DataFrame(new_rows).to_csv(OUTPUT_CSV, index=False)
 
-            if address in cache:
-                lat, lon = cache[address]
-            else:
-                try:
-                    lat, lon = geocode_address(address, api_key=api_key)
-                    cache[address] = (lat, lon)
-                    time.sleep(rate_limit_seconds)  # rate-limit safety
-                except Exception as exc:  # noqa: BLE001
-                    print(f"✖ Failed: {address} → {exc}")
-                    continue
-
-            new_rows.append(
-                {
-                    **row,
-                    "lat": lat,
-                    "lon": lon,
-                }
-            )
-            coordinates_rows.append(
-                {
-                    "installation_id": row.get("installation_id"),
-                    "lat": lat,
-                    "lon": lon,
-                }
-            )
-            print(f"✔ Geocoded: {address}")
-    except Exception as exc:  # noqa: BLE001
-        print(exc)
-        print("Exiting...")
-    finally:
-        # --- Save result ---
-        pd.DataFrame(new_rows).to_csv(output_csv, index=False)
-        pd.DataFrame(coordinates_rows).to_csv(output_coordinates_csv, index=False)
-
-    print("Done.")
-
-
-if __name__ == "__main__":
-    # --- Configuration / constants section ---
-    GEOAPIFY_API_KEY = ""  # TODO: set your API key here or read from env
-
-    CURRENT_PATH = os.path.dirname(__file__)
-    DATA_PATH = os.path.join(CURRENT_PATH, "..", "data")
-    INPUT_CSV = os.path.join(DATA_PATH, "eutl_installations.csv")
-    OUTPUT_CSV = os.path.join(DATA_PATH, "eutl_installations-output.csv")
-    OUTPUT_COORDINATES_CSV = os.path.join(
-        DATA_PATH, "eutl_installations_coordinates.csv"
-    )
-
-    # Optionally, read API key from environment instead:
-    # GEOAPIFY_API_KEY = os.environ.get("GEOAPIFY_API_KEY", "")
-
-    geocode_installations(
-        input_csv=INPUT_CSV,
-        output_csv=OUTPUT_CSV,
-        output_coordinates_csv=OUTPUT_COORDINATES_CSV,
-        api_key=GEOAPIFY_API_KEY,
-        rate_limit_seconds=0.25,
-    )
+print("Done.")
