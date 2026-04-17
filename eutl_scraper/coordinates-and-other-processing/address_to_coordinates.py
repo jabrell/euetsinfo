@@ -3,6 +3,7 @@ import requests
 import pandas as pd
 from tqdm import tqdm
 
+GEOAPIFY_API_KEY = '59e98649998e4c78830664c009eeb886'
 GEOAPIFY_URL = "https://api.geoapify.com/v1/geocode/search"
 
 DIRNAME = os.path.dirname(__file__)
@@ -32,7 +33,7 @@ def build_full_address(row):
     # Location details
     postal_code = clean_part(row.get("postal_code"))
     city = clean_part(row.get("city"))
-    country = clean_part(row.get("registry_id"))
+    country = clean_part(row.get("registry_name"))
 
     city_block = ", ".join(p for p in [postal_code, city] if p)
     if city_block:
@@ -65,7 +66,16 @@ def geocode_address(address: str):
     res = data["results"][0]
     return res.get("lat"), res.get("lon")
 
+# Output
+new_rows = []
 
+# Existing CSV
+existing_df = pd.read_csv(OUTPUT_CSV) if os.path.exists(OUTPUT_CSV) else pd.DataFrame()
+fetched_installations = {}
+for row in existing_df.to_dict('records'):
+    fetched_installations[row["installation_id"]] = row
+    new_rows.append(row)
+    
 # --- Load CSV ---
 df = pd.read_csv(INPUT_CSV)
 
@@ -84,12 +94,15 @@ df["full_address"] = df.apply(build_full_address, axis=1)
 df = df[df["activity_type_code"] != 10]
 df = df[df["activity_type_code"] != 50]
 
-new_rows = []
 try:
 
     for row in tqdm(df.to_dict('records')):
-        if str(row["activity_type_code"]) in ["10", "50"]:
+        if row["installation_id"] in fetched_installations:
             continue
+        
+        if  str(row["activity_type_code"]) in ["10", "50"]:
+            continue
+        
         address = row["full_address"]
 
         if address in cache:
