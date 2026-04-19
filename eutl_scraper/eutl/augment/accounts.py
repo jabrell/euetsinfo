@@ -129,8 +129,8 @@ def add_missing_accounts_from_transactions(
             accountName=lambda df: df["accountName"].fillna("NotKnown"),
             account_type=lambda df: df["account_type2"].map(_format_account_type),
             isClosurePending=pd.NA,
-            snapshotDate=lambda df: df_accounts.snapshotDate.unique()[0],
-            created_at=lambda df: df_accounts.created_at.unique()[0],
+            snapshotDate=df_accounts.snapshotDate.unique()[0],
+            created_at=df_accounts.created_at.unique()[0],
         )
         .drop(columns=["account_type2"])
     )

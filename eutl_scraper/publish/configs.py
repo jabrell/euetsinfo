@@ -29,9 +29,9 @@ class BaseConfig:
     transformers: list[Callable] = field(default_factory=list)
 
     @staticmethod
-    def _to_datetime(col: str) -> Callable:
+    def _to_datetime(col: str, errors: str = "coerce") -> Callable:
         """Return a function that converts a column to datetime format."""
-        return lambda df: pd.to_datetime(df[col], utc=True)
+        return lambda df: pd.to_datetime(df[col], utc=True, errors=errors)
 
     @staticmethod
     def _to_nullable_int(col: str) -> Callable:
@@ -147,8 +147,8 @@ class AccountsConfig(BaseConfig):
 
     def __post_init__(self):
         self.type_convertors = {
-            "openingDate": self._to_datetime("openingDate"),
-            "closingDate": self._to_datetime("closingDate"),
+            "openingDate": self._to_datetime("openingDate", errors="coerce"),
+            "closingDate": self._to_datetime("closingDate", errors="coerce"),
             "snapshotDate": self._to_datetime("snapshotDate"),
             "created_at": self._to_datetime("created_at"),
         }
@@ -182,12 +182,11 @@ class AccountHoldersConfig(BaseConfig):
         default_factory=lambda: {
             "account_holder_id": "id",
             "account_holder_name": "name",
-            "account_holder_company_registration_number": "companyRegistrationNumber",
-            "account_holder_lei": "legalEntityIdentifier",
-            "account_holder_address1": "addressMain",
-            "addressSecondary": "addressSecondary",
+            "account_holder_company_registration_number": "company_registration_number",
+            "account_holder_lei": "legal_entity_identifier",
+            "account_holder_address1": "address1",
             "account_holder_city": "city",
-            "registry_id": "country",
+            "registry_id": "registry_id",
             "created_at": "created_at",
         }
     )
@@ -404,7 +403,7 @@ class LinkAccountHolderConfig(BaseConfig):
     column_mapping: dict[str, str] = field(
         default_factory=lambda: {
             "account_id": "account_id",
-            "holder_id": "holder_id",
+            "account_holder_id": "holder_id",
             "created_at": "created_at",
         }
     )

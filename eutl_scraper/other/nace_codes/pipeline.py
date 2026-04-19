@@ -16,6 +16,7 @@ def pipeline_nace_from_leakage_lists(
     fn_leakage_2015: str | Path | None = None,
     fn_leakage_2020: str | Path | None = None,
     fn_nace_scheme: str | Path | None = None,
+    drop_missing_installations: bool = True,
 ) -> pd.DataFrame:
     """Pipeline to extract NACE codes from leakage lists and save to disk
 
@@ -29,6 +30,9 @@ def pipeline_nace_from_leakage_lists(
             If none is provided, the default file will be used
         fn_nace_scheme (str | Path | None): path to NACE scheme file
             If none is provided, the default file will be used
+        drop_missing_installations (bool): Whether to drop installations that have
+            a NACE code but the installation is not known from the EUTL data.
+            Defaults to True.
 
     Returns:
         pd.DataFrame: with nace classification by installation
@@ -51,6 +55,20 @@ def pipeline_nace_from_leakage_lists(
         fn_leakage_2020=fn_leakage_2020,
         df_nace_codes=df_nace,
     )
+
+    # drop installations that are not in the eutl data
+    if drop_missing_installations:
+        df_eutl = pd.read_csv(settings.fp("installations", settings.dir_extracted))
+        known_installations = set(df_eutl.installation_id)
+        no_installation = (
+            set(df_nace_by_installation.installation_id) - known_installations
+        )
+        if len(no_installation) > 0:
+            msg = f"Dropping {len(no_installation)} installations not found in EUTL."
+            logger.warning(msg, filter="nace_pipeline")
+            df_nace_by_installation = df_nace_by_installation[
+                ~df_nace_by_installation.installation_id.isin(no_installation)
+            ]
 
     # save to disk
     if save_to_disk:

@@ -51,9 +51,12 @@ def load_accounts_power_bi_download(fn_bi_account_data: Path) -> pd.DataFrame:
             keep_default_na=True,
         )
         .rename(columns=map_cols)
-        .assign(account_id=lambda df: df.apply(_form_account_account_id, axis=1))[
-            list(map_cols.values())
-        ]
+        .assign(
+            account_id=lambda df: df.apply(_form_account_account_id, axis=1),
+            account_holder_name=lambda df: (
+                df["account_holder_name"].fillna("unknown").str.strip()
+            ),
+        )[list(map_cols.values())]
     )
     return df_bi
 
@@ -125,7 +128,9 @@ def extract_account_holders_from_power_bi_download(
     df_account_holders = (
         df_.drop(columns=["account_id", "accountName"])
         .drop_duplicates(subset=["account_holder_id"])
-        .assign(created_at=pd.Timestamp.now())
+        .assign(
+            created_at=pd.Timestamp.now(),
+        )
     )
     return df_account_holders, df_link_accounts_holders
 
