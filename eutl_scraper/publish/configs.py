@@ -29,9 +29,9 @@ class BaseConfig:
     transformers: list[Callable] = field(default_factory=list)
 
     @staticmethod
-    def _to_datetime(col: str) -> Callable:
+    def _to_datetime(col: str, errors: str = "coerce") -> Callable:
         """Return a function that converts a column to datetime format."""
-        return lambda df: pd.to_datetime(df[col], utc=True)
+        return lambda df: pd.to_datetime(df[col], utc=True, errors=errors)
 
     @staticmethod
     def _to_nullable_int(col: str) -> Callable:
@@ -81,7 +81,6 @@ class InstallationsConfig(BaseConfig):
         default_factory=lambda: {
             "installation_id": "id",
             "installation_name": "name",
-            "account_id": "account_id",
             "permit_identifier": "permitID",
             "eper_identification": "eperID",
             "ets_id": "ets_id",
@@ -97,6 +96,7 @@ class InstallationsConfig(BaseConfig):
             "year_of_first_emissions": "year_of_first_emissions",
             "year_of_last_emissions": "year_of_last_emissions",
             "snapshot_date": "snapshot_date",
+            "created_at": "created_at",
         }
     )
     type_convertors: dict[str, Callable] = field(default_factory=dict)
@@ -108,6 +108,7 @@ class InstallationsConfig(BaseConfig):
             "year_of_last_emissions": self._to_nullable_int("year_of_last_emissions"),
             "activity_type_code": self._to_nullable_int("activity_type_code"),
             "year_of_first_emissions": self._to_nullable_int("year_of_first_emissions"),
+            "created_at": self._to_datetime("created_at"),
         }
 
 
@@ -135,27 +136,28 @@ class AccountsConfig(BaseConfig):
             "account_id": "id",
             "accountName": "name",
             "account_type": "account_type",
-            "holder_id": "holder_id",
-            "openingDate": "openingDate",
-            "closingDate": "closingDate",
-            "isClosurePending": "isClosurePending",
-            "snapshotDate": "snapshotDate",
+            "openingDate": "opening_date",
+            "closingDate": "closing_date",
+            "isClosurePending": "is_closure_pending",
+            "snapshotDate": "snapshot_date",
+            "created_at": "created_at",
         }
     )
     type_convertors: dict[str, Callable] = field(default_factory=dict)
 
     def __post_init__(self):
         self.type_convertors = {
-            "openingDate": self._to_datetime("openingDate"),
-            "closingDate": self._to_datetime("closingDate"),
+            "openingDate": self._to_datetime("openingDate", errors="coerce"),
+            "closingDate": self._to_datetime("closingDate", errors="coerce"),
             "snapshotDate": self._to_datetime("snapshotDate"),
+            "created_at": self._to_datetime("created_at"),
         }
 
 
 @dataclass
-class HoldersConfig(BaseConfig):
-    name: str = "holders"
-    schema_path: Path = SCHEMA_PATH / "holders.yaml"
+class AccountHoldersConfig(BaseConfig):
+    name: str = "account_holders"
+    schema_path: Path = SCHEMA_PATH / "account_holders.yaml"
     resource_metadata: ResourceMetadata = field(
         default_factory=lambda: ResourceMetadata(
             title="EU ETS AccountHolders",
@@ -178,21 +180,22 @@ class HoldersConfig(BaseConfig):
     )
     column_mapping: dict[str, str] = field(
         default_factory=lambda: {
-            "holder_id": "id",
-            "accountHolderName": "name",
-            "companyRegistrationNumber": "companyRegistrationNumber",
-            "legalEntityIdentifier": "legalEntityIdentifier",
-            "addressMain": "addressMain",
-            "addressSecondary": "addressSecondary",
-            "postalCode": "postalCode",
-            "city": "city",
-            "country": "country",
-            "telephone1": "telephone1",
-            "telephone2": "telephone2",
-            "email": "email",
+            "account_holder_id": "id",
+            "account_holder_name": "name",
+            "account_holder_company_registration_number": "company_registration_number",
+            "account_holder_lei": "legal_entity_identifier",
+            "account_holder_address1": "address1",
+            "account_holder_city": "city",
+            "registry_id": "registry_id",
+            "created_at": "created_at",
         }
     )
     type_convertors: dict[str, Callable] = field(default_factory=dict)
+
+    def __post_init__(self):
+        self.type_convertors = {
+            "created_at": self._to_datetime("created_at"),
+        }
 
 
 @dataclass
@@ -239,6 +242,7 @@ class ComplianceConfig(BaseConfig):
             "excluded": "excluded",
             "ch_excluded": "ch_excluded",
             "snapshot_date": "snapshot_date",
+            "created_at": "created_at",
         }
     )
     type_convertors: dict[str, Callable] = field(default_factory=dict)
@@ -246,6 +250,7 @@ class ComplianceConfig(BaseConfig):
     def __post_init__(self):
         self.type_convertors = {
             "snapshot_date": self._to_datetime("snapshot_date"),
+            "created_at": self._to_datetime("created_at"),
         }
 
 
@@ -281,6 +286,7 @@ class ProjectsConfig(BaseConfig):
             "lulucf_code_description": "lulucf_code_description",
             "track": "track",
             "expiry_date": "expiry_date",
+            "created_at": "created_at",
         }
     )
     type_convertors: dict[str, Callable] = field(default_factory=dict)
@@ -288,6 +294,7 @@ class ProjectsConfig(BaseConfig):
     def __post_init__(self):
         self.type_convertors = {
             "expiry_date": self._to_datetime("expiry_date"),
+            "created_at": self._to_datetime("created_at"),
         }
 
 
@@ -326,6 +333,7 @@ class TransactionsConfig(BaseConfig):
             "unit_type_description": "unit_type_description",
             "supp_unit_type_description": "supp_unit_type_description",
             "amount": "amount",
+            "created_at": "created_at",
         }
     )
     type_convertors: dict[str, Callable] = field(default_factory=dict)
@@ -333,4 +341,75 @@ class TransactionsConfig(BaseConfig):
     def __post_init__(self):
         self.type_convertors = {
             "transaction_date": self._to_datetime("transaction_date"),
+            "created_at": self._to_datetime("created_at"),
+        }
+
+
+@dataclass
+class LinkInstallationAccountConfig(BaseConfig):
+    name: str = "link_installation_account"
+    schema_path: Path = SCHEMA_PATH / "link_installation_account.yaml"
+    resource_metadata: ResourceMetadata = field(
+        default_factory=lambda: ResourceMetadata(
+            title="EU ETS Link Installation Account",
+            description=(
+                "Information about the link between installations and accounts in "
+                "the European Union Emissions Trading System (EU ETS)."
+            ),
+            sources=[
+                {
+                    "title": "European Commission, EUTL database",
+                    "path": "https://union-registry-data.ec.europa.eu/report/welcome",
+                }
+            ],
+        )
+    )
+    column_mapping: dict[str, str] = field(
+        default_factory=lambda: {
+            "installation_id": "installation_id",
+            "account_id": "account_id",
+            "snapshot_date": "snapshot_date",
+            "created_at": "created_at",
+        }
+    )
+    type_convertors: dict[str, Callable] = field(default_factory=dict)
+
+    def __post_init__(self):
+        self.type_convertors = {
+            "snapshot_date": self._to_datetime("snapshot_date"),
+            "created_at": self._to_datetime("created_at"),
+        }
+
+
+@dataclass
+class LinkAccountHolderConfig(BaseConfig):
+    name: str = "link_account_holder"
+    schema_path: Path = SCHEMA_PATH / "link_account_holder.yaml"
+    resource_metadata: ResourceMetadata = field(
+        default_factory=lambda: ResourceMetadata(
+            title="EU ETS Link Account Holder",
+            description=(
+                "Information about the link between account holders and accounts in "
+                "the European Union Emissions Trading System (EU ETS)."
+            ),
+            sources=[
+                {
+                    "title": "European Commission, EUTL database",
+                    "path": "https://union-registry-data.ec.europa.eu/report/welcome",
+                }
+            ],
+        )
+    )
+    column_mapping: dict[str, str] = field(
+        default_factory=lambda: {
+            "account_id": "account_id",
+            "account_holder_id": "holder_id",
+            "created_at": "created_at",
+        }
+    )
+    type_convertors: dict[str, Callable] = field(default_factory=dict)
+
+    def __post_init__(self):
+        self.type_convertors = {
+            "created_at": self._to_datetime("created_at"),
         }

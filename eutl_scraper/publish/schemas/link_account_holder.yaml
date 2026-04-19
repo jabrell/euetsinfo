@@ -1,0 +1,38 @@
+primaryKey:
+  - account_id
+  - holder_id
+missingValues:
+  - ""
+  - "NA"
+foreignKeys:
+  - fields:
+      - account_id
+    reference:
+      resource: accounts
+      fields:
+        - id
+  - fields:
+      - holder_id
+    reference:
+      resource: account_holders
+      fields:
+        - id
+fields:
+  - name: account_id
+    title: Account ID
+    description: Unique identifier for the account.
+    type: string
+    constraints:
+      required: true
+  - name: holder_id
+    title: Holder ID
+    description: Unique identifier for the account holder.
+    type: string
+    constraints:
+      required: true
+  - name: created_at
+    title: Date when the data was created
+    description: Date when data have been downloaded and processed
+    type: datetime
+    constraints:
+      required: true

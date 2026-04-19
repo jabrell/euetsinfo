@@ -1,0 +1,11 @@
+from eutl_scraper import Settings
+from eutl_scraper.logger import setup_logging
+from eutl_scraper.publish import publish_data_package
+
+if __name__ == "__main__":
+    settings = Settings(dir_data="data_tmp/")
+    setup_logging("INFO")
+    package, report = publish_data_package(
+        settings=settings, fn_out="test.zip", validate_package=True
+    )
+    print("here")
