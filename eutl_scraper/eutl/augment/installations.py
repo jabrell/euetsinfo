@@ -16,6 +16,7 @@ def create_ets2_installations(settings: Settings) -> pd.DataFrame | None:
         pd.DataFrame | None: DataFrame containing the missing installations, or
             None if there are no missing installations or if there was an error.
     """
+    logger.info("Creating missing installations...", filter="eutl_pipeline")
     df_compliance = pd.read_csv(settings.fp("compliance", settings.dir_extracted))
 
     df_installations = pd.read_csv(settings.fp("installations", settings.dir_extracted))

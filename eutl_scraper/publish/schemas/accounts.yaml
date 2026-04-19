@@ -27,14 +27,10 @@ fields:
     title: Closing Date
     description: Date the account was closed.
     type: datetime
-    constraints:
-      required: true
   - name: is_closure_pending
     title: Closure Pending
     description: Whether the account has a pending closure.
     type: boolean
-    constraints:
-      required: true
   - name: snapshot_date
     title: Snapshot Date
     description: Date of the data snapshot as provided by the EUTL.

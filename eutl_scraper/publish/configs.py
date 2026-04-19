@@ -180,18 +180,14 @@ class AccountHoldersConfig(BaseConfig):
     )
     column_mapping: dict[str, str] = field(
         default_factory=lambda: {
-            "holder_id": "id",
-            "accountHolderName": "name",
-            "companyRegistrationNumber": "companyRegistrationNumber",
-            "legalEntityIdentifier": "legalEntityIdentifier",
-            "addressMain": "addressMain",
+            "account_holder_id": "id",
+            "account_holder_name": "name",
+            "account_holder_company_registration_number": "companyRegistrationNumber",
+            "account_holder_lei": "legalEntityIdentifier",
+            "account_holder_address1": "addressMain",
             "addressSecondary": "addressSecondary",
-            "postalCode": "postalCode",
-            "city": "city",
-            "country": "country",
-            "telephone1": "telephone1",
-            "telephone2": "telephone2",
-            "email": "email",
+            "account_holder_city": "city",
+            "registry_id": "country",
             "created_at": "created_at",
         }
     )

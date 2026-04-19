@@ -1,18 +1,3 @@
-"""Account holders are parties that are responsible for operating accounts.
-While holders are an official entity in the EUTL system, data for holders are not
-directly. In this module we therefore extract account holders from
-
-1. Transaction data (automatically downloaded)
-2. Manual account data downloaded as provided by the Power BI interface
-
-We extract the holders, assign a unique ID, and relate account holders to
-accounts. The unique ID is created in a way to be stable across time, to avoid
-problems with future additions of accounts.
-
-Note that holder creation is based on source data, i.e., data that just have been
-downloaded from the EUTL system but no further processing has been done.
-"""
-
 import hashlib
 import re
 from pathlib import Path
@@ -22,7 +7,55 @@ from loguru import logger
 
 from eutl_scraper.settings import Settings
 
-from ..mappings import map_registryCode_inv
+
+def _form_account_account_id(row: pd.Series) -> str:
+    """Form account_id from registry_id and account_identifier.
+
+    Args:
+        row (pd.Series): Row of the DataFrame with registry_id and account_identifier.
+
+    Returns:
+        str: Formed account_id.
+    """
+    if pd.isnull(row["account_identifier"]):
+        return row["account_identifier"]
+    return f"{row['registry_id']}_{int(row['account_identifier'])}"
+
+
+def load_accounts_power_bi_download(fn_bi_account_data: Path) -> pd.DataFrame:
+    """Load accounts data from the Power BI download.
+
+    Args:
+        fn_bi_account_data (Path): Account data as downloaded from the
+            Power BI interface
+    """
+    map_cols = {
+        "Account Identifier": "account_identifier",
+        "National Administrator": "national_administrator",
+        "Account Type": "account_type",
+        "Account Holder Name": "account_holder_name",
+        "Account Name": "accountName",
+        "Company Registration No": "account_holder_company_registration_number",
+        "Main Address Line": "account_holder_address1",
+        "City": "account_holder_city",
+        "Legal Entity Identifier": "account_holder_lei",
+        "..1": "registry_id",
+        "account_id": "account_id",
+    }
+    df_bi = (
+        pd.read_excel(
+            fn_bi_account_data,
+            skipfooter=2,
+            engine="calamine",
+            na_values=["-"],
+            keep_default_na=True,
+        )
+        .rename(columns=map_cols)
+        .assign(account_id=lambda df: df.apply(_form_account_account_id, axis=1))[
+            list(map_cols.values())
+        ]
+    )
+    return df_bi
 
 
 def generate_account_holder_id(row: pd.Series, digits: int = 10) -> str:
@@ -36,10 +69,10 @@ def generate_account_holder_id(row: pd.Series, digits: int = 10) -> str:
         str: A stable hash-based unique identifier for the account holder.
     """
     # 1. normalized the account holder name
-    name = str(row["accountHolderName"]).strip().lower()
+    name = str(row["account_holder_name"]).strip().lower()
 
     # 2. Check of company registration number exists
-    raw_crn = str(row["companyRegistrationNumber"]).strip().lower()
+    raw_crn = str(row["account_holder_company_registration_number"]).strip().lower()
 
     is_missing = (
         pd.isnull(raw_crn)
@@ -59,145 +92,50 @@ def generate_account_holder_id(row: pd.Series, digits: int = 10) -> str:
     return hash[:digits]
 
 
-def _load_accounts_from_manual_data(fn_manual_account_data: Path) -> pd.DataFrame:
-    """Get all accounts from manual account data
+def extract_account_holders_from_power_bi_download(
+    df: pd.DataFrame,
+) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """We construct the account holders out of the manual downloads from the
+    Power BI interface. We checked that the account holders in the transactions data
+    are all present in the account holders data from the Power BI download. The
+    exception are accounts involved in transactions that are also not present in
+    the standard account data. These are accounts in foreign countries (GB, CH, CDM....)
 
     Args:
-        fn_manual_account_data (Path): Manual account data as downloaded from the
-            Power BI interface
-    """
-    df_bi = (
-        pd.read_excel(
-            fn_manual_account_data,
-            skipfooter=2,
-            engine="calamine",
-            na_values=["-"],
-            keep_default_na=True,
-        )
-        .rename(columns={"..1": "registry_id"})
-        .drop(columns=".")
-        .assign(
-            account_id=lambda df: (
-                df["registry_id"] + "_" + df["Account Identifier"].astype(str)
-            ),
-        )
-    )
-    return df_bi
-
-
-def _get_holders_from_manual_data(fn_manual_account_data: Path) -> pd.DataFrame:
-    """Extract account holders from manual account data.
-
-    Args:
-        fn_manual_account_data (Path): Manual account data as downloaded from the
-            EUTL system.
+        df (pd.DataFrame): Account data as downloaded from the Power BI interface.
 
     Returns:
-        pd.DataFrame: DataFrame of unique account holders with generated holder IDs.
+        tuple[pd.DataFrame, pd.DataFrame]: Extracted account holders and link table.
     """
-    df_bi = _load_accounts_from_manual_data(fn_manual_account_data)
-    bi_holder_cols = {
-        "Account Holder Name": "accountHolderName",
-        "Company Registration No": "companyRegistrationNumber",
-        "Legal Entity Identifier": "legalEntityIdentifier",
-        "Main Address Line": "addressMain",
-        "City": "city",
-        "Telephone 1": "telephone1",
-        "Telephone 2": "telephone2",
-        "Email": "email",
-    }
-    df_bi = (
-        df_bi[["account_id"] + list(bi_holder_cols.keys())]
-        # drop holder if the name is missing
-        .loc[lambda df: pd.notnull(df["Account Holder Name"])]
-        # exclude accounts that are already in the transaction holders
-        .rename(columns=bi_holder_cols)
+    # create the holder id
+    df_ = df.assign(
+        account_holder_id=lambda df: df.apply(generate_account_holder_id, axis=1)
     )
-    return df_bi
 
-
-def _load_accounts_from_transactions(fn_transactions: Path) -> pd.DataFrame:
-    """Get all accounts from transaction data
-
-    Args:
-        fn_transactions (Path): Transaction data as automatically downloaded
-    """
-    df_trans = pd.read_csv(fn_transactions, low_memory=False)
-
-    # extract transferring and acquiring accounts
-    lst_df = []
-    for prefix in ["TRANSFERRING", "ACQUIRING"]:
-        cols = [c for c in df_trans.columns if c.startswith(prefix)]
-        df_ = df_trans[cols].copy()
-        cols = [c.replace(f"{prefix}_", "") for c in cols]
-        df_.columns = cols
-        lst_df.append(df_)
-
-    # combine the data frames and de-duplicate
-    df_trans = pd.concat(lst_df, axis=0).drop_duplicates().reset_index(drop=True)
-
-    # add the correct registry_id and subsequently the account_id
-    def assign_account_id(row) -> str:
-        """Create account id from transaction accounts"""
-        if pd.notnull(row["ACCOUNT_IDENTIFIER"]):
-            if pd.notnull(row["registry_id"]):
-                registry_id = row["registry_id"]
-            else:
-                registry_id = "UNKNOWN"
-            return registry_id + "_" + str(int(row["ACCOUNT_IDENTIFIER"]))
-
-    df_trans = df_trans.assign(
-        registry_id=lambda df: (
-            df["REGISTRY_NAME"].str.strip().map(map_registryCode_inv)
-        ),
-        account_id=lambda df: df.apply(assign_account_id, axis=1),
+    # extract the link between accounts and account holders
+    df_link_accounts_holders = df_[["account_id", "account_holder_id"]].assign(
+        created_at=pd.Timestamp.now()
     )
-    return df_trans
-    #     .assign(
-    #         registry_id=lambda df: (
-    #             df["REGISTRY_NAME"].str.strip().map(map_registry_names)
-    #         ),
-    #         account_id=lambda df: df.apply(assign_account_id, axis=1),
-    #     )
-    # )
-
-
-def _get_holders_from_transactions(fn_transactions: Path) -> pd.DataFrame:
-    """Extract account holders from transaction data. We only extract holders for
-    accounts for which the account holder name is available, as this is needed
-    for the generation of the unique holder ID.
-
-    Args:
-        fn_transactions (Path): Transaction data as automatically downloaded
-
-    Returns:
-        pd.DataFrame: DataFrame of unique account holders with generated holder IDs.
-    """
-    df_trans = _load_accounts_from_transactions(fn_transactions)
-    trans_holder_cols = {
-        "ACCOUNT_HOLDER": "accountHolderName",
-        "ACCOUNT_HOLDER_COMPANY_REGISTRATION_NUMBER": "companyRegistrationNumber",
-        "ACCOUNT_HOLDER_LEI": "legalEntityIdentifier",
-        "ACCOUNT_HOLDER_ADDRESS1": "addressMain",
-        "ACCOUNT_HOLDER_ADDRESS2": "addressSecondary",
-        "ACCOUNT_HOLDER_POSTAL_CODE": "postalCode",
-        "ACCOUNT_HOLDER_CITY": "city",
-        "ACCOUNT_HOLDER_COUNTRY_CODE": "country",
-    }
-    df_trans = (
-        df_trans[["account_id"] + list(trans_holder_cols.keys())]
-        # drop holder if the name is missing
-        .loc[lambda df: pd.notnull(df["ACCOUNT_HOLDER"])]
-        .rename(columns=trans_holder_cols)
+    assert df_link_accounts_holders.account_id.is_unique, (
+        "account_id is not unique in link table"
     )
-    return df_trans
+    df_link_accounts_holders.info()
+
+    # create the account holders table
+    df_account_holders = (
+        df_.drop(columns=["account_id", "accountName"])
+        .drop_duplicates(subset=["account_holder_id"])
+        .assign(created_at=pd.Timestamp.now())
+    )
+    return df_account_holders, df_link_accounts_holders
 
 
 def extract_account_holders(
     settings: Settings, fn_manual_account_data: Path, save_to_disk: bool = True
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """Load the transaction and manual account data, which are used for holder
-    extraction.
+    """Extract account holders from data obtained from the Power Bi interface.
+    Note that the data are obtained using all account and not just the
+    operator holding accounts.
 
     Args:
         settings (Settings): Settings object containing directory paths and filenames.
@@ -208,31 +146,12 @@ def extract_account_holders(
         tuple[pd.DataFrame, pd.DataFrame]: A tuple containing the account holders
             DataFrame and the link accounts holders DataFrame.
     """
-    logger.info("Extracting account holders...", filter="eutl_extract")
-    df_holder_trans = _get_holders_from_transactions(
-        fn_transactions=settings.fp("transactions", settings.dir_source)
-    ).assign(holder_id=lambda df: df.apply(generate_account_holder_id, axis=1))
-    df_holder_manual = (
-        _get_holders_from_manual_data(fn_manual_account_data=fn_manual_account_data)
-        # exclude accounts that are already in the transaction holders
-        .loc[lambda df: ~df["account_id"].isin(df_holder_trans["account_id"])]
-        .assign(holder_id=lambda df: df.apply(generate_account_holder_id, axis=1))
+    logger.info(
+        "Extracting account holders from Power BI download...", filter="eutl_extract"
     )
-    # combine sources and de-duplicate based on account_id and holder_id
-    df_holders = (
-        pd.concat([df_holder_trans, df_holder_manual], axis=0)
-        .drop_duplicates(subset=["account_id", "holder_id"])
-        .reset_index(drop=True)
-    )
-
-    # get the link and the holders only tables
-    df_link_accounts_holders = df_holders[["account_id", "holder_id"]].assign(
-        created_at=pd.Timestamp.now()
-    )
-    df_holders = (
-        df_holders.drop_duplicates(subset=["holder_id"])
-        .drop(columns=["account_id"])
-        .assign(created_at=pd.Timestamp.now())
+    df_bi = load_accounts_power_bi_download(fn_manual_account_data)
+    df_holders, df_link_accounts_holders = (
+        extract_account_holders_from_power_bi_download(df_bi)
     )
 
     # save if output directory is given

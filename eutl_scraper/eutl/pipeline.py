@@ -8,7 +8,10 @@ from pathlib import Path
 
 from loguru import logger
 
-from eutl_scraper.eutl.augment.installations import create_ets2_installations
+from eutl_scraper.eutl.augment import (
+    add_missing_accounts_from_transactions,
+    create_ets2_installations,
+)
 from eutl_scraper.settings import Settings
 
 from .download import download_all
@@ -73,3 +76,4 @@ def pipeline_eutl(
     if EUTLPipelineSteps.AUGMENT in steps:
         logger.info("Augment EUTL data...", filter="eutl_pipeline")
         create_ets2_installations(settings=settings)
+        add_missing_accounts_from_transactions(settings=settings)
