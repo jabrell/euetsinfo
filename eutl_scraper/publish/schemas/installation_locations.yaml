@@ -1,4 +1,6 @@
-primaryKey: installation_id
+primaryKey:
+  - installation_id
+  - source
 missingValues:
   - ""
   - "NA"
@@ -26,6 +28,13 @@ fields:
     title: Longitude
     description: Longitude coordinate of the installation.
     type: number
+    constraints:
+      required: true
+  - name: source
+    title: Source of the data
+    description: The source from which the coordinates were obtained (e.g.,
+      "geoapify", "googlemaps").
+    type: string
     constraints:
       required: true
   - name: created_at

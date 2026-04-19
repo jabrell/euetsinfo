@@ -31,7 +31,7 @@ def get_all_data(
     settings: Settings,
     pipelines: list[Pipelines] | None = None,
     fn_manual_accounts: str | Path | None = None,
-    geoapify_api_key: str | None = None,
+    api_keys: dict[str, str] | None = None,
     max_installations: int | None = None,
 ) -> None:
     """Run the specified pipelines to get all data.
@@ -48,8 +48,9 @@ def get_all_data(
         fn_manual_accounts (str | Path | None): Filename of the manually downloaded
             account data. This is only needed for the EUTL pipeline.
             If None, an error will be raised if the EUTL pipeline is run.
-        geoapify_api_key (str | None): API key for the Geoapify geocoding service.
+        api_keys (dict[str, str] | None): API keys for various geocoding services.
             This is only needed for the INSTALLATION_COORDINATES pipeline.
+            Expected keys are: "geoapify" and "googlemaps".
         max_installations (int | None): Optional limit on the number of installations to
             process in the INSTALLATION_COORDINATES pipeline (useful for testing).
             If None, all installations will be processed.
@@ -70,7 +71,7 @@ def get_all_data(
     if Pipelines.INSTALLATION_COORDINATES in pipelines:
         registry[Pipelines.INSTALLATION_COORDINATES] = partial(
             pipeline_installation_coordinates,
-            api_key=geoapify_api_key,
+            api_keys=api_keys,
             max_installations=max_installations,
         )
 

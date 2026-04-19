@@ -8,12 +8,17 @@ from eutl_scraper import Pipelines, Settings, get_all_data, setup_logging
 if __name__ == "__main__":
     # path to the manual accounts file
     fn_manual_accounts = Path("manual_data") / "accounts_20260412.xlsx"
-    # extract_all(dir_data=Path("data/"), fn_manual_account_data=fn_manual_accounts)
+
+    # settings and logging
     settings = Settings(dir_data="data_tmp/")
     setup_logging("INFO")
-    # load environment variables from .env fil: GEOAPIFY_API_KEY
+
+    # load environment variables from .env file: API keys for geocoding
     load_dotenv()
-    GEOAPIFY_API_KEY = os.environ.get("GEOAPIFY_API_KEY", "")
+    api_keys = {
+        "googlemaps": os.getenv("GOOGLE_API_KEY"),
+        "geoapify": os.getenv("GEOAPIFY_API_KEY"),
+    }
 
     get_all_data(
         settings=settings,
@@ -24,6 +29,5 @@ if __name__ == "__main__":
             Pipelines.INSTALLATION_COORDINATES,
         ],
         fn_manual_accounts=fn_manual_accounts,
-        geoapify_api_key=GEOAPIFY_API_KEY,
-        max_installations=10,
+        api_keys=api_keys,
     )
