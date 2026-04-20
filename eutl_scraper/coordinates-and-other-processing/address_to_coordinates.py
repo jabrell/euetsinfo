@@ -3,7 +3,7 @@ import requests
 import pandas as pd
 from tqdm import tqdm
 
-GEOAPIFY_API_KEY = '59e98649998e4c78830664c009eeb886'
+GEOAPIFY_API_KEY = 'TODO'
 GEOAPIFY_URL = "https://api.geoapify.com/v1/geocode/search"
 
 DIRNAME = os.path.dirname(__file__)
