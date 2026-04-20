@@ -122,7 +122,12 @@ def add_missing_accounts_from_transactions(
         df_transaction_parties.account_id.isin(missing_accounts)
     ]
     cols = ["accountName", "openingDate", "closingDate", "account_id", "account_type2"]
-    print(f"Missing accounts: {len(df_missing_parties)}")
+    logger.warning(
+        f"{len(missing_accounts)} accounts from transactions are missing in accounts "
+        f"data. These will be added with limited information (account type, account "
+        f"name, opening and closing date).",
+        filter="eutl_pipeline",
+    )
     df_missing_accounts = (
         df_missing_parties[cols]
         .assign(

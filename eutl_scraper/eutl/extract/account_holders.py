@@ -122,7 +122,6 @@ def extract_account_holders_from_power_bi_download(
     assert df_link_accounts_holders.account_id.is_unique, (
         "account_id is not unique in link table"
     )
-    df_link_accounts_holders.info()
 
     # create the account holders table
     df_account_holders = (

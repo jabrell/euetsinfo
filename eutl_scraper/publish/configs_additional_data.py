@@ -24,14 +24,19 @@ class InstallationLocations(BaseConfig):
                     "title": "GEOAPIFY API",
                     "path": "https://api.geoapify.com",
                 },
+                {
+                    "title": "Google Maps Geocoding API",
+                    "path": "https://developers.google.com/maps/documentation/geocoding/overview",
+                },
             ],
         )
     )
     column_mapping: dict[str, str] = field(
         default_factory=lambda: {
             "installation_id": "installation_id",
-            "lat": "latitude",
-            "lon": "longitude",
+            "latitude": "latitude",
+            "longitude": "longitude",
+            "source": "source",
             "created_at": "created_at",
         }
     )
@@ -41,7 +46,7 @@ class InstallationLocations(BaseConfig):
             "created_at": self._to_datetime("created_at"),
         }
         self.transformers = [
-            self._dropna_subset(["lat", "lon"]),
+            self._dropna_subset(["latitude", "longitude"]),
         ]
 
 

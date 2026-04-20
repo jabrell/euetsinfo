@@ -1,5 +1,7 @@
 import googlemaps
 import pandas as pd
+from loguru import logger
+from tqdm import tqdm
 
 from eutl_scraper.eutl.mappings import map_registryCodes
 
@@ -15,7 +17,7 @@ def form_address(row: pd.Series) -> tuple[str, str]:
         tuple[str, str]: address and country code
     """
     address = ""
-    for a in ["mainAddress", "secondaryAddress", "postalCode", "city", "country"]:
+    for a in ["address1", "address2", "postal_code", "city", "registry_id"]:
         if pd.notnull(row[a]):
             if a == "country":
                 address += f"{map_registryCodes.get(row[a])}, "
@@ -23,7 +25,7 @@ def form_address(row: pd.Series) -> tuple[str, str]:
                 address += f"{row[a]}, "
     if len(address) > 0:
         address = address[:-2]
-    return address, row["country"]
+    return address, row["registry_id"]
 
 
 def get_gmaps_coordinates(
@@ -65,39 +67,32 @@ def get_installation_coordinates_google(
     """Gets installation coordinates using googlemaps api
 
     Args:
-        df_installations (pd.DataFrame): dataframe with installation data
+        df_in (pd.DataFrame): dataframe with installation data
         api_key (str): google api key
 
     Returns:
         pd.DataFrame: with installation_id, latitude and longitude
     """
-    # get installation data, excluding aircrafts
-    mask = ~df_installations["activity"].isin(
-        ["10-Aircraft operator activities", "50-Maritime operator activities"]
-    )
-    df_in = df_installations[mask]
-
     # google client
     gmaps = googlemaps.Client(key=api_key)
 
     # loop over installations, get address and coordinates
     lst_res = []
-    print(f"Fetch locations for {len(df_in)} installations")
-    for i, (_, row) in enumerate(df_in.iterrows()):
-        if ((i + 1) % 500) == 0:
-            print(
-                "Get GoogleMaps coordinates for installation %s (%d/%d)"
-                % (row["installationID"], (i + 1), len(df_in))
-            )
+    logger.info(
+        f"Fetch locations for {len(df_installations)} installations from google maps"
+    )
+    for _, row in tqdm(df_installations.iterrows(), total=len(df_installations)):
         address, countryCode = form_address(row)
         lat, lng = get_gmaps_coordinates(gmaps, address, countryCode=countryCode)
         if lat:
             res = {}
-            res["installation_id"] = row["installationID"]
+            res["installation_id"] = row["installation_id"]
             res["latitude"] = lat
             res["longitude"] = lng
             lst_res.append(res)
     df_loc = pd.DataFrame(lst_res)
-    print(f"Retrieved locations for {len(df_loc)} installations. ")
-
+    logger.info(
+        f"Retrieved locations for {len(df_loc)} installations from google maps."
+    )
+    df_loc = df_loc.assign(created_at=pd.Timestamp.now())
     return df_loc
