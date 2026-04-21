@@ -55,15 +55,15 @@ fields:
     title: City
     description: City where the installation is located.
     type: string
-  - name: postalCode
+  - name: postal_code
     title: Postal Code
     description: Postal code of the installation location.
     type: string
-  - name: addressMain
+  - name: address_main
     title: Address Line 1
     description: Primary address of the installation.
     type: string
-  - name: addressSecondary
+  - name: address_secondary
     title: Address Line 2
     description: Secondary address of the installation.
     type: string

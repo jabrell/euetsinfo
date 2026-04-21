@@ -14,6 +14,7 @@ dependencies = [
     "jupyter>=1.1.1",
     "loguru>=0.7.3",
     "lxml>=6.0.2",
+    "matplotlib>=3.10.8",
     "notebook>=7.4.7",
     "openpyxl>=3.1.5",
     "pandas>=2.3.3",

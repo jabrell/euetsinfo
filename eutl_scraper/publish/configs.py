@@ -90,9 +90,9 @@ class InstallationsConfig(BaseConfig):
             "activity_type": "activity_name",
             "permit_revocation_date": "permit_revocation_date",
             "city": "city",
-            "postal_code": "postalCode",
-            "address1": "addressMain",
-            "address2": "addressSecondary",
+            "postal_code": "postal_code",
+            "address1": "address_main",
+            "address2": "address_secondary",
             "year_of_first_emissions": "year_of_first_emissions",
             "year_of_last_emissions": "year_of_last_emissions",
             "snapshot_date": "snapshot_date",
@@ -184,9 +184,10 @@ class AccountHoldersConfig(BaseConfig):
             "account_holder_name": "name",
             "account_holder_company_registration_number": "company_registration_number",
             "account_holder_lei": "legal_entity_identifier",
-            "account_holder_address1": "address1",
+            "account_holder_address1": "address_main",
             "account_holder_city": "city",
             "registry_id": "registry_id",
+            "registry_name": "registry_name",
             "created_at": "created_at",
         }
     )
@@ -241,7 +242,7 @@ class ComplianceConfig(BaseConfig):
             "surrendered_former_eua": "surrendered_former_eua",
             "surrendered_cer": "surrendered_cer",
             "excluded": "excluded",
-            "ch_excluded": "ch_excluded",
+            "ch_excluded": "excluded_ch",
             "snapshot_date": "snapshot_date",
             "created_at": "created_at",
         }
@@ -278,7 +279,6 @@ class ProjectsConfig(BaseConfig):
     column_mapping: dict[str, str] = field(
         default_factory=lambda: {
             "project_id": "id",
-            "project_identifier": "project_identifier",
             "project_type": "project_type",
             "originating_registry_id": "originating_registry_id",
             # amount is unclear seems to be error from extration from transactions
@@ -333,6 +333,7 @@ class TransactionsConfig(BaseConfig):
             "transferring_installation_id": "transferring_installation_id",
             "unit_type_description": "unit_type_description",
             "supp_unit_type_description": "supp_unit_type_description",
+            "project_identifier": "project_id",
             "amount": "amount",
             "created_at": "created_at",
         }
@@ -341,6 +342,7 @@ class TransactionsConfig(BaseConfig):
 
     def __post_init__(self):
         self.type_convertors = {
+            "project_identifier": self._to_nullable_int("project_identifier"),
             "transaction_date": self._to_datetime("transaction_date"),
             "created_at": self._to_datetime("created_at"),
         }

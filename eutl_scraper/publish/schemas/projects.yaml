@@ -9,12 +9,6 @@ fields:
     type: integer
     constraints:
       required: true
-  - name: project_identifier
-    title: Project Identifier
-    description: Numeric identifier of the offset project.
-    type: number
-    constraints:
-      required: true
   - name: project_type
     title: Project Type
     description: Type of the offset project (e.g., CDM, JI).

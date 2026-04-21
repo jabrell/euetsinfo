@@ -5,6 +5,7 @@ from pathlib import Path
 import pandas as pd
 from loguru import logger
 
+from eutl_scraper.eutl.mappings import map_registryCodes
 from eutl_scraper.settings import Settings
 
 
@@ -156,6 +157,11 @@ def extract_account_holders(
     df_bi = load_accounts_power_bi_download(fn_manual_account_data)
     df_holders, df_link_accounts_holders = (
         extract_account_holders_from_power_bi_download(df_bi)
+    )
+
+    # add a column with registry name as well
+    df_holders = df_holders.assign(
+        registry_name=lambda df: df.registry_id.map(map_registryCodes)
     )
 
     # save if output directory is given

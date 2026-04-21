@@ -86,9 +86,11 @@ def _rename_and_check_transactions(df: pd.DataFrame) -> pd.DataFrame:
         "unit_type_description",
         "supp_unit_type_description",
         "amount",
+        "project_identifier",
     ]
     df_trans = df[transaction_columns].assign(
-        transaction_date=lambda df: pd.to_datetime(df.transaction_date)
+        transaction_date=lambda df: pd.to_datetime(df.transaction_date),
+        project_identifier=lambda df: df.project_identifier.astype("Int64"),
     )
     return df_trans
 

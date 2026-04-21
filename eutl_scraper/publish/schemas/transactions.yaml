@@ -14,6 +14,12 @@ foreignKeys:
       resource: accounts
       fields:
         - id
+  - fields:
+      - project_id
+    reference:
+      resource: projects
+      fields:
+        - id
 fields:
   - name: id
     title: Transaction ID
@@ -75,6 +81,10 @@ fields:
     title: Supplementary Unit Type
     description: Supplementary description of the unit type.
     type: string
+  - name: project_id
+    title: Project ID
+    description: Identifier of the project associated with the transaction, if applicable.
+    type: integer
   - name: amount
     title: Amount
     description: Number of units transacted.

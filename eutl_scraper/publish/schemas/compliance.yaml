@@ -110,7 +110,7 @@ fields:
     type: boolean
     constraints:
       required: true
-  - name: ch_excluded
+  - name: excluded_ch
     title: CH Excluded
     description: Whether the installation is excluded from the Swiss ETS for this year.
     type: boolean
