@@ -42,19 +42,27 @@ fields:
       required: true
   - name: allocated
     title: Allocated
-    description: Number of allowances allocated.
+    description: Total number of allowances allocated to the installation for free,
+      including transitional and reserve allocations. However, this does not
+      include allowances allocated under the Swiss ETS.
+    type: number
+  - name: allocated_free
+    title: Allocated Free
+    description: Number of free allowances allocated. This is the number of
+      allowances allocated for free to the installation, excluding transitional
+      and reserve allocations.
     type: number
   - name: allocated_ch
     title: Allocated (CH)
     description: Number of allowances allocated under the Swiss ETS.
     type: number
-  - name: allocation_res
+  - name: allocated_reserve
     title: Allocation Reserve
     description: Allowances held in reserve.
     type: number
-  - name: allocation_tra
+  - name: allocated_transitional
     title: Allocation Transitional
-    description: Transitional allowances allocated.
+    description: Transitional allowances allocated (10c).
     type: number
   - name: verified
     title: Verified Emissions

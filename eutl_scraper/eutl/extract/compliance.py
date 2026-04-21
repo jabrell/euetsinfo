@@ -95,6 +95,25 @@ def _rename_and_check(df: pd.DataFrame) -> pd.DataFrame:
     return df_comp
 
 
+def add_total_allocations(df: pd.DataFrame) -> pd.DataFrame:
+    """Add total allocation columns to the compliance DataFrame.
+
+    Args:
+        df (pd.DataFrame): DataFrame containing compliance data.
+
+    Returns:
+        pd.DataFrame: DataFrame with added total allocation columns.
+    """
+    df = df.assign(
+        allocated_total=lambda df: (
+            df.allocated.fillna(0)
+            + df.allocation_res.fillna(0)
+            + df.allocation_tra.fillna(0)
+        ),
+    )
+    return df
+
+
 def extract_compliance(settings: Settings, save_to_disk: bool = True) -> pd.DataFrame:
     """Extract compliance data from the given source file.
 
@@ -113,6 +132,10 @@ def extract_compliance(settings: Settings, save_to_disk: bool = True) -> pd.Data
         .pipe(_rename_and_check)
         .assign(created_at=pd.Timestamp.now())
     )
+
+    # calculate total allocations
+    df = add_total_allocations(df)
+
     if save_to_disk:
         logger.info(
             "Saving extracted compliance data to disk...", filter="eutl_extract"

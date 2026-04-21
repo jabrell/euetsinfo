@@ -24,9 +24,9 @@ if __name__ == "__main__":
         settings=settings,
         pipelines=[
             Pipelines.EUTL,
-            Pipelines.NACE_FROM_LEAKAGE_LISTS,
-            Pipelines.EEX_AUCTIONS,
-            Pipelines.INSTALLATION_COORDINATES,
+            # Pipelines.NACE_FROM_LEAKAGE_LISTS,
+            # Pipelines.EEX_AUCTIONS,
+            # Pipelines.INSTALLATION_COORDINATES,
         ],
         fn_manual_accounts=fn_manual_accounts,
         api_keys=api_keys,
