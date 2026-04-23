@@ -1,0 +1,231 @@
+// Generated from: eutl_data_package
+
+Table installations {
+  id varchar [pk, not null, note: 'Unique identifier for the installation.']
+  name varchar [note: 'Name of the installation.']
+  permitID varchar [note: 'Identifier of the installation permit.']
+  eperID varchar [note: 'European Pollutant Emission Register identification.']
+  ets_id varchar [not null, note: 'EU Emissions Trading System identifier.']
+  registry_id varchar [not null, note: 'Identifier of the national registry.']
+  registry_name varchar [not null, note: 'Name of the national registry.']
+  activity_id integer [note: 'Numeric code of the installation activity type.']
+  activity_name varchar [note: 'Name of the installation activity type.']
+  permit_revocation_date datetime [note: 'Date the permit was revoked, if applicable.']
+  city varchar [note: 'City where the installation is located.']
+  postal_code varchar [note: 'Postal code of the installation location.']
+  address_main varchar [note: 'Primary address of the installation.']
+  address_secondary varchar [note: 'Secondary address of the installation.']
+  year_of_first_emissions integer [note: 'First year emissions were reported.']
+  year_of_last_emissions integer [note: 'Last year emissions were reported, if applicable.']
+  snapshot_date datetime [note: 'Date of the data snapshot as provided by the EUTL.']
+  created_at datetime [not null, note: 'Date when data have been downloaded and processed']
+  Note: 'Information about the installations that are part of the European Union Emissions Trading System (EU ETS). Note that for euets installations, the account_id is mandatory However, ETS2 accounts are currently derived as they appear in the compliance data. They do not relate to an account_id'
+}
+
+Table accounts {
+  id varchar [pk, not null, note: 'Unique identifier for the account.']
+  name varchar [not null, note: 'Name of the account.']
+  account_type varchar [note: 'Type of the account.']
+  opening_date datetime [note: 'Date the account was opened.']
+  closing_date datetime [note: 'Date the account was closed.']
+  is_closure_pending boolean [note: 'Whether the account has a pending closure.']
+  snapshot_date datetime [not null, note: 'Date of the data snapshot as provided by the EUTL.']
+  created_at datetime [not null, note: 'Date when data have been downloaded and processed']
+  Note: 'Information about the accounts that are part of the European Union Emissions Trading System (EU ETS).'
+}
+
+Table link_installation_account {
+  installation_id varchar [not null, note: 'Unique identifier for the installation.']
+  account_id varchar [not null, note: 'Unique identifier for the account.']
+  snapshot_date datetime [note: 'Date of the data snapshot as provided by the EUTL.']
+  created_at datetime [not null, note: 'Date when data have been downloaded and processed']
+  indexes {
+    (installation_id, account_id) [pk]
+  }
+  Note: 'Information about the link between installations and accounts in the European Union Emissions Trading System (EU ETS).'
+}
+
+Table account_holders {
+  id varchar [pk, not null, note: 'Stable hash-based identifier derived from the account holder name and company registration number.']
+  name varchar [not null, note: 'Name of the account holder.']
+  company_registration_number varchar [note: 'Company registration number of the account holder.']
+  legal_entity_identifier varchar [note: 'Legal Entity Identifier (LEI) of the account holder.']
+  address_main varchar [note: 'Primary address of the account holder.']
+  city varchar [note: 'City of the account holder.']
+  registry_id varchar [note: 'Country of the account holder.']
+  registry_name varchar [note: 'Name of the national registry where the account is registered.']
+  created_at datetime [not null, note: 'Date when data have been downloaded and processed']
+  Note: 'Information about the account holders that are part of the European Union Emissions Trading System (EU ETS). Account holders are the legal entities that hold accounts in the EU ETS and are responsible for the operation of the accounts. Note that account holders can hold multiple accounts. Account holders are derived from data in the accounts and transactions table and are not directly available in the EUTL database.'
+}
+
+Table link_account_holder {
+  account_id varchar [not null, note: 'Unique identifier for the account.']
+  holder_id varchar [not null, note: 'Unique identifier for the account holder.']
+  created_at datetime [not null, note: 'Date when data have been downloaded and processed']
+  indexes {
+    (account_id, holder_id) [pk]
+  }
+  Note: 'Information about the link between account holders and accounts in the European Union Emissions Trading System (EU ETS).'
+}
+
+Table compliance {
+  installation_id varchar [not null, note: 'Identifier of the installation.']
+  year integer [not null, note: 'Compliance year.']
+  installation_name varchar [note: 'Name of the installation.']
+  registry_id varchar [not null, note: 'Identifier of the national registry.']
+  registry_name varchar [not null, note: 'Name of the national registry.']
+  allocated decimal [note: 'Total number of allowances allocated to the installation for free, including transitional and reserve allocations. However, this does not include allowances allocated under the Swiss ETS.']
+  allocated_free decimal [note: 'Number of free allowances allocated. This is the number of allowances allocated for free to the installation, excluding transitional and reserve allocations.']
+  allocated_ch decimal [note: 'Number of allowances allocated under the Swiss ETS.']
+  allocated_reserve decimal [note: 'Allowances held in reserve.']
+  allocated_transitional decimal [note: 'Transitional allowances allocated (10c).']
+  verified decimal [note: 'Verified emissions in tonnes of CO2 equivalent.']
+  verified_ch decimal [note: 'Verified emissions under the Swiss ETS.']
+  surrendered decimal [note: 'Total number of allowances surrendered.']
+  surrendered_eua decimal [note: 'EU Allowances surrendered.']
+  surrendered_euaa decimal [note: 'EU Aviation Allowances surrendered.']
+  surrendered_chu decimal [note: 'Swiss allowances surrendered.']
+  surrendered_chua decimal [note: 'Swiss aviation allowances surrendered.']
+  surrendered_eru_from_aau decimal [note: 'Emission Reduction Units derived from Assigned Amount Units surrendered.']
+  surrendered_former_eua decimal [note: 'Former EU Allowances surrendered.']
+  surrendered_cer decimal [note: 'Certified Emission Reductions surrendered.']
+  excluded boolean [not null, note: 'Whether the installation is excluded from the EU ETS for this year.']
+  excluded_ch boolean [not null, note: 'Whether the installation is excluded from the Swiss ETS for this year.']
+  snapshot_date datetime [not null, note: 'Date of the data snapshot as provided by the EUTL.']
+  created_at datetime [not null, note: 'Date when data have been downloaded and processed']
+  indexes {
+    (installation_id, year) [pk]
+  }
+  Note: 'Information about the compliance status of installations that are part of the European  Union Emissions Trading System (EU ETS).'
+}
+
+Table projects {
+  id integer [pk, not null, note: 'Unique identifier for the offset project.']
+  project_type varchar [note: 'Type of the offset project (e.g., CDM, JI).']
+  originating_registry_id varchar [not null, note: 'Identifier of the registry where the project originated.']
+  lulucf_code_description varchar [note: 'Land Use, Land-Use Change and Forestry classification description.']
+  track decimal [note: 'JI project track number.']
+  expiry_date datetime [note: 'Expiry date of the project credits.']
+  created_at datetime [not null, note: 'Date when data have been downloaded and processed']
+  Note: 'Information about the CDM and JI projects that created allowances  in the European  Union Emissions Trading System (EU ETS). The data is derived from the transactions table'
+}
+
+Table transactions {
+  id varchar [not null, note: 'Identifier of the transaction.']
+  date datetime [not null, note: 'Date of the transaction.']
+  ets_id varchar [not null, note: 'Emissions Trading System identifier.']
+  transaction_type varchar [not null, note: 'Type of the transaction.']
+  originating_registry_id varchar [note: 'Identifier of the registry where the transaction originated.']
+  acquiring_registry_id varchar [note: 'Identifier of the registry of the acquiring account.']
+  acquiring_account_id varchar [note: 'Identifier of the account acquiring the units.']
+  acquiring_installation_id varchar [note: 'Identifier of the installation associated with the acquiring account.']
+  transferring_registry_id varchar [note: 'Identifier of the registry of the transferring account.']
+  transferring_account_id varchar [note: 'Identifier of the account transferring the units.']
+  transferring_installation_id varchar [note: 'Identifier of the installation associated with the transferring account.']
+  unit_type_description varchar [note: 'Description of the unit type being transacted.']
+  supp_unit_type_description varchar [note: 'Supplementary description of the unit type.']
+  project_id integer [note: 'Identifier of the project associated with the transaction, if applicable.']
+  amount integer [not null, note: 'Number of units transacted.']
+  created_at datetime [not null, note: 'Date when data have been downloaded and processed']
+  Note: 'Information about the transactions in the European Union Emissions Trading System (EU ETS).'
+}
+
+Table installation_locations {
+  installation_id varchar [not null, note: 'Identifier of the installation.']
+  latitude decimal [not null, note: 'Latitude coordinate of the installation.']
+  longitude decimal [not null, note: 'Longitude coordinate of the installation.']
+  source varchar [not null, note: 'The source from which the coordinates were obtained (e.g., "geoapify", "googlemaps").']
+  created_at datetime [not null, note: 'Date when data have been downloaded and processed']
+  indexes {
+    (installation_id, source) [pk]
+  }
+  Note: 'Locations of installations in the European Union Emissions Trading System (EU ETS).'
+}
+
+Table nace_mappings {
+  installation_id varchar [pk, not null, note: 'Identifier of the installation.']
+  nace_2015 varchar [note: 'NACE Rev. 2 activity code assigned in the 2015 leakage list.']
+  nace_2020 varchar [note: 'NACE Rev. 2 activity code assigned in the 2020 leakage list.']
+  created_at datetime [not null, note: 'Date when data have been downloaded and processed']
+  Note: 'Mapping of NACE codes for installations in the European Union Emissions Trading System (EU ETS).'
+}
+
+Table eex_auctions {
+  auction_name varchar [not null, note: 'Name of the auction event.']
+  auction_price_eur_per_tco2 decimal [not null, note: 'Clearing price of the auction in EUR per tonne of CO2.']
+  auction_volume_tco2 integer [not null, note: 'Total volume auctioned in tonnes of CO2.']
+  average_bid_size decimal [not null, note: 'Average size of bids submitted.']
+  average_bids_per_bidder decimal [not null, note: 'Average number of bids submitted per bidder.']
+  average_volume_bid_per_bidder decimal [not null, note: 'Average volume bid per bidder.']
+  average_volume_won_per_bidder decimal [not null, note: 'Average volume won per bidder.']
+  contract varchar [not null, note: 'Contract type of the auction.']
+  country varchar [not null, note: 'Country conducting the auction.']
+  cover_ratio decimal [not null, note: 'Ratio of total bids to volume auctioned.']
+  date datetime [not null, note: 'Date of the auction.']
+  maximum_bid_eur_per_tco2 decimal [not null, note: 'Highest bid price in EUR per tonne of CO2.']
+  mean_price_eur_per_tco2 decimal [not null, note: 'Mean bid price in EUR per tonne of CO2.']
+  median_price_eur_per_tco2 decimal [not null, note: 'Median bid price in EUR per tonne of CO2.']
+  minimum_bid_eur_per_tco2 decimal [not null, note: 'Lowest bid price in EUR per tonne of CO2.']
+  number_of_bids_submitted integer [not null, note: 'Total number of bids submitted.']
+  number_of_successful_bidders integer [not null, note: 'Number of bidders that won allowances.']
+  number_of_successful_bids integer [not null, note: 'Number of bids that were successful.']
+  revenue_at_eur decimal [note: 'Auction revenue allocated to Austria.']
+  revenue_be_eur decimal [note: 'Auction revenue allocated to Belgium.']
+  revenue_bg_eur decimal [note: 'Auction revenue allocated to Bulgaria.']
+  revenue_cy_eur decimal [note: 'Auction revenue allocated to Cyprus.']
+  revenue_cz_eur decimal [note: 'Auction revenue allocated to Czech Republic.']
+  revenue_de_eur decimal [note: 'Auction revenue allocated to Germany.']
+  revenue_dk_eur decimal [note: 'Auction revenue allocated to Denmark.']
+  revenue_ee_eur decimal [note: 'Auction revenue allocated to Estonia.']
+  revenue_el_eur decimal [note: 'Auction revenue allocated to Greece.']
+  revenue_es_eur decimal [note: 'Auction revenue allocated to Spain.']
+  revenue_fi_eur decimal [note: 'Auction revenue allocated to Finland.']
+  revenue_fr_eur decimal [note: 'Auction revenue allocated to France.']
+  revenue_hr_eur decimal [note: 'Auction revenue allocated to Croatia.']
+  revenue_hu_eur decimal [note: 'Auction revenue allocated to Hungary.']
+  revenue_ie_eur decimal [note: 'Auction revenue allocated to Ireland.']
+  revenue_innovation_fund_eur decimal [note: 'Auction revenue allocated to the Innovation Fund.']
+  revenue_innovation_fund_rrf_eur decimal [note: 'Auction revenue allocated to the Innovation Fund under the Recovery and Resilience Facility.']
+  revenue_is_eur decimal [note: 'Auction revenue allocated to Iceland.']
+  revenue_it_eur decimal [note: 'Auction revenue allocated to Italy.']
+  revenue_li_eur decimal [note: 'Auction revenue allocated to Liechtenstein.']
+  revenue_lt_eur decimal [note: 'Auction revenue allocated to Lithuania.']
+  revenue_lu_eur decimal [note: 'Auction revenue allocated to Luxembourg.']
+  revenue_lv_eur decimal [note: 'Auction revenue allocated to Latvia.']
+  revenue_modernisation_fund_eur decimal [note: 'Auction revenue allocated to the Modernisation Fund.']
+  revenue_ms_rrf_eur decimal [note: 'Auction revenue allocated to Member States under the Recovery and Resilience Facility.']
+  revenue_mt_eur decimal [note: 'Auction revenue allocated to Malta.']
+  revenue_nl_eur decimal [note: 'Auction revenue allocated to the Netherlands.']
+  revenue_no_eur decimal [note: 'Auction revenue allocated to Norway.']
+  revenue_pl_eur decimal [note: 'Auction revenue allocated to Poland.']
+  revenue_pt_eur decimal [note: 'Auction revenue allocated to Portugal.']
+  revenue_ro_eur decimal [note: 'Auction revenue allocated to Romania.']
+  revenue_se_eur decimal [note: 'Auction revenue allocated to Sweden.']
+  revenue_si_eur decimal [note: 'Auction revenue allocated to Slovenia.']
+  revenue_sk_eur decimal [note: 'Auction revenue allocated to Slovakia.']
+  revenue_social_climate_fund_eur decimal [note: 'Auction revenue allocated to the Social Climate Fund.']
+  standard_deviation_bid_volume_per_bidder decimal [not null, note: 'Standard deviation of bid volume per bidder.']
+  standard_deviation_volume_won_per_bidder decimal [not null, note: 'Standard deviation of volume won per bidder.']
+  status varchar [not null, note: 'Status of the auction.']
+  time varchar [not null, note: 'Time of the auction.']
+  total_amount_of_bids integer [not null, note: 'Total volume of all bids submitted.']
+  total_number_of_bidders integer [not null, note: 'Total number of participating bidders.']
+  total_revenue_eur decimal [not null, note: 'Total auction revenue in EUR.']
+  datetime datetime [not null, note: 'Combined date and time of the auction.']
+  created_at datetime [not null, note: 'Timestamp when the record was created.']
+  indexes {
+    (auction_name, date) [pk]
+  }
+  Note: 'Data on auctions of emission allowances on the European Energy Exchange (EEX).'
+}
+
+Ref: link_installation_account.installation_id > installations.id
+Ref: link_installation_account.account_id > accounts.id
+Ref: link_account_holder.account_id > accounts.id
+Ref: link_account_holder.holder_id > account_holders.id
+Ref: compliance.installation_id > installations.id
+Ref: transactions.acquiring_account_id > accounts.id
+Ref: transactions.transferring_account_id > accounts.id
+Ref: transactions.project_id > projects.id
+Ref: installation_locations.installation_id > installations.id
+Ref: nace_mappings.installation_id > installations.id

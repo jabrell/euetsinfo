@@ -52,8 +52,8 @@ def build_full_address(row: dict) -> str:
     parts: list[str] = []
 
     # Address lines
-    addr1 = clean_part(row.get("address_1"))
-    addr2 = clean_part(row.get("address_2"))
+    addr1 = clean_part(row.get("address1"))
+    addr2 = clean_part(row.get("address2"))
 
     if addr1:
         parts.append(addr1)
@@ -63,7 +63,7 @@ def build_full_address(row: dict) -> str:
     # Location details
     postal_code = clean_part(row.get("postal_code"))
     city = clean_part(row.get("city"))
-    country = clean_part(row.get("country"))
+    country = clean_part(row.get("registry_name"))
 
     city_block = ", ".join(part for part in (postal_code, city) if part)
     if city_block:
@@ -79,7 +79,7 @@ def geocode_address(
     address: str,
     api_key: str,
     base_url: str = GEOAPIFY_URL,
-    timeout: int = 10,
+    timeout: int = 30,
 ) -> tuple[float | None, float | None]:
     """
     Geocode a single address using the Geoapify API.
@@ -116,37 +116,10 @@ def geocode_address(
     return lat, lon
 
 
-def load_installations(input_csv: str) -> pd.DataFrame:
-    """
-    Load the installations CSV into a DataFrame and prepare it for geocoding.
-
-    Args:
-        input_csv: Path to the input CSV file.
-
-    Returns:
-        A pandas DataFrame containing the installations data.
-    """
-    df = pd.read_csv(input_csv)
-
-    # Ensure columns exist
-    for col in ["lat", "lon"]:
-        if col not in df.columns:
-            df[col] = None
-
-    # Filter out activity types 10 and 50 (aircraft and shipping)
-    mask = ~df["activity_type_code"].isin([10, 50])
-    df = df[mask]
-
-    # add the full address column
-    df["full_address"] = df.apply(build_full_address, axis=1)
-    return df
-
-
 def geocode_installations(
     df: pd.DataFrame,
     api_key: str,
-    rate_limit_seconds: float = 0.25,
-    max_installations: int | None = None,
+    rate_limit_seconds: float = 1,
 ) -> pd.DataFrame:
     """
     Main processing function that reads installations, geocodes their addresses,

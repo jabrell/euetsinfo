@@ -14,13 +14,12 @@ if __name__ == "__main__":
     load_dotenv(".env")
 
     api_keys = {
-        "googlemaps": os.getenv("GOOGLE_API_KEY"),
+        # "googlemaps": os.getenv("GOOGLE_API_KEY"),
         "geoapify": os.getenv("GEOAPIFY_API_KEY"),
     }
     df_locations = pipeline_installation_coordinates(
         settings=settings,
         api_keys=api_keys,
         save_to_disk=True,
-        max_installations=10,
     )
     print("here")
