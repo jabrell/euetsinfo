@@ -10,7 +10,7 @@ Two pipelines covering the compliance entity end-to-end:
 
 import pandas as pd
 
-from eutl_scraper.pipeline import Pipeline
+from eutl_scraper.pipeline import Bundle, Pipeline
 from eutl_scraper.settings import DownloadClient, Settings
 
 
@@ -224,3 +224,25 @@ class ExtractCompliancePipeline(Pipeline):
                 + df.allocation_tra.fillna(0)
             ),
         )
+
+
+class ComplianceBundle(Bundle):
+    """Compliance entity end-to-end: fetch the raw CSV, then extract the cleaned table.
+
+    Pipelines (in execution order):
+        1. :class:`FetchCompliancePipeline` — downloads the raw CSV into
+           ``dir_source``.
+        2. :class:`ExtractCompliancePipeline` — cleans and normalises the raw
+           CSV into ``dir_extracted``.
+
+    Run this bundle on its own to produce the published compliance table
+    without touching any other EUTL entity.
+    """
+
+    name = "eutl_compliance"
+
+    def _build_pipelines(self) -> list[Pipeline]:
+        return [
+            FetchCompliancePipeline(self.settings),
+            ExtractCompliancePipeline(self.settings),
+        ]

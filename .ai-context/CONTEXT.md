@@ -35,18 +35,19 @@ A pipeline whose **Load** reads from `dir_extracted` (multiple entities allowed)
 _Note_: "augment" is no longer a phase inside a larger pipeline — it is a pipeline of its own. It is **not** a special "depends on previous steps" construct; its dependency on prior outputs is just "my load reads files from `dir_extracted`" — the same kind of disk-based dependency an Extract Pipeline has on `dir_source`.
 
 **Bundle**:
-A named collection of pipelines grouped by **source/domain** (EUTL, EEX, NACE, Geocoding). Two responsibilities:
+A named, **flat** collection of pipelines — a list of nodes with implicit edges given by list order. A Bundle never contains another Bundle. Three responsibilities:
 1. **Factory** — accepts source-level runtime config (API keys, user-supplied file paths, knobs like `max_installations`) and uses it to decide *which* pipelines to instantiate. E.g. the geocoding bundle includes `GeoapifyPipeline` only if a Geoapify key is provided.
 2. **Runner** — `Bundle.run()` is `for p in self.pipelines: p.run()` in declared list order, nothing more.
+3. **Composition target** — bundles overlap freely. A pipeline may be reachable from more than one Bundle; a coarser Bundle composes by *flattening* finer Bundles' pipeline lists at construction time (e.g. `EUTLBundle._build_pipelines` inlines `ComplianceBundle(...).pipelines`, `AccountsBundle(...).pipelines`, …). Composition lives at the factory level; the runtime type stays `list[Pipeline]`.
 Source-level runtime config (API keys, manually-downloaded file paths) enters the system via the Bundle's constructor. Per-pipeline disk paths still come from **Settings**.
 _Not a Pipeline_: a Bundle does not have load/transform/save; it only has `run()`. The shared interface with Pipeline is `run()` and nothing else (Composite pattern, not inheritance).
-_Avoid_: pipeline-of-pipelines, meta-pipeline.
+_Avoid_: pipeline-of-pipelines, meta-pipeline, nested bundle.
 
 ## Relationships
 
 - A **Pipeline** has exactly three **Phases**: Load, Transform, Save.
 - A **Pipeline** produces exactly one **Product** (which may span multiple files).
-- A **Bundle** groups multiple **Pipelines** and defines their execution order.
+- A **Bundle** groups multiple **Pipelines** and defines their execution order. Bundles do not nest — finer Bundles (e.g. `ComplianceBundle`) are composed into coarser ones (e.g. `EUTLBundle`) by flattening their pipeline lists at construction.
 - **Fetch / Extract / Augment Pipelines** are kinds of Pipeline, distinguished by *where their Load reads from* and *where their Save writes to*:
   - Fetch: remote → `dir_source`
   - Extract: `dir_source` → `dir_extracted`
