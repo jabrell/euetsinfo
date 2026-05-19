@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 
 from eutl_scraper import Settings
 from eutl_scraper.eutl import EUTLBundle
+from eutl_scraper.other.eex_auctions import EEXAuctionsBundle
 from eutl_scraper.logger import setup_logging
 
 if __name__ == "__main__":
@@ -22,5 +23,6 @@ if __name__ == "__main__":
     #     api_keys=api_keys,
     #     save_to_disk=True,
     # )
-    EUTLBundle(settings=settings).run()
+    # EUTLBundle(settings=settings).run()
+    EEXAuctionsBundle(settings=settings).run()
     print("here")
