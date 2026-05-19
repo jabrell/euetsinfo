@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 
-from eutl_scraper import Settings
+from eutl_scraper import Settings, AllDataBundle
 from eutl_scraper.eutl import EUTLBundle
 from eutl_scraper.other.eex_auctions import EEXAuctionsBundle
 from eutl_scraper.other.nace_codes import  NaceFromLeakageListsBundle
@@ -34,6 +34,6 @@ if __name__ == "__main__":
     # EUTLBundle(settings=settings).run()
     # EEXAuctionsBundle(settings=settings).run()
     # NaceFromLeakageListsBundle(settings=settings, drop_missing_installations=True).run()
-    InstallationLocationsBundle(settings=settings, api_keys=api_keys, max_installations=30).run()
+    AllDataBundle(settings=settings, api_keys=api_keys).run()
 
     print("here")

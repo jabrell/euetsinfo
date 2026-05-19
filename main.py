@@ -3,14 +3,22 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-from eutl_scraper import Pipelines, Settings, get_all_data, setup_logging
+from eutl_scraper import AllDataBundle, Settings, setup_logging
 
 if __name__ == "__main__":
     # path to the manual accounts file
     fn_manual_accounts = Path("manual_data") / "accounts_20260412.xlsx"
 
     # settings and logging
-    settings = Settings(dir_data="data_tmp/")
+    settings = Settings(
+        dir_data="data_tmp2/",
+        manual_files={
+            "manual_accounts": Path("manual_data/accounts_20260412.xlsx"),
+            "existing_installation_locations": Path(
+                "manual_data/installation_locations.csv"
+            ),
+        },
+    )
     setup_logging("INFO")
 
     # load environment variables from .env file: API keys for geocoding
@@ -21,14 +29,9 @@ if __name__ == "__main__":
         "osm": os.getenv("OSM_USER_AGENT"),
     }
 
-    get_all_data(
+    AllDataBundle(
         settings=settings,
-        pipelines=[
-            Pipelines.EUTL,
-            Pipelines.NACE_FROM_LEAKAGE_LISTS,
-            Pipelines.EEX_AUCTIONS,
-            Pipelines.INSTALLATION_COORDINATES,
-        ],
-        fn_manual_accounts=fn_manual_accounts,
         api_keys=api_keys,
-    )
+    ).run()
+
+    print("here")

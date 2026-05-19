@@ -8,10 +8,8 @@ from .bundle import ExtractInstallationLocationsPipeline, InstallationLocationsB
 from .geoapify_coordinates import get_installation_coordinates_geoapify
 from .google_coordinates import get_installation_coordinates_google
 from .osm_coordinates import get_installation_coordinates_osm
-from .pipeline import load_installations, pipeline_installation_coordinates
 
 __all__ = [
-    "load_installations",
     "pipeline_installation_coordinates",
     "get_installation_coordinates_google",
     "get_installation_coordinates_geoapify",

@@ -1,9 +1,9 @@
-from .eex_auctions import pipeline_eex_auctions
-from .locations import pipeline_installation_coordinates
-from .nace_codes import pipeline_nace_from_leakage_lists
+from .eex_auctions import EEXAuctionsBundle
+from .locations import InstallationLocationsBundle
+from .nace_codes import NaceFromLeakageListsBundle
 
 __all__ = [
-    "pipeline_installation_coordinates",
-    "pipeline_nace_from_leakage_lists",
-    "pipeline_eex_auctions",
+    "InstallationLocationsBundle",
+    "NaceFromLeakageListsBundle",
+    "EEXAuctionsBundle",
 ]
