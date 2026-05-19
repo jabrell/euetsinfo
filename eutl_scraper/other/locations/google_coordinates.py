@@ -10,16 +10,16 @@ def form_address(row: pd.Series) -> tuple[str, str]:
     """Forms address based on Series with address data
 
     Args:
-        row (pd.Series): with address data, including mainAddress, secondaryAddress,
-            postalCode, city and country.
+        row (pd.Series): with address data, including address1, address2,
+            postal_code, city and registry_id.
 
     Returns:
-        tuple[str, str]: address and country code
+        tuple[str, str]: address and registry code
     """
     address = ""
     for a in ["address1", "address2", "postal_code", "city", "registry_id"]:
         if pd.notnull(row[a]):
-            if a == "country":
+            if a == "registry_id":
                 address += f"{map_registryCodes.get(row[a])}, "
             else:
                 address += f"{row[a]}, "
@@ -29,24 +29,24 @@ def form_address(row: pd.Series) -> tuple[str, str]:
 
 
 def get_gmaps_coordinates(
-    gmaps: googlemaps.Client, address: str, countryCode: str | None = None
+    gmaps: googlemaps.Client, address: str, registryCode: str | None = None
 ):
     """Get latitude and longitude from google maps
 
     Args:
         gmaps (googlemaps.Client): google maps client
         address (str): address
-        countryCode (str | None): two digit iso code of the country. If provided,
-            the search will be limited to this country. This can help to get
+        registryCode (str | None): registry code. If provided,
+            the search will be limited to this registry. This can help to get
             more accurate results for countries with overseas territories.
 
     """
     # get locations
     # for countries with oversea teritores exclude the country identifier
-    if countryCode in ["FR", "GB", "NL", "DK", "NO"]:
+    if registryCode in ["FR", "GB", "NL", "DK", "NO"]:
         loc = gmaps.geocode(address=address)
     else:
-        loc = gmaps.geocode(address=address, components={"country": countryCode})
+        loc = gmaps.geocode(address=address, components={"country": registryCode})
     # if get no results, try without countryCode to include overseas territories
     if len(loc) == 0:
         loc = gmaps.geocode(address=address)
@@ -63,12 +63,17 @@ def get_gmaps_coordinates(
 def get_installation_coordinates_google(
     df_installations: pd.DataFrame,
     api_key: str,
+    rate_limit_seconds: float = 1,
 ) -> pd.DataFrame:
     """Gets installation coordinates using googlemaps api
 
     Args:
         df_in (pd.DataFrame): dataframe with installation data
         api_key (str): google api key
+        rate_limit_seconds (float, optional): delay between api calls to respect
+            rate limits. Not applicable for googlemaps, but included for consistency
+            with other geocoding services.
+            Default: 1.
 
     Returns:
         pd.DataFrame: with installation_id, latitude and longitude
@@ -83,7 +88,7 @@ def get_installation_coordinates_google(
     )
     for _, row in tqdm(df_installations.iterrows(), total=len(df_installations)):
         address, countryCode = form_address(row)
-        lat, lng = get_gmaps_coordinates(gmaps, address, countryCode=countryCode)
+        lat, lng = get_gmaps_coordinates(gmaps, address, registryCode=countryCode)
         if lat:
             res = {}
             res["installation_id"] = row["installation_id"]
