@@ -11,7 +11,11 @@ from eutl_scraper.pipeline import Bundle, Pipeline
 
 from .account_holders import AccountHoldersBundle
 from .accounts import AccountsBundle
+from .add_missing_accounts_from_transactions import (
+    AddMissingAccountsFromTransactionsPipeline,
+)
 from .compliance import ComplianceBundle
+from .create_ets2_installations import CreateETS2InstallationsPipeline
 from .installations import InstallationsBundle
 from .transactions import TransactionsBundle
 
@@ -38,4 +42,6 @@ class EUTLBundle(Bundle):
             *AccountsBundle(self.settings).pipelines,
             *InstallationsBundle(self.settings).pipelines,
             *AccountHoldersBundle(self.settings).pipelines,
+            CreateETS2InstallationsPipeline(self.settings),
+            AddMissingAccountsFromTransactionsPipeline(self.settings),
         ]
