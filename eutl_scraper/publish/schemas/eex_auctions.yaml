@@ -274,7 +274,7 @@ fields:
   - name: time
     title: Time
     description: Time of the auction.
-    type: string
+    type: datetime
     constraints:
       required: true
   - name: total_amount_of_bids

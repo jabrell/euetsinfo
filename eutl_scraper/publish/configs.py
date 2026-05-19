@@ -44,10 +44,19 @@ class BaseConfig:
         return lambda df: df.dropna(subset=cols, how="all")
 
     @staticmethod
-    def _float_to_nace(col: str, format: str = ".2f") -> Callable:
-        return lambda df: df[col].apply(
-            lambda x: f"{x:{format}}" if pd.notna(x) else None
-        )
+    def _format_nace(col: str, format: str = ".2f") -> Callable:
+        """Format a NACE code column as a zero-padded decimal string.
+
+        Inputs may be strings (parquet preserves the leakage-list ``str``
+        dtype) or numeric; both are coerced to float before formatting so
+        the published values match the previous CSV-era output.
+        """
+
+        def _convert(df: pd.DataFrame) -> pd.Series:
+            numeric = pd.to_numeric(df[col], errors="coerce")
+            return numeric.apply(lambda x: f"{x:{format}}" if pd.notna(x) else None)
+
+        return _convert
 
     @staticmethod
     def _drop_duplicates_subset(cols: list[str]) -> Callable:

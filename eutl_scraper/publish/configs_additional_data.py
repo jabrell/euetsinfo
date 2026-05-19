@@ -80,8 +80,8 @@ class NaceMappings(BaseConfig):
 
     def __post_init__(self):
         self.type_convertors = {
-            "nace_2015": self._float_to_nace("nace_2015"),
-            "nace_2020": self._float_to_nace("nace_2020"),
+            "nace_2015": self._format_nace("nace_2015"),
+            "nace_2020": self._format_nace("nace_2020"),
             "created_at": self._to_datetime("created_at"),
         }
 
