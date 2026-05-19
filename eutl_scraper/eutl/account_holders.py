@@ -29,7 +29,8 @@ from .mappings import map_registryCodes
 
 
 class ExtractAccountHoldersPipeline(Pipeline):
-    """Extract account holders and the account-to-holder link table from the manual Excel.
+    """Extract account holders and the account-to-holder link table from the manual
+    Excel.
 
     Inputs:
         The PowerBI accounts Excel at
@@ -48,9 +49,9 @@ class ExtractAccountHoldersPipeline(Pipeline):
         - The **link_account_holder** table mapping ``account_id`` to
           ``account_holder_id`` with ``created_at``.
 
-    Output locations:
-        - ``settings.fp("account_holders", settings.dir_extracted)``
-        - ``settings.fp("link_account_holder", settings.dir_extracted)``
+    Output locations (both written with ``ending="parquet"``):
+        - ``settings.fp("account_holders", settings.dir_extracted, ...)``
+        - ``settings.fp("link_account_holder", settings.dir_extracted, ...)``
     """
 
     name = "extract_account_holders"
@@ -119,12 +120,18 @@ class ExtractAccountHoldersPipeline(Pipeline):
         )
 
     def save(self) -> None:
-        self.df_link.to_csv(
-            self.settings.fp("link_account_holder", self.settings.dir_extracted),
+        self.df_link.to_parquet(
+            self.settings.fp(
+                "link_account_holder",
+                self.settings.dir_extracted,
+                ending="parquet",
+            ),
             index=False,
         )
-        self.df_holders.to_csv(
-            self.settings.fp("account_holders", self.settings.dir_extracted),
+        self.df_holders.to_parquet(
+            self.settings.fp(
+                "account_holders", self.settings.dir_extracted, ending="parquet"
+            ),
             index=False,
         )
 
@@ -182,10 +189,10 @@ class AccountHoldersBundle(Bundle):
         at this location).
       - Outputs:
 
-        - ``dir_extracted/eutl_link_account_holder.csv`` (mapping
+        - ``dir_extracted/eutl_link_account_holder.parquet`` (mapping
           ``account_id`` ↔ ``account_holder_id``).
-        - ``dir_extracted/eutl_account_holders.csv`` (deduplicated holders
-          with ``registry_name`` and ``created_at``).
+        - ``dir_extracted/eutl_account_holders.parquet`` (deduplicated
+          holders with ``registry_name`` and ``created_at``).
 
     Prerequisite: the manual Excel must already be in ``dir_source`` before
     this bundle runs. Run :class:`AccountsBundle` first (or include both

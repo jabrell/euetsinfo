@@ -92,9 +92,9 @@ class ExtractInstallationsPipeline(Pipeline):
         - The **link_installation_account** table mapping ``installation_id``
           to ``account_id`` with the snapshot / ``created_at`` stamps.
 
-    Output locations:
-        - ``settings.fp("installations", settings.dir_extracted)``
-        - ``settings.fp("link_installation_account", settings.dir_extracted)``
+    Output locations (both written with ``ending="parquet"``):
+        - ``settings.fp("installations", settings.dir_extracted, ...)``
+        - ``settings.fp("link_installation_account", settings.dir_extracted, ...)``
     """
 
     name = "extract_installations"
@@ -138,12 +138,18 @@ class ExtractInstallationsPipeline(Pipeline):
         self.df_installations = df.drop(columns=["account_id"])
 
     def save(self) -> None:
-        self.df_installations.to_csv(
-            self.settings.fp("installations", self.settings.dir_extracted),
+        self.df_installations.to_parquet(
+            self.settings.fp(
+                "installations", self.settings.dir_extracted, ending="parquet"
+            ),
             index=False,
         )
-        self.df_link.to_csv(
-            self.settings.fp("link_installation_account", self.settings.dir_extracted),
+        self.df_link.to_parquet(
+            self.settings.fp(
+                "link_installation_account",
+                self.settings.dir_extracted,
+                ending="parquet",
+            ),
             index=False,
         )
 
@@ -232,10 +238,10 @@ class InstallationsBundle(Bundle):
       - Input: ``dir_source/eutl_installations.csv``.
       - Outputs:
 
-        - ``dir_extracted/eutl_installations.csv`` (cleaned installations
-          table).
-        - ``dir_extracted/eutl_link_installation_account.csv`` (link table
-          mapping ``installation_id`` to ``account_id``).
+        - ``dir_extracted/eutl_installations.parquet`` (cleaned
+          installations table).
+        - ``dir_extracted/eutl_link_installation_account.parquet`` (link
+          table mapping ``installation_id`` to ``account_id``).
 
     Run this bundle on its own to produce the published installations table
     and the installation-account link table without touching any other EUTL

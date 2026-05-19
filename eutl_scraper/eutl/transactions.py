@@ -108,8 +108,8 @@ class ExtractTransactionsPipeline(Pipeline):
           type imposed from the unit-type description and parsed expiry date.
 
     Output locations:
-        - ``settings.fp("transactions", settings.dir_extracted)``
-        - ``settings.fp("projects", settings.dir_extracted)``
+        - ``settings.fp("transactions", settings.dir_extracted, ending="parquet")``
+        - ``settings.fp("projects", settings.dir_extracted, ending="parquet")``
     """
 
     name = "extract_transactions"
@@ -158,12 +158,14 @@ class ExtractTransactionsPipeline(Pipeline):
         )
 
     def save(self) -> None:
-        self.df_transactions.to_csv(
-            self.settings.fp("transactions", self.settings.dir_extracted),
+        self.df_transactions.to_parquet(
+            self.settings.fp(
+                "transactions", self.settings.dir_extracted, ending="parquet"
+            ),
             index=False,
         )
-        self.df_projects.to_csv(
-            self.settings.fp("projects", self.settings.dir_extracted),
+        self.df_projects.to_parquet(
+            self.settings.fp("projects", self.settings.dir_extracted, ending="parquet"),
             index=False,
         )
 
@@ -308,10 +310,10 @@ class TransactionsBundle(Bundle):
       - Input: ``dir_source/eutl_transactions.csv``.
       - Outputs:
 
-        - ``dir_extracted/eutl_transactions.csv`` (cleaned transactions
-          table).
-        - ``dir_extracted/eutl_projects.csv`` (unique projects derived from
-          the same cleaning pass).
+        - ``dir_extracted/eutl_transactions.parquet`` (cleaned
+          transactions table).
+        - ``dir_extracted/eutl_projects.parquet`` (unique projects derived
+          from the same cleaning pass).
 
     Run this bundle on its own to produce the published transactions and
     projects tables without touching any other EUTL entity.

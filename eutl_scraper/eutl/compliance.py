@@ -84,8 +84,8 @@ class ExtractCompliancePipeline(Pipeline):
         sentinels, and added ``allocated_total`` / ``created_at`` columns.
 
     Output location:
-        ``settings.fp("compliance", settings.dir_extracted)`` — i.e. the
-        ``eutl_compliance.csv`` file under ``dir_extracted``.
+        ``settings.fp("compliance", settings.dir_extracted, ending="parquet")``
+        — i.e. the ``eutl_compliance.parquet`` file under ``dir_extracted``.
     """
 
     name = "extract_compliance"
@@ -133,8 +133,11 @@ class ExtractCompliancePipeline(Pipeline):
         )
 
     def save(self) -> None:
-        self.df.to_csv(
-            self.settings.fp("compliance", self.settings.dir_extracted), index=False
+        self.df.to_parquet(
+            self.settings.fp(
+                "compliance", self.settings.dir_extracted, ending="parquet"
+            ),
+            index=False,
         )
 
     @staticmethod
@@ -171,7 +174,7 @@ class ExtractCompliancePipeline(Pipeline):
                 ets_id="euets",
                 snapshot_date=pd.to_datetime(df.SNAPSHOT_DATE, format="%Y-%m-%d"),
             )
-            .drop(columns=["INSTALLATION_IDENTIFIER"])
+            .drop(columns=["INSTALLATION_IDENTIFIER", "SNAPSHOT_DATE"])
             .rename(columns=map_col)
             .rename(columns=lambda x: x.lower())
         )
@@ -240,8 +243,8 @@ class ComplianceBundle(Bundle):
     - **ExtractCompliancePipeline**
 
       - Input: ``dir_source/eutl_compliance.csv``.
-      - Output: ``dir_extracted/eutl_compliance.csv`` (cleaned compliance
-        table).
+      - Output: ``dir_extracted/eutl_compliance.parquet`` (cleaned
+        compliance table).
 
     Run this bundle on its own to produce the published compliance table
     without touching any other EUTL entity.

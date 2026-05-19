@@ -128,8 +128,8 @@ class ExtractAccountsPipeline(Pipeline):
         boolean ``isClosurePending``, and a ``created_at`` stamp.
 
     Output location:
-        ``settings.fp("accounts", settings.dir_extracted)`` — i.e. the
-        ``eutl_accounts.csv`` file under ``dir_extracted``.
+        ``settings.fp("accounts", settings.dir_extracted, ending="parquet")``
+        — i.e. the ``eutl_accounts.parquet`` file under ``dir_extracted``.
     """
 
     name = "extract_accounts"
@@ -156,8 +156,9 @@ class ExtractAccountsPipeline(Pipeline):
         )
 
     def save(self) -> None:
-        self.df.to_csv(
-            self.settings.fp("accounts", self.settings.dir_extracted), index=False
+        self.df.to_parquet(
+            self.settings.fp("accounts", self.settings.dir_extracted, ending="parquet"),
+            index=False,
         )
 
     @staticmethod
@@ -243,7 +244,7 @@ class AccountsBundle(Bundle):
     - **ExtractAccountsPipeline**
 
       - Input: ``dir_source/eutl_accounts.csv``.
-      - Output: ``dir_extracted/eutl_accounts.csv`` (cleaned accounts
+      - Output: ``dir_extracted/eutl_accounts.parquet`` (cleaned accounts
         table).
 
     Run this bundle on its own to produce the published accounts table and
