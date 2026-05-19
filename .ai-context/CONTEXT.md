@@ -42,9 +42,6 @@ Source-level runtime config (API keys, manually-downloaded file paths) enters th
 _Not a Pipeline_: a Bundle does not have load/transform/save; it only has `run()`. The shared interface with Pipeline is `run()` and nothing else (Composite pattern, not inheritance).
 _Avoid_: pipeline-of-pipelines, meta-pipeline.
 
-**Kind**:
-A tag on each Pipeline — one of `Fetch | Extract | Augment` — used **only** as a user-facing filter (e.g. `bundle.run(kinds={Augment})` to re-run only augment pipelines during development). The Kind has no role in dependency resolution or execution ordering. It exists because the current `EUTLPipelineSteps` filtering workflow needs to survive the migration.
-
 ## Relationships
 
 - A **Pipeline** has exactly three **Phases**: Load, Transform, Save.
@@ -60,4 +57,4 @@ A tag on each Pipeline — one of `Fetch | Extract | Augment` — used **only** 
 
 - "Pipeline" in the current code (`pipeline_eutl`) means what we now call a **Bundle**. The new `BasePipeline` ABC in `eutl_scraper/pipeline/__init__.py` will mean a single load/transform/save unit. Existing call sites will need renaming during migration.
 - "Bundle" vs "Job" vs "Group" — provisional; revisit when composition semantics (Question 3) are resolved.
-- "Step" is deliberately not used. The proposal's `EUTLPipelineSteps` enum (download / extract / augment) is really a *phase-filter over a bundle*, not a property of any one pipeline.
+- "Step" is deliberately not used. The current `EUTLPipelineSteps` enum (download / extract / augment) is being dropped; the equivalent workflow ("re-run only augments") is recovered by manually selecting an Augment Pipeline or by adding a filter later if needed.
