@@ -1,7 +1,4 @@
-"""Module to fetch coordinates for EUTL installations based on the
-[Geoapify API](https://www.geoapify.com/).
-
-The first version of this module was provided by: Roberto Rossini (Bruegel)"""
+import concurrent.futures
 
 import pandas as pd
 from loguru import logger
@@ -9,6 +6,7 @@ from loguru import logger
 from ...settings import Settings
 from .geoapify_coordinates import get_installation_coordinates_geoapify
 from .google_coordinates import get_installation_coordinates_google
+from .osm_coordinates import get_installation_coordinates_osm
 
 
 def load_installations(
@@ -48,6 +46,8 @@ def pipeline_installation_coordinates(
     Args:
         api_keys: API key for the geocoding service
             Geoapify API key: https://www.geoapify.com/
+            For OMS (Nominatim) no API key is needed, but you must provide a
+            user agent string.
         save_to_disk (bool): Whether to save the extracted data to disk.
             Defaults to True.
         max_installations: Optional limit on the number of installations to process
@@ -70,6 +70,7 @@ def pipeline_installation_coordinates(
     geocoding_services = {
         "googlemaps": get_installation_coordinates_google,
         "geoapify": get_installation_coordinates_geoapify,
+        "osm": get_installation_coordinates_osm,
     }
 
     # check that only valid services are provided
@@ -82,13 +83,35 @@ def pipeline_installation_coordinates(
 
     # loop over geocoding services and concatenate results
     lst_df = []
-    for service_name, api_key in api_keys.items():
-        if api_key is None:
-            print(f"API key for {service_name} not found. Skipping...")
-            continue
-        geocode_func = geocoding_services[service_name]
-        df = geocode_func(df_installations, api_key)
-        lst_df.append(df.assign(source=service_name))
+    with concurrent.futures.ThreadPoolExecutor(max_workers=len(api_keys)) as executor:
+        # Submit all tasks to the executor and store the futures in a dictionary
+        future_to_service = {}
+        for service_name, api_key in api_keys.items():
+            if not api_key:
+                logger.warning(
+                    f"API key/User Agent for {service_name} not found. Skipping..."
+                )
+                continue
+            geocode_func = geocoding_services[service_name]
+
+            # executor.submit runs the function in a separate thread
+            future = executor.submit(geocode_func, df_installations, api_key)
+            future_to_service[future] = service_name
+
+        # collect the results as they complete
+        for future in concurrent.futures.as_completed(future_to_service):
+            service_name = future_to_service[future]
+            try:
+                # Retrieve the resulting DataFrame from the thread
+                df_result = future.result()
+                lst_df.append(df_result.assign(source=service_name))
+                logger.info(f"Successfully completed fetch for {service_name}.")
+            except Exception as exc:
+                # Catch exceptions from inside the thread so they don't crash
+                # the whole pipeline
+                logger.error(f"Service {service_name} generated an exception: {exc}")
+
+    # combine results from all services into a single DataFrame
     df = pd.concat(lst_df, ignore_index=True)
 
     # save to disk

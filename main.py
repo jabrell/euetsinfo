@@ -18,15 +18,16 @@ if __name__ == "__main__":
     api_keys = {
         "googlemaps": os.getenv("GOOGLE_API_KEY"),
         "geoapify": os.getenv("GEOAPIFY_API_KEY"),
+        "osm": os.getenv("OSM_USER_AGENT"),
     }
 
     get_all_data(
         settings=settings,
         pipelines=[
             Pipelines.EUTL,
-            # Pipelines.NACE_FROM_LEAKAGE_LISTS,
-            # Pipelines.EEX_AUCTIONS,
-            # Pipelines.INSTALLATION_COORDINATES,
+            Pipelines.NACE_FROM_LEAKAGE_LISTS,
+            Pipelines.EEX_AUCTIONS,
+            Pipelines.INSTALLATION_COORDINATES,
         ],
         fn_manual_accounts=fn_manual_accounts,
         api_keys=api_keys,
