@@ -23,9 +23,19 @@ class BasePipeline(ABC):
         raise NotImplementedError("Subclasses must implement the fetch method.")
 
     @abstractmethod
+    def load(self, *args, **kwargs):
+        """Load data from disk into memory."""
+        raise NotImplementedError("Subclasses must implement the load method.")
+
+    @abstractmethod
     def extract(self, *args, **kwargs):
         """Extract relevant information from the transformed data."""
         raise NotImplementedError("Subclasses must implement the extract method.")
+
+    @abstractmethod
+    def save(self, *args, **kwargs):
+        """Save the extracted data to disk."""
+        raise NotImplementedError("Subclasses must implement the save method.")
 
     @abstractmethod
     def augment(self, *args, **kwargs):
