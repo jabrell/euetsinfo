@@ -1,4 +1,8 @@
-import logging
+"""Module to fetch coordinates for EUTL installations based on the
+[Geoapify API](https://www.geoapify.com/).
+
+The first version of this module was provided by: Roberto Rossini (Bruegel)"""
+
 import time
 from typing import Any
 
@@ -116,81 +120,8 @@ def geocode_address(
     return lat, lon
 
 
-def geocode_installations(
-    df: pd.DataFrame,
-    api_key: str,
-    rate_limit_seconds: float = 1,
-) -> pd.DataFrame:
-    """
-    Main processing function that reads installations, geocodes their addresses,
-    and writes full and coordinates-only CSV outputs.
-
-    Steps:
-    - Load input CSV
-    - Ensure 'lat' and 'lon' columns exist
-    - Build full address strings
-    - Filter out certain activity types (10 and 50)
-    - Geocode missing coordinates (with a cache to avoid duplicate calls)
-    - Save the enriched dataset and a coordinates-only CSV
-
-    Args:
-        df (pd.DataFrame): DataFrame containing the installations data prepared
-            for geocoding (see `load_installations` function).
-        api_key: Geoapify API key used for geocoding.
-        rate_limit_seconds: Delay between API calls to respect rate limits.
-
-    Returns:
-        A pandas DataFrame containing the geocoded installations data.
-    """
-
-    # Optional cache to avoid duplicate calls
-    cache: dict[str, tuple[float | None, float | None]] = {}
-
-    new_rows: list[dict[str, Any]] = []
-    coordinates_rows: list[dict[str, Any]] = []
-
-    rows = df.to_dict("records")
-    try:
-        for row in tqdm(rows):
-            address = row.get("full_address", "")
-
-            if address in cache:
-                lat, lon = cache[address]
-            else:
-                try:
-                    lat, lon = geocode_address(address, api_key=api_key)
-                    cache[address] = (lat, lon)
-                    time.sleep(rate_limit_seconds)  # rate-limit safety
-                except Exception as exc:  # noqa: BLE001
-                    logging.error(f"✖ Failed: {address} → {exc}")
-                    continue
-
-            new_rows.append(
-                {
-                    **row,
-                    "lat": lat,
-                    "lon": lon,
-                }
-            )
-            coordinates_rows.append(
-                {
-                    "installation_id": row.get("installation_id"),
-                    "lat": lat,
-                    "lon": lon,
-                }
-            )
-            logging.info(f"✔ Geocoded: {address}")
-    except Exception as exc:  # noqa: BLE001
-        print(exc)
-        print("Exiting...")
-    finally:
-        df = pd.DataFrame(coordinates_rows).assign(created_at=pd.Timestamp.now())
-
-    return df
-
-
 def get_installation_coordinates_geoapify(
-    df_installations, api_key, rate_limit_seconds=0.25
+    df_installations, api_key, rate_limit_seconds=1
 ):
     """Gets installation coordinates using geoapify api
 
@@ -199,7 +130,7 @@ def get_installation_coordinates_geoapify(
         api_key (str): geoapify api key
         rate_limit_seconds (float, optional): delay between api calls to respect
             rate limits.
-            Defaults to 0.25.
+            Defaults to 1.
 
     Returns:
         pd.DataFrame: with installation_id, latitude and longitude
@@ -209,8 +140,13 @@ def get_installation_coordinates_geoapify(
     lst_res = []
     for row in tqdm(rows):
         address = build_full_address(row)
-        lat, lon = geocode_address(address, api_key=api_key)
-        if lat:
+        try:
+            lat, lon = geocode_address(address, api_key=api_key)
+            time.sleep(rate_limit_seconds)
+        except Exception as exc:
+            logger.error(f"Failed to geocode {address}: {exc}")
+            continue
+        if lat and lon:
             res = {}
             res["installation_id"] = row["installation_id"]
             res["latitude"] = lat
