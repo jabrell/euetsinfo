@@ -1,22 +1,22 @@
 """NACE-by-installation pipeline.
 
-Orchestrates the existing sibling module :mod:`.nace_from_leakage_lists`:
+Orchestrates the existing sibling module `.nace_from_leakage_lists`:
 
-- :func:`extract_nace_scheme` parses the bundled NACE Rev. 2 HTML scheme.
-- :func:`extract_nace_by_installation` parses the bundled 2015 and 2020
+- `extract_nace_scheme` parses the bundled NACE Rev. 2 HTML scheme.
+- `extract_nace_by_installation` parses the bundled 2015 and 2020
   leakage-list Excel files, joins them with the scheme, and yields one
-  row per installation with ``nace_2015`` / ``nace_2020``.
+  row per installation with `nace_2015` / `nace_2020`.
 
 Two classes:
 
-- :class:`ExtractNaceFromLeakageListsPipeline` — single pipeline producing
-  two cohesive parquet products in ``dir_extracted``:
-  ``nace_from_leakage_lists`` and ``nace_scheme``.
-- :class:`NaceFromLeakageListsBundle` — flat bundle of the pipeline above,
-  with one source-level knob: ``drop_missing_installations``.
+- `ExtractNaceFromLeakageListsPipeline` — single pipeline producing two
+  cohesive parquet products in `dir_extracted`:
+  `nace_from_leakage_lists` and `nace_scheme`.
+- `NaceFromLeakageListsBundle` — flat bundle of the pipeline above, with
+  one source-level knob: `drop_missing_installations`.
 
-The three input files (``leakage_2015.xlsx``, ``leakage_2020.xlsx``,
-``NACE_REV2_20200427_154248.htm``) live next to this file inside the
+The three input files (`leakage_2015.xlsx`, `leakage_2020.xlsx`,
+`NACE_REV2_20200427_154248.htm`) live next to this file inside the
 package and are not downloaded from anywhere.
 """
 
@@ -43,27 +43,28 @@ class ExtractNaceFromLeakageListsPipeline(Pipeline):
     """Build the NACE-by-installation and NACE-scheme tables from bundled inputs.
 
     Inputs:
-        Three package-bundled files (constants ``FN_LEAKAGE_2015``,
-        ``FN_LEAKAGE_2020``, ``FN_NACE_SCHEME``) plus, when
-        ``drop_missing_installations=True``, the extracted installations
+        Three package-bundled files (constants `FN_LEAKAGE_2015`,
+        `FN_LEAKAGE_2020`, `FN_NACE_SCHEME`) plus, when
+        `drop_missing_installations=True`, the extracted installations
         parquet at
-        ``settings.fp("installations", settings.dir_extracted, ending="parquet")``.
+        `settings.fp("installations", settings.dir_extracted, ending="parquet")`.
 
     Product:
-        Two cohesive tables written to ``dir_extracted``:
+        Two cohesive tables written to `dir_extracted`:
 
         - **nace_from_leakage_lists** — one row per installation with
-          ``installation_id``, ``nace_2015`` and ``nace_2020``.
+          `installation_id`, `nace_2015` and `nace_2020`.
         - **nace_scheme** — the NACE Rev. 2 classification table parsed
           from the bundled HTML.
 
-    Output locations (both ``ending="parquet"``):
-        - ``settings.fp("nace_from_leakage_lists", settings.dir_extracted, ...)``
-        - ``settings.fp("nace_scheme", settings.dir_extracted, ...)``
+    Output locations (both `ending="parquet"`):
+
+    - `settings.fp("nace_from_leakage_lists", settings.dir_extracted, ...)`
+    - `settings.fp("nace_scheme", settings.dir_extracted, ...)`
 
     Knobs:
-        ``drop_missing_installations`` — when ``True`` (default), rows whose
-        ``installation_id`` is not present in the extracted installations
+        `drop_missing_installations` — when `True` (default), rows whose
+        `installation_id` is not present in the extracted installations
         table are dropped from the NACE-by-installation product (with a
         warning). Matches the legacy default.
     """
@@ -125,10 +126,10 @@ class NaceFromLeakageListsBundle(Bundle):
     """NACE codes from the bundled 2015/2020 leakage lists.
 
     Source-level runtime config:
-        ``drop_missing_installations`` — propagated to
-        :class:`ExtractNaceFromLeakageListsPipeline`. When ``True``, the
-        bundle has a hard dependency on the extracted installations
-        parquet being on disk; run an upstream installations bundle first.
+        `drop_missing_installations` — propagated to
+        `ExtractNaceFromLeakageListsPipeline`. When `True`, the bundle
+        has a hard dependency on the extracted installations parquet
+        being on disk; run an upstream installations bundle first.
     """
 
     name = "nace_from_leakage_lists"

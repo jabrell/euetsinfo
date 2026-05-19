@@ -2,20 +2,21 @@
 
 Two classes covering the account-holders entity end-to-end:
 
-- :class:`ExtractAccountHoldersPipeline` — reads the PowerBI accounts Excel
-  from ``dir_source`` (placed there by :class:`FetchManualAccountsPipeline`
-  in :class:`AccountsBundle`), derives unique account holders and the
-  account-to-holder link table, and writes both to ``dir_extracted``.
-- :class:`AccountHoldersBundle` — flat bundle of the single pipeline above.
+- `ExtractAccountHoldersPipeline` — reads the PowerBI accounts Excel from
+  `dir_source` (placed there by `FetchManualAccountsPipeline` in
+  `AccountsBundle`), derives unique account holders and the
+  account-to-holder link table, and writes both to `dir_extracted` as
+  parquet.
+- `AccountHoldersBundle` — flat bundle of the single pipeline above.
 
-There is no fetch pipeline here: the manual Excel arrives in ``dir_source``
-via the accounts data flow. Running :class:`AccountHoldersBundle` standalone
+There is no fetch pipeline here: the manual Excel arrives in `dir_source`
+via the accounts data flow. Running `AccountHoldersBundle` standalone
 requires the Excel to already be staged at the expected location.
 
 This module is self-contained for its helper logic — hashing and ID
 generation live here as static methods. Shared reference data
-(``map_registryCodes`` for mapping country codes to registry names) is
-imported from :mod:`eutl_scraper.eutl.mappings` rather than duplicated.
+(`map_registryCodes` for mapping country codes to registry names) is
+imported from `eutl_scraper.eutl.mappings` rather than duplicated.
 """
 
 import hashlib
@@ -29,29 +30,29 @@ from .mappings import map_registryCodes
 
 
 class ExtractAccountHoldersPipeline(Pipeline):
-    """Extract account holders and the account-to-holder link table from the manual
-    Excel.
+    """Extract account holders and the link table from the manual Excel.
 
     Inputs:
         The PowerBI accounts Excel at
-        ``settings.fp("manual_accounts", settings.dir_source, ending="xlsx")``.
-        That file is placed there by :class:`FetchManualAccountsPipeline`
-        (in :class:`AccountsBundle`) — this pipeline does no fetch and does
-        not read from any user-supplied path directly.
+        `settings.fp("manual_accounts", settings.dir_source, ending="xlsx")`.
+        That file is placed there by `FetchManualAccountsPipeline`
+        (in `AccountsBundle`) — this pipeline does no fetch and does not
+        read from any user-supplied path directly.
 
     Product:
         Two cohesive outputs derived from one cleaning pass:
 
-        - The **account_holders** table — one row per unique account holder
-          with stable hash-based ``account_holder_id``, identifying info
-          (name, CRN, address, city, LEI), ``registry_name``, and
-          ``created_at``.
-        - The **link_account_holder** table mapping ``account_id`` to
-          ``account_holder_id`` with ``created_at``.
+        - The **account_holders** table — one row per unique account
+          holder with stable hash-based `account_holder_id`, identifying
+          info (name, CRN, address, city, LEI), `registry_name`, and
+          `created_at`.
+        - The **link_account_holder** table mapping `account_id` to
+          `account_holder_id` with `created_at`.
 
-    Output locations (both written with ``ending="parquet"``):
-        - ``settings.fp("account_holders", settings.dir_extracted, ...)``
-        - ``settings.fp("link_account_holder", settings.dir_extracted, ...)``
+    Output locations (both written with `ending="parquet"`):
+
+    - `settings.fp("account_holders", settings.dir_extracted, ...)`
+    - `settings.fp("link_account_holder", settings.dir_extracted, ...)`
     """
 
     name = "extract_account_holders"
@@ -137,15 +138,15 @@ class ExtractAccountHoldersPipeline(Pipeline):
 
     @staticmethod
     def _form_account_account_id(row: pd.Series) -> str | None:
-        """Form ``account_id`` from ``registry_id`` and ``account_identifier``.
+        """Form `account_id` from `registry_id` and `account_identifier`.
 
         Args:
-            row (pd.Series): Row of the DataFrame with ``registry_id`` and
-                ``account_identifier``.
+            row: Row of the DataFrame with `registry_id` and
+                `account_identifier`.
 
         Returns:
-            str | None: The composite ``account_id``, or the (NaN) account
-                identifier itself if it is missing.
+            The composite `account_id`, or the (NaN) account identifier
+            itself if it is missing.
         """
         if pd.isnull(row["account_identifier"]):
             return row["account_identifier"]
@@ -156,12 +157,12 @@ class ExtractAccountHoldersPipeline(Pipeline):
         """Generate a stable hash-based unique identifier for the account holder.
 
         Args:
-            row (pd.Series): A row from the holders DataFrame.
-            digits (int, optional): Number of leading hex digits to use from
-                the SHA256 hash. Defaults to ``10``.
+            row: A row from the holders DataFrame.
+            digits: Number of leading hex digits to use from the SHA256
+                hash. Defaults to `10`.
 
         Returns:
-            str: A stable hash-based unique identifier for the account holder.
+            A stable hash-based unique identifier for the account holder.
         """
         name = str(row["account_holder_name"]).strip().lower()
         raw_crn = str(row["account_holder_company_registration_number"]).strip().lower()
@@ -182,22 +183,20 @@ class AccountHoldersBundle(Bundle):
     Data flow:
 
     - **ExtractAccountHoldersPipeline**
+        - Input: `dir_source/eutl_manual_accounts.xlsx` (the PowerBI
+          Excel, placed there by `FetchManualAccountsPipeline` in
+          `AccountsBundle`, or by any prior step that staged the file at
+          this location).
+        - Outputs:
+            - `dir_extracted/eutl_link_account_holder.parquet` (mapping
+              `account_id` ↔ `account_holder_id`).
+            - `dir_extracted/eutl_account_holders.parquet` (deduplicated
+              holders with `registry_name` and `created_at`).
 
-      - Input: ``dir_source/eutl_manual_accounts.xlsx`` (the PowerBI Excel,
-        placed there by :class:`FetchManualAccountsPipeline` in
-        :class:`AccountsBundle`, or by any prior step that staged the file
-        at this location).
-      - Outputs:
-
-        - ``dir_extracted/eutl_link_account_holder.parquet`` (mapping
-          ``account_id`` ↔ ``account_holder_id``).
-        - ``dir_extracted/eutl_account_holders.parquet`` (deduplicated
-          holders with ``registry_name`` and ``created_at``).
-
-    Prerequisite: the manual Excel must already be in ``dir_source`` before
-    this bundle runs. Run :class:`AccountsBundle` first (or include both
-    bundles in :class:`EUTLBundle`) to stage it; otherwise ``load`` fails
-    loud with ``FileNotFoundError``.
+    Prerequisite: the manual Excel must already be in `dir_source` before
+    this bundle runs. Run `AccountsBundle` first (or include both bundles
+    in `EUTLBundle`) to stage it; otherwise `load` fails loud with
+    `FileNotFoundError`.
     """
 
     name = "eutl_account_holders"

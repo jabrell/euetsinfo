@@ -1,11 +1,13 @@
 """Compliance data flow.
 
-Two pipelines covering the compliance entity end-to-end:
+Three classes covering the compliance entity end-to-end:
 
-- :class:`FetchCompliancePipeline` — downloads the raw CSV from the EUTL
-  public Azure blob and writes it to ``dir_source``.
-- :class:`ExtractCompliancePipeline` — reads the raw CSV from ``dir_source``,
-  cleans and normalises it, and writes the result to ``dir_extracted``.
+- `FetchCompliancePipeline` — downloads the raw compliance CSV from the
+  EUTL public Azure blob and writes it to `dir_source`.
+- `ExtractCompliancePipeline` — reads the raw CSV from `dir_source`,
+  cleans and normalises it, and writes the result to `dir_extracted` as
+  parquet.
+- `ComplianceBundle` — flat bundle of the two pipelines above.
 """
 
 import pandas as pd
@@ -18,16 +20,16 @@ class FetchCompliancePipeline(Pipeline):
     """Download the raw EUTL compliance CSV from the EUTL public Azure blob.
 
     Inputs:
-        Remote URL: the EUTL operators-yearly-activity daily snapshot, served
-        as a gzipped CSV from the EU's public Azure blob storage.
+        Remote URL — the EUTL operators-yearly-activity daily snapshot,
+        served as a gzipped CSV from the EU's public Azure blob storage.
 
     Product:
         The raw compliance table as a single DataFrame (gzip already
-        decompressed in-flight by ``DownloadClient.download_csv``).
+        decompressed in-flight by `DownloadClient.download_csv`).
 
     Output location:
-        ``settings.fp("compliance", settings.dir_source)`` — i.e. the
-        ``eutl_compliance.csv`` file under ``dir_source``.
+        `settings.fp("compliance", settings.dir_source)` — i.e. the
+        `eutl_compliance.csv` file under `dir_source`.
     """
 
     name = "fetch_compliance"
@@ -41,11 +43,11 @@ class FetchCompliancePipeline(Pipeline):
         """Initialise the pipeline.
 
         Args:
-            settings (Settings): Configuration object used to resolve the
-                output path via ``settings.fp("compliance", dir_source)``.
-            client (DownloadClient, optional): Shared HTTP client to reuse
-                across multiple fetch pipelines. If ``None``, the pipeline
-                creates and closes its own.
+            settings: Configuration object used to resolve the output path
+                via `settings.fp("compliance", dir_source)`.
+            client: Shared HTTP client to reuse across multiple fetch
+                pipelines. If `None`, the pipeline creates and closes its
+                own.
         """
         super().__init__(settings)
         self._client = client
@@ -73,19 +75,20 @@ class ExtractCompliancePipeline(Pipeline):
     """Clean and normalise the raw EUTL compliance CSV into the published shape.
 
     Inputs:
-        Raw compliance CSV produced by :class:`FetchCompliancePipeline`, read
-        from ``settings.fp("compliance", settings.dir_source)``. The fetch
-        pipeline (or any equivalent that places this file on disk) must have
-        run first; this pipeline does no remote calls.
+        Raw compliance CSV produced by `FetchCompliancePipeline`, read
+        from `settings.fp("compliance", settings.dir_source)`. The fetch
+        pipeline (or any equivalent that places this file on disk) must
+        have run first; this pipeline does no remote calls.
 
     Product:
-        The cleaned compliance table — one row per ``(installation_id, year)``
-        with normalised column names, typed numeric fields, NA-substituted
-        sentinels, and added ``allocated_total`` / ``created_at`` columns.
+        The cleaned compliance table — one row per
+        `(installation_id, year)` with normalised column names, typed
+        numeric fields, NA-substituted sentinels, and added
+        `allocated_total` / `created_at` columns.
 
     Output location:
-        ``settings.fp("compliance", settings.dir_extracted, ending="parquet")``
-        — i.e. the ``eutl_compliance.parquet`` file under ``dir_extracted``.
+        `settings.fp("compliance", settings.dir_extracted, ending="parquet")`
+        — i.e. the `eutl_compliance.parquet` file under `dir_extracted`.
     """
 
     name = "extract_compliance"
@@ -145,10 +148,10 @@ class ExtractCompliancePipeline(Pipeline):
         """Strip whitespace from string columns.
 
         Args:
-            df (pd.DataFrame): Input DataFrame.
+            df: Input DataFrame.
 
         Returns:
-            pd.DataFrame: DataFrame with whitespace stripped from string columns.
+            DataFrame with whitespace stripped from every string column.
         """
         df = df.copy()
         str_cols = df.select_dtypes(include=["object", "string"]).columns
@@ -160,10 +163,10 @@ class ExtractCompliancePipeline(Pipeline):
         """Create unique installation IDs and normalise dtypes / sentinel values.
 
         Args:
-            df (pd.DataFrame): DataFrame containing raw compliance data.
+            df: DataFrame containing raw compliance data.
 
         Returns:
-            pd.DataFrame: DataFrame containing normalized compliance data.
+            DataFrame containing normalised compliance data.
         """
         map_col = {"REGISTRY_CODE": "registry_id"}
         df_c = (
@@ -194,15 +197,14 @@ class ExtractCompliancePipeline(Pipeline):
         """Select published columns, rename, and verify uniqueness.
 
         Args:
-            df (pd.DataFrame): DataFrame containing the compliance data after
-                normalization.
+            df: DataFrame containing the compliance data after normalisation.
 
         Returns:
-            pd.DataFrame: DataFrame containing compliance data.
+            DataFrame in the published shape.
 
         Raises:
-            ValueError: If the compliance data is not unique by installation
-                ID and year.
+            ValueError: If the compliance data is not unique by
+                installation ID and year.
         """
         if not df.set_index(["installation_id", "year"]).index.is_unique:
             raise ValueError(
@@ -215,10 +217,10 @@ class ExtractCompliancePipeline(Pipeline):
         """Add total allocation column.
 
         Args:
-            df (pd.DataFrame): DataFrame containing compliance data.
+            df: DataFrame containing compliance data.
 
         Returns:
-            pd.DataFrame: DataFrame with added ``allocated_total`` column.
+            DataFrame with an added `allocated_total` column.
         """
         return df.assign(
             allocated_total=lambda df: (
@@ -230,21 +232,18 @@ class ExtractCompliancePipeline(Pipeline):
 
 
 class ComplianceBundle(Bundle):
-    """Compliance entity end-to-end: fetch the raw CSV, then extract the cleaned table.
+    """Compliance entity end-to-end: fetch the raw CSV, then extract.
 
     Data flow:
 
     - **FetchCompliancePipeline**
-
-      - Input: remote gzipped CSV from the EUTL public Azure blob.
-      - Output: ``dir_source/eutl_compliance.csv`` (gzip decompressed
-        in-flight; written as plain CSV).
-
+        - Input: remote gzipped CSV from the EUTL public Azure blob.
+        - Output: `dir_source/eutl_compliance.csv` (gzip decompressed
+          in-flight; written as plain CSV).
     - **ExtractCompliancePipeline**
-
-      - Input: ``dir_source/eutl_compliance.csv``.
-      - Output: ``dir_extracted/eutl_compliance.parquet`` (cleaned
-        compliance table).
+        - Input: `dir_source/eutl_compliance.csv`.
+        - Output: `dir_extracted/eutl_compliance.parquet` (cleaned
+          compliance table).
 
     Run this bundle on its own to produce the published compliance table
     without touching any other EUTL entity.

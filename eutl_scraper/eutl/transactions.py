@@ -2,19 +2,19 @@
 
 Three classes covering the transactions entity end-to-end:
 
-- :class:`FetchTransactionsPipeline` — downloads the ZIP archive from the
+- `FetchTransactionsPipeline` — downloads the ZIP archive from the
   European Commission, opens it in memory, and persists the inner
-  transactions CSV to ``dir_source``.
-- :class:`ExtractTransactionsPipeline` — reads the raw transactions CSV from
-  ``dir_source``, cleans it, and emits two outputs to ``dir_extracted``: the
-  cleaned transactions table and a derived projects table (both produced in
-  a single cleaning pass).
-- :class:`TransactionsBundle` — flat bundle of the two pipelines above.
+  transactions CSV to `dir_source`.
+- `ExtractTransactionsPipeline` — reads the raw transactions CSV from
+  `dir_source`, cleans it, and emits two parquet outputs to
+  `dir_extracted`: the cleaned transactions table and a derived projects
+  table (both produced in a single cleaning pass).
+- `TransactionsBundle` — flat bundle of the two pipelines above.
 
-This module is self-contained for its helper logic — cleaning helpers live
-here as static methods. Shared reference data
-(``map_registryCode_inv`` for mapping registry names to country codes) is
-imported from :mod:`eutl_scraper.eutl.mappings` rather than duplicated.
+This module is self-contained for its helper logic — cleaning helpers
+live here as static methods. Shared reference data
+(`map_registryCode_inv` for mapping registry names to country codes) is
+imported from `eutl_scraper.eutl.mappings` rather than duplicated.
 """
 
 import io
@@ -34,15 +34,15 @@ class FetchTransactionsPipeline(Pipeline):
     Inputs:
         Remote ZIP archive served by the European Commission's climate
         document portal. The archive contains a CSV whose filename starts
-        with ``transactions_EUTL_PUBLIC_NOTESD``.
+        with `transactions_EUTL_PUBLIC_NOTESD`.
 
     Product:
         The raw transactions table as a single DataFrame (read from the
         ZIP-embedded CSV).
 
     Output location:
-        ``settings.fp("transactions", settings.dir_source)`` — i.e. the
-        ``eutl_transactions.csv`` file under ``dir_source``.
+        `settings.fp("transactions", settings.dir_source)` — i.e. the
+        `eutl_transactions.csv` file under `dir_source`.
     """
 
     name = "fetch_transactions"
@@ -57,11 +57,11 @@ class FetchTransactionsPipeline(Pipeline):
         """Initialise the pipeline.
 
         Args:
-            settings (Settings): Configuration object used to resolve the
-                output path via ``settings.fp("transactions", dir_source)``.
-            client (DownloadClient, optional): Shared HTTP client to reuse
-                across multiple fetch pipelines. If ``None``, the pipeline
-                creates and closes its own.
+            settings: Configuration object used to resolve the output path
+                via `settings.fp("transactions", dir_source)`.
+            client: Shared HTTP client to reuse across multiple fetch
+                pipelines. If `None`, the pipeline creates and closes its
+                own.
         """
         super().__init__(settings)
         self._client = client
@@ -93,23 +93,25 @@ class ExtractTransactionsPipeline(Pipeline):
     """Clean the raw transactions CSV and derive the projects table in one pass.
 
     Inputs:
-        Raw transactions CSV produced by :class:`FetchTransactionsPipeline`,
-        read from ``settings.fp("transactions", settings.dir_source)``. The
+        Raw transactions CSV produced by `FetchTransactionsPipeline`,
+        read from `settings.fp("transactions", settings.dir_source)`. The
         fetch pipeline (or any equivalent that places this file on disk)
         must have run first; this pipeline does no remote calls.
 
     Product:
         Two cohesive outputs derived from one cleaning pass:
 
-        - The cleaned **transactions** table — one row per transaction with
-          normalised IDs (account, installation, registry), typed dates and
-          project IDs, and a ``created_at`` stamp.
-        - The unique **projects** table — one row per project, with project
-          type imposed from the unit-type description and parsed expiry date.
+        - The cleaned **transactions** table — one row per transaction
+          with normalised IDs (account, installation, registry), typed
+          dates and project IDs, and a `created_at` stamp.
+        - The unique **projects** table — one row per project, with
+          project type imposed from the unit-type description and parsed
+          expiry date.
 
     Output locations:
-        - ``settings.fp("transactions", settings.dir_extracted, ending="parquet")``
-        - ``settings.fp("projects", settings.dir_extracted, ending="parquet")``
+
+    - `settings.fp("transactions", settings.dir_extracted, ending="parquet")`
+    - `settings.fp("projects", settings.dir_extracted, ending="parquet")`
     """
 
     name = "extract_transactions"
@@ -174,10 +176,10 @@ class ExtractTransactionsPipeline(Pipeline):
         """Strip whitespace from string columns.
 
         Args:
-            df (pd.DataFrame): Input DataFrame.
+            df: Input DataFrame.
 
         Returns:
-            pd.DataFrame: DataFrame with whitespace stripped from string columns.
+            DataFrame with whitespace stripped from every string column.
         """
         df = df.copy()
         str_cols = df.select_dtypes(include=["object", "string"]).columns
@@ -189,13 +191,13 @@ class ExtractTransactionsPipeline(Pipeline):
         """Map registry names to codes and create account / installation IDs.
 
         Args:
-            df (pd.DataFrame): DataFrame containing raw transaction data
-                (already whitespace-stripped).
+            df: DataFrame containing raw transaction data (already
+                whitespace-stripped).
 
         Returns:
-            pd.DataFrame: DataFrame with normalised registry IDs and unique
-                ``{prefix}_account_id`` / ``{prefix}_installation_id`` columns
-                for both the acquiring and transferring sides.
+            DataFrame with normalised registry IDs and unique
+            `{prefix}_account_id` / `{prefix}_installation_id` columns for
+            both the acquiring and transferring sides.
         """
         col_rename = {"ORIGINATING_REGISTRY": "originating_registry_id"}
         df_trans = (
@@ -240,12 +242,11 @@ class ExtractTransactionsPipeline(Pipeline):
         """Select published transaction columns and retype dates / project IDs.
 
         Args:
-            df (pd.DataFrame): DataFrame containing the transactions data
-                after normalisation.
+            df: DataFrame containing the transactions data after
+                normalisation.
 
         Returns:
-            pd.DataFrame: DataFrame containing the published transactions
-                shape.
+            DataFrame containing the published transactions shape.
         """
         return df[cls._TRANSACTION_COLUMNS].assign(
             transaction_date=lambda df: pd.to_datetime(df.transaction_date),
@@ -257,14 +258,13 @@ class ExtractTransactionsPipeline(Pipeline):
         """Extract the unique projects table from cleaned transaction data.
 
         Args:
-            df (pd.DataFrame): DataFrame containing cleaned transaction data,
-                including the columns later dropped from the published
-                transactions shape.
+            df: DataFrame containing cleaned transaction data, including
+                the columns later dropped from the published transactions
+                shape.
 
         Returns:
-            pd.DataFrame: DataFrame containing one row per project, with
-                project type imposed from the unit-type description and
-                parsed expiry date.
+            DataFrame containing one row per project, with project type
+            imposed from the unit-type description and parsed expiry date.
         """
 
         def impose_project_type(unit_type_desc: str) -> str | None:
@@ -294,26 +294,21 @@ class ExtractTransactionsPipeline(Pipeline):
 
 
 class TransactionsBundle(Bundle):
-    """Transactions entity end-to-end: fetch the ZIP and extract transactions
-    + projects.
+    """Transactions entity end-to-end: fetch ZIP + extract transactions + projects.
 
     Data flow:
 
     - **FetchTransactionsPipeline**
-
-      - Input: remote ZIP archive (EC climate document portal URL).
-      - Output: ``dir_source/eutl_transactions.csv`` (the inner CSV from the
-        ZIP, written as-is).
-
+        - Input: remote ZIP archive (EC climate document portal URL).
+        - Output: `dir_source/eutl_transactions.csv` (the inner CSV from
+          the ZIP, written as-is).
     - **ExtractTransactionsPipeline**
-
-      - Input: ``dir_source/eutl_transactions.csv``.
-      - Outputs:
-
-        - ``dir_extracted/eutl_transactions.parquet`` (cleaned
-          transactions table).
-        - ``dir_extracted/eutl_projects.parquet`` (unique projects derived
-          from the same cleaning pass).
+        - Input: `dir_source/eutl_transactions.csv`.
+        - Outputs:
+            - `dir_extracted/eutl_transactions.parquet` (cleaned
+              transactions table).
+            - `dir_extracted/eutl_projects.parquet` (unique projects
+              derived from the same cleaning pass).
 
     Run this bundle on its own to produce the published transactions and
     projects tables without touching any other EUTL entity.

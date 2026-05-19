@@ -2,11 +2,10 @@
 
 One pipeline class:
 
-- :class:`CreateETS2InstallationsPipeline` — reads the extracted compliance
-  and installations tables, finds installation_ids present in compliance
-  but absent from installations, builds stub rows tagged
-  ``ets_id="ETS2"``, and overwrites the installations parquet file with
-  the augmented table.
+- `CreateETS2InstallationsPipeline` — reads the extracted compliance and
+  installations tables, finds `installation_id`s present in compliance
+  but absent from installations, builds stub rows tagged `ets_id="ETS2"`,
+  and overwrites the installations parquet file with the augmented table.
 """
 
 import pandas as pd
@@ -19,35 +18,36 @@ class CreateETS2InstallationsPipeline(Pipeline):
     """Append ETS2-tagged stub installations inferred from compliance.
 
     Inputs:
-        Two parquet files in ``dir_extracted``:
+        Two parquet files in `dir_extracted`:
 
-        - ``settings.fp("compliance", settings.dir_extracted, ending="parquet")``
-        - ``settings.fp("installations", settings.dir_extracted, ending="parquet")``
+        - `settings.fp("compliance", settings.dir_extracted, ending="parquet")`
+        - `settings.fp("installations", settings.dir_extracted, ending="parquet")`
 
-        Both must have been produced earlier (by ``ComplianceBundle`` and
-        ``InstallationsBundle``). This pipeline does no remote calls and no
-        reads from ``dir_source``.
+        Both must have been produced earlier (by `ComplianceBundle` and
+        `InstallationsBundle`). This pipeline does no remote calls and no
+        reads from `dir_source`.
 
     Product:
         The installations table augmented with stub rows for any
-        ``installation_id`` that appears in compliance but not in
-        installations. Stubs carry only ``installation_id``,
-        ``installation_name``, ``registry_id``, ``registry_name`` (taken
-        from compliance) plus ``ets_id="ETS2"``; all other columns are NA.
-        ``created_at`` is forward-filled from the existing rows so the
+        `installation_id` that appears in compliance but not in
+        installations. Stubs carry only `installation_id`,
+        `installation_name`, `registry_id`, `registry_name` (taken from
+        compliance) plus `ets_id="ETS2"`; all other columns are NA.
+        `created_at` is forward-filled from the existing rows so the
         column type is preserved.
 
     Output location:
-        ``settings.fp("installations", settings.dir_extracted, ending="parquet")``
+        `settings.fp("installations", settings.dir_extracted, ending="parquet")`
         — overwrites the installations file produced by
-        :class:`ExtractInstallationsPipeline`. The
-        ``link_installation_account`` table is *not* touched.
+        `ExtractInstallationsPipeline`. The `link_installation_account`
+        table is *not* touched.
 
-    Failure modes (fail loud — both raise ``ValueError``):
-        - More than ``MAX_MISSING`` (30) missing installations: the legacy
-          threshold for "this is no longer ETS2 — something upstream broke."
-          Refuses to write.
-        - Duplicate ``installation_id`` in the constructed stub rows.
+    Failure modes (fail loud — both raise `ValueError`):
+
+    - More than `MAX_MISSING` (30) missing installations: the legacy
+      threshold for "this is no longer ETS2 — something upstream broke."
+      Refuses to write.
+    - Duplicate `installation_id` in the constructed stub rows.
 
     No-op:
         Zero missing installations is allowed and is a clean no-op — the

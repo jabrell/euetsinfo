@@ -2,10 +2,10 @@
 
 One pipeline class:
 
-- :class:`AddMissingAccountsFromTransactionsPipeline` — reads the raw
+- `AddMissingAccountsFromTransactionsPipeline` — reads the raw
   transactions CSV and the extracted accounts parquet, derives unique
-  transaction parties, finds account_ids absent from the accounts table,
-  and overwrites the accounts parquet with the augmented table.
+  transaction parties, finds `account_id`s absent from the accounts
+  table, and overwrites the accounts parquet with the augmented table.
 """
 
 import pandas as pd
@@ -16,40 +16,42 @@ from eutl_scraper.pipeline import Pipeline
 
 
 class AddMissingAccountsFromTransactionsPipeline(Pipeline):
-    """Append stub accounts for any party seen in transactions but absent from accounts.
+    """Append stub accounts for parties seen in transactions but absent from accounts.
 
     Inputs:
-        - Raw transactions CSV at
-          ``settings.fp("transactions", settings.dir_source)`` — uppercase
-          per-side party columns (``ACQUIRING_ACCOUNT_NAME`` /
-          ``TRANSFERRING_ACCOUNT_NAME``, ``*_ACCOUNT_OPEN_DT``,
-          ``*_ACCOUNT_TYPE2``, holder fields, …) needed for stub detail
-          that ``ExtractTransactionsPipeline`` does not preserve.
-        - Extracted accounts parquet at
-          ``settings.fp("accounts", settings.dir_extracted, ending="parquet")``.
+
+    - Raw transactions CSV at
+      `settings.fp("transactions", settings.dir_source)` — uppercase
+      per-side party columns (`ACQUIRING_ACCOUNT_NAME` /
+      `TRANSFERRING_ACCOUNT_NAME`, `*_ACCOUNT_OPEN_DT`,
+      `*_ACCOUNT_TYPE2`, holder fields, …) needed for stub detail that
+      `ExtractTransactionsPipeline` does not preserve.
+    - Extracted accounts parquet at
+      `settings.fp("accounts", settings.dir_extracted, ending="parquet")`.
 
     Product:
         The accounts table with one stub row appended per missing
-        ``account_id``. Stubs carry ``accountName`` (defaulted to
-        ``"NotKnown"`` if NA on the transaction side), ``openingDate``,
-        ``closingDate``, ``account_id``, ``account_type`` (last
-        ``-``-separated token of ``account_type2``), ``isClosurePending=NA``,
-        and ``snapshotDate`` / ``created_at`` copied from the existing
-        accounts (assumes single-valued — same assumption as legacy).
+        `account_id`. Stubs carry `accountName` (defaulted to
+        `"NotKnown"` if NA on the transaction side), `openingDate`,
+        `closingDate`, `account_id`, `account_type` (last `-`-separated
+        token of `account_type2`), `isClosurePending=NA`, and
+        `snapshotDate` / `created_at` copied from the existing accounts
+        (assumes single-valued — same assumption as legacy).
 
     Output location:
-        ``settings.fp("accounts", settings.dir_extracted, ending="parquet")``
-        — overwrites the file produced by ``ExtractAccountsPipeline``.
+        `settings.fp("accounts", settings.dir_extracted, ending="parquet")`
+        — overwrites the file produced by `ExtractAccountsPipeline`.
 
-    Failure modes (raise ``ValueError``):
-        - Derived ``account_id`` not unique across constructed transaction
-          parties.
-        - Existing ``snapshotDate`` or ``created_at`` not single-valued in
-          the accounts table.
+    Failure modes (raise `ValueError`):
+
+    - Derived `account_id` not unique across constructed transaction
+      parties.
+    - Existing `snapshotDate` or `created_at` not single-valued in the
+      accounts table.
 
     No-op:
-        Zero missing accounts is a clean no-op — the existing accounts file
-        is left untouched (no rewrite).
+        Zero missing accounts is a clean no-op — the existing accounts
+        file is left untouched (no rewrite).
     """
 
     name = "add_missing_accounts_from_transactions"

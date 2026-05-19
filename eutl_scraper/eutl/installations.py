@@ -2,16 +2,16 @@
 
 Three classes covering the installations entity end-to-end:
 
-- :class:`FetchInstallationsPipeline` — downloads the raw installations CSV
-  from the EUTL public Azure blob and writes it to ``dir_source``.
-- :class:`ExtractInstallationsPipeline` — reads the raw installations CSV
-  from ``dir_source``, cleans it, and emits two outputs to ``dir_extracted``:
-  the cleaned installations table and the derived installation-account link
-  table.
-- :class:`InstallationsBundle` — flat bundle of the two pipelines above.
+- `FetchInstallationsPipeline` — downloads the raw installations CSV from
+  the EUTL public Azure blob and writes it to `dir_source`.
+- `ExtractInstallationsPipeline` — reads the raw installations CSV from
+  `dir_source`, cleans it, and emits two parquet outputs to
+  `dir_extracted`: the cleaned installations table and the derived
+  installation-account link table.
+- `InstallationsBundle` — flat bundle of the two pipelines above.
 
-This module is self-contained for its helper logic — cleaning helpers live
-here as static methods on :class:`ExtractInstallationsPipeline`.
+This module is self-contained for its helper logic — cleaning helpers
+live here as static methods on `ExtractInstallationsPipeline`.
 """
 
 import pandas as pd
@@ -24,16 +24,16 @@ class FetchInstallationsPipeline(Pipeline):
     """Download the raw EUTL installations CSV from the EUTL public Azure blob.
 
     Inputs:
-        Remote URL: the EUTL operators daily snapshot, served as a gzipped
-        CSV from the EU's public Azure blob storage.
+        Remote URL — the EUTL operators daily snapshot, served as a
+        gzipped CSV from the EU's public Azure blob storage.
 
     Product:
         The raw installations table as a single DataFrame (gzip already
-        decompressed in-flight by ``DownloadClient.download_csv``).
+        decompressed in-flight by `DownloadClient.download_csv`).
 
     Output location:
-        ``settings.fp("installations", settings.dir_source)`` — i.e. the
-        ``eutl_installations.csv`` file under ``dir_source``.
+        `settings.fp("installations", settings.dir_source)` — i.e. the
+        `eutl_installations.csv` file under `dir_source`.
     """
 
     name = "fetch_installations"
@@ -46,11 +46,11 @@ class FetchInstallationsPipeline(Pipeline):
         """Initialise the pipeline.
 
         Args:
-            settings (Settings): Configuration object used to resolve the
-                output path via ``settings.fp("installations", dir_source)``.
-            client (DownloadClient, optional): Shared HTTP client to reuse
-                across multiple fetch pipelines. If ``None``, the pipeline
-                creates and closes its own.
+            settings: Configuration object used to resolve the output path
+                via `settings.fp("installations", dir_source)`.
+            client: Shared HTTP client to reuse across multiple fetch
+                pipelines. If `None`, the pipeline creates and closes its
+                own.
         """
         super().__init__(settings)
         self._client = client
@@ -75,26 +75,28 @@ class FetchInstallationsPipeline(Pipeline):
 
 
 class ExtractInstallationsPipeline(Pipeline):
-    """Clean the raw installations CSV and derive the installation-account link table.
+    """Clean the raw installations CSV and derive the link table.
 
     Inputs:
-        Raw installations CSV produced by :class:`FetchInstallationsPipeline`,
-        read from ``settings.fp("installations", settings.dir_source)``. The
-        fetch pipeline (or any equivalent that places this file on disk)
-        must have run first; this pipeline does no remote calls.
+        Raw installations CSV produced by `FetchInstallationsPipeline`,
+        read from `settings.fp("installations", settings.dir_source)`.
+        The fetch pipeline (or any equivalent that places this file on
+        disk) must have run first; this pipeline does no remote calls.
 
     Product:
         Two cohesive outputs derived from one cleaning pass:
 
         - The cleaned **installations** table — one row per installation
-          with composite ``installation_id``, registry IDs, activity
-          metadata, address, and snapshot / ``created_at`` stamps.
-        - The **link_installation_account** table mapping ``installation_id``
-          to ``account_id`` with the snapshot / ``created_at`` stamps.
+          with composite `installation_id`, registry IDs, activity
+          metadata, address, and snapshot / `created_at` stamps.
+        - The **link_installation_account** table mapping
+          `installation_id` to `account_id` with the snapshot /
+          `created_at` stamps.
 
-    Output locations (both written with ``ending="parquet"``):
-        - ``settings.fp("installations", settings.dir_extracted, ...)``
-        - ``settings.fp("link_installation_account", settings.dir_extracted, ...)``
+    Output locations (both written with `ending="parquet"`):
+
+    - `settings.fp("installations", settings.dir_extracted, ...)`
+    - `settings.fp("link_installation_account", settings.dir_extracted, ...)`
     """
 
     name = "extract_installations"
@@ -158,10 +160,10 @@ class ExtractInstallationsPipeline(Pipeline):
         """Strip whitespace from string columns.
 
         Args:
-            df (pd.DataFrame): Input DataFrame.
+            df: Input DataFrame.
 
         Returns:
-            pd.DataFrame: DataFrame with whitespace stripped from string columns.
+            DataFrame with whitespace stripped from every string column.
         """
         df = df.copy()
         str_cols = df.select_dtypes(include=["object", "string"]).columns
@@ -173,13 +175,12 @@ class ExtractInstallationsPipeline(Pipeline):
         """Create installation / account IDs and normalise dtypes.
 
         Args:
-            df (pd.DataFrame): DataFrame containing raw installation data
-                (already whitespace-stripped).
+            df: DataFrame containing raw installation data (already
+                whitespace-stripped).
 
         Returns:
-            pd.DataFrame: DataFrame with composite ``installation_id`` and
-                ``account_id`` columns, ``ets_id``, and a parsed
-                ``snapshot_date``.
+            DataFrame with composite `installation_id` and `account_id`
+            columns, `ets_id`, and a parsed `snapshot_date`.
         """
         map_col = {"REGISTRY_CODE": "registry_id"}
         return (
@@ -203,12 +204,10 @@ class ExtractInstallationsPipeline(Pipeline):
         """Select published installation columns and verify ID validity.
 
         Args:
-            df (pd.DataFrame): DataFrame containing installation data after
-                normalisation.
+            df: DataFrame containing installation data after normalisation.
 
         Returns:
-            pd.DataFrame: DataFrame containing the published installation
-                columns.
+            DataFrame containing the published installation columns.
 
         Raises:
             ValueError: If installation IDs are not unique, or if any
@@ -222,30 +221,25 @@ class ExtractInstallationsPipeline(Pipeline):
 
 
 class InstallationsBundle(Bundle):
-    """Installations entity end-to-end: fetch the Azure CSV, extract installations
-    + link table.
+    """Installations entity end-to-end: fetch + extract installations + link table.
 
     Data flow:
 
     - **FetchInstallationsPipeline**
-
-      - Input: remote gzipped CSV from the EUTL public Azure blob.
-      - Output: ``dir_source/eutl_installations.csv`` (gzip decompressed
-        in-flight; written as plain CSV).
-
+        - Input: remote gzipped CSV from the EUTL public Azure blob.
+        - Output: `dir_source/eutl_installations.csv` (gzip decompressed
+          in-flight; written as plain CSV).
     - **ExtractInstallationsPipeline**
+        - Input: `dir_source/eutl_installations.csv`.
+        - Outputs:
+            - `dir_extracted/eutl_installations.parquet` (cleaned
+              installations table).
+            - `dir_extracted/eutl_link_installation_account.parquet`
+              (link table mapping `installation_id` to `account_id`).
 
-      - Input: ``dir_source/eutl_installations.csv``.
-      - Outputs:
-
-        - ``dir_extracted/eutl_installations.parquet`` (cleaned
-          installations table).
-        - ``dir_extracted/eutl_link_installation_account.parquet`` (link
-          table mapping ``installation_id`` to ``account_id``).
-
-    Run this bundle on its own to produce the published installations table
-    and the installation-account link table without touching any other EUTL
-    entity.
+    Run this bundle on its own to produce the published installations
+    table and the installation-account link table without touching any
+    other EUTL entity.
     """
 
     name = "eutl_installations"

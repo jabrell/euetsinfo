@@ -2,20 +2,20 @@
 
 Four classes covering the accounts entity end-to-end:
 
-- :class:`FetchAccountsPipeline` — downloads the raw accounts CSV from the
-  EUTL public Azure blob and writes it to ``dir_source``.
-- :class:`FetchManualAccountsPipeline` — byte-copies the user-supplied
-  PowerBI accounts Excel from ``dir_manual`` to ``dir_source`` so downstream
-  pipelines (today: none; future: account-holders extract) can find it via
-  the standard ``settings.fp(...)`` path.
-- :class:`ExtractAccountsPipeline` — reads the raw accounts CSV from
-  ``dir_source``, cleans and normalises it, and writes the result to
-  ``dir_extracted``.
-- :class:`AccountsBundle` — flat bundle of the three pipelines above.
+- `FetchAccountsPipeline` — downloads the raw accounts CSV from the EUTL
+  public Azure blob and writes it to `dir_source`.
+- `FetchManualAccountsPipeline` — byte-copies the user-supplied PowerBI
+  accounts Excel from the user's manual-files path into `dir_source` so
+  downstream pipelines (today: none; future: account-holders extract) can
+  find it via the standard `settings.fp(...)` path.
+- `ExtractAccountsPipeline` — reads the raw accounts CSV from
+  `dir_source`, cleans and normalises it, and writes the result to
+  `dir_extracted` as parquet.
+- `AccountsBundle` — flat bundle of the three pipelines above.
 
-This module is self-contained for its helper logic — cleaning helpers live
-here as static methods on :class:`ExtractAccountsPipeline`, not imported from
-elsewhere.
+This module is self-contained for its helper logic — cleaning helpers
+live here as static methods on `ExtractAccountsPipeline`, not imported
+from elsewhere.
 """
 
 import pandas as pd
@@ -28,16 +28,16 @@ class FetchAccountsPipeline(Pipeline):
     """Download the raw EUTL accounts CSV from the EUTL public Azure blob.
 
     Inputs:
-        Remote URL: the EUTL accounts daily snapshot, served as a gzipped CSV
-        from the EU's public Azure blob storage.
+        Remote URL — the EUTL accounts daily snapshot, served as a
+        gzipped CSV from the EU's public Azure blob storage.
 
     Product:
         The raw accounts table as a single DataFrame (gzip already
-        decompressed in-flight by ``DownloadClient.download_csv``).
+        decompressed in-flight by `DownloadClient.download_csv`).
 
     Output location:
-        ``settings.fp("accounts", settings.dir_source)`` — i.e. the
-        ``eutl_accounts.csv`` file under ``dir_source``.
+        `settings.fp("accounts", settings.dir_source)` — i.e. the
+        `eutl_accounts.csv` file under `dir_source`.
     """
 
     name = "fetch_accounts"
@@ -50,11 +50,11 @@ class FetchAccountsPipeline(Pipeline):
         """Initialise the pipeline.
 
         Args:
-            settings (Settings): Configuration object used to resolve the
-                output path via ``settings.fp("accounts", dir_source)``.
-            client (DownloadClient, optional): Shared HTTP client to reuse
-                across multiple fetch pipelines. If ``None``, the pipeline
-                creates and closes its own.
+            settings: Configuration object used to resolve the output path
+                via `settings.fp("accounts", dir_source)`.
+            client: Shared HTTP client to reuse across multiple fetch
+                pipelines. If `None`, the pipeline creates and closes its
+                own.
         """
         super().__init__(settings)
         self._client = client
@@ -79,21 +79,21 @@ class FetchAccountsPipeline(Pipeline):
 
 
 class FetchManualAccountsPipeline(Pipeline):
-    """Copy the user-supplied PowerBI accounts Excel into dir_source.
+    """Copy the user-supplied PowerBI accounts Excel into `dir_source`.
 
     Inputs:
         A user-placed Excel file. The path is supplied by the user via
-        ``Settings(manual_files={"manual_accounts": Path(...)})`` and looked
-        up here through ``settings.fp_manual("manual_accounts")``. The file
+        `Settings(manual_files={"manual_accounts": Path(...)})` and looked
+        up here through `settings.fp_manual("manual_accounts")`. The file
         is not modified or parsed in this pipeline — it is moved verbatim
-        into ``dir_source`` so it can be picked up by downstream extract
-        pipelines using the standard ``settings.fp(...)`` lookup.
+        into `dir_source` so it can be picked up by downstream extract
+        pipelines using the standard `settings.fp(...)` lookup.
 
     Product:
         The raw Excel bytes, untouched.
 
     Output location:
-        ``settings.fp("manual_accounts", settings.dir_source, ending="xlsx")``.
+        `settings.fp("manual_accounts", settings.dir_source, ending="xlsx")`.
     """
 
     name = "fetch_manual_accounts"
@@ -116,20 +116,20 @@ class ExtractAccountsPipeline(Pipeline):
     """Clean and normalise the raw EUTL accounts CSV into the published shape.
 
     Inputs:
-        Raw accounts CSV produced by :class:`FetchAccountsPipeline`, read
-        from ``settings.fp("accounts", settings.dir_source)``. The fetch
-        pipeline (or any equivalent that places this file on disk) must have
-        run first; this pipeline does no remote calls.
+        Raw accounts CSV produced by `FetchAccountsPipeline`, read from
+        `settings.fp("accounts", settings.dir_source)`. The fetch pipeline
+        (or any equivalent that places this file on disk) must have run
+        first; this pipeline does no remote calls.
 
     Product:
-        The cleaned accounts table — composite ``account_id`` from registry
+        The cleaned accounts table — composite `account_id` from registry
         code and account identifier, renamed columns, unified
-        ``account_type`` (combining ``ETS_ACCOUNT_TYPE`` and ``FULL_TYPE``),
-        boolean ``isClosurePending``, and a ``created_at`` stamp.
+        `account_type` (combining `ETS_ACCOUNT_TYPE` and `FULL_TYPE`),
+        boolean `isClosurePending`, and a `created_at` stamp.
 
     Output location:
-        ``settings.fp("accounts", settings.dir_extracted, ending="parquet")``
-        — i.e. the ``eutl_accounts.parquet`` file under ``dir_extracted``.
+        `settings.fp("accounts", settings.dir_extracted, ending="parquet")`
+        — i.e. the `eutl_accounts.parquet` file under `dir_extracted`.
     """
 
     name = "extract_accounts"
@@ -166,10 +166,10 @@ class ExtractAccountsPipeline(Pipeline):
         """Strip whitespace from string columns.
 
         Args:
-            df (pd.DataFrame): Input DataFrame.
+            df: Input DataFrame.
 
         Returns:
-            pd.DataFrame: DataFrame with whitespace stripped from string columns.
+            DataFrame with whitespace stripped from every string column.
         """
         df = df.copy()
         str_cols = df.select_dtypes(include=["object", "string"]).columns
@@ -181,11 +181,11 @@ class ExtractAccountsPipeline(Pipeline):
         """Create unique account IDs from registry code and account identifier.
 
         Args:
-            df (pd.DataFrame): DataFrame containing raw accounts data
-                (already whitespace-stripped).
+            df: DataFrame containing raw accounts data (already
+                whitespace-stripped).
 
         Returns:
-            pd.DataFrame: DataFrame with an added ``account_id`` column.
+            DataFrame with an added `account_id` column.
         """
         return df.assign(
             account_id=lambda df: (
@@ -198,12 +198,10 @@ class ExtractAccountsPipeline(Pipeline):
         """Rename columns, unify account type, and convert closure flag to boolean.
 
         Args:
-            df (pd.DataFrame): DataFrame containing accounts data after
-                ID creation.
+            df: DataFrame containing accounts data after ID creation.
 
         Returns:
-            pd.DataFrame: DataFrame containing accounts in the published
-                shape.
+            DataFrame containing accounts in the published shape.
         """
         df_accounts = df.rename(columns=cls._COLUMN_MAP).drop(
             columns=["REGISTRY_NAME", "ACCOUNT_IDENTIFIER", "REGISTRY_CODE"]
@@ -225,27 +223,22 @@ class AccountsBundle(Bundle):
     Data flow:
 
     - **FetchAccountsPipeline**
-
-      - Input: remote gzipped CSV from the EUTL public Azure blob.
-      - Output: ``dir_source/eutl_accounts.csv`` (gzip decompressed
-        in-flight; written as plain CSV).
-
+        - Input: remote gzipped CSV from the EUTL public Azure blob.
+        - Output: `dir_source/eutl_accounts.csv` (gzip decompressed
+          in-flight; written as plain CSV).
     - **FetchManualAccountsPipeline**
-
-      - Input: user-supplied PowerBI Excel at
-        ``settings.fp_manual("manual_accounts")`` (path registered by the
-        user via ``Settings(manual_files=...)``).
-      - Output: ``dir_source/eutl_manual_accounts.xlsx`` (byte-for-byte
-        copy under the stable internal name).
-      - Fails loud with ``KeyError`` if no ``"manual_accounts"`` entry is
-        in ``Settings.manual_files``, or ``FileNotFoundError`` if the path
-        does not exist.
-
+        - Input: user-supplied PowerBI Excel at
+          `settings.fp_manual("manual_accounts")` (path registered by the
+          user via `Settings(manual_files=...)`).
+        - Output: `dir_source/eutl_manual_accounts.xlsx` (byte-for-byte
+          copy under the stable internal name).
+        - Fails loud with `KeyError` if no `"manual_accounts"` entry is
+          in `Settings.manual_files`, or `FileNotFoundError` if the path
+          does not exist.
     - **ExtractAccountsPipeline**
-
-      - Input: ``dir_source/eutl_accounts.csv``.
-      - Output: ``dir_extracted/eutl_accounts.parquet`` (cleaned accounts
-        table).
+        - Input: `dir_source/eutl_accounts.csv`.
+        - Output: `dir_extracted/eutl_accounts.parquet` (cleaned accounts
+          table).
 
     Run this bundle on its own to produce the published accounts table and
     stage the manual Excel for downstream account-holders extraction.

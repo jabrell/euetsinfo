@@ -2,18 +2,18 @@
 
 Orchestrates the existing sibling modules in this package:
 
-- :mod:`.download` — scrape EEX, locate URLs, stream files to disk.
-- :mod:`.extraction` — read XLSX / ZIP artefacts off disk.
-- :mod:`.parsing` — clean, harmonise, type-cast.
+- `.download` — scrape EEX, locate URLs, stream files to disk.
+- `.extraction` — read XLSX / ZIP artefacts off disk.
+- `.parsing` — clean, harmonise, type-cast.
 
 Three classes:
 
-- :class:`FetchEEXAuctionsPipeline` — remote → ``dir_source`` (XLSX and
-  optionally the multi-year history ZIP).
-- :class:`ExtractEEXAuctionsPipeline` — ``dir_source`` (XLSX, optionally
-  ZIP) → ``dir_extracted`` (parquet).
-- :class:`EEXAuctionsBundle` — flat bundle of the two above, with one
-  source-level knob, ``download_history``.
+- `FetchEEXAuctionsPipeline` — remote → `dir_source` (XLSX and optionally
+  the multi-year history ZIP).
+- `ExtractEEXAuctionsPipeline` — `dir_source` (XLSX, optionally ZIP) →
+  `dir_extracted` (parquet).
+- `EEXAuctionsBundle` — flat bundle of the two above, with one
+  source-level knob, `download_history`.
 """
 
 import pandas as pd
@@ -30,24 +30,26 @@ class FetchEEXAuctionsPipeline(Pipeline):
     """Scrape EEX and download today's XLSX (and optionally the history ZIP).
 
     Inputs:
-        The EEX market-data HTML page at ``EEX_URL`` plus the XLSX
-        (always) and ZIP (when ``download_history=True``) it links to.
+        The EEX market-data HTML page at `EEX_URL` plus the XLSX (always)
+        and ZIP (when `download_history=True`) it links to.
 
     Product:
         The raw EEX artefact(s) on disk, untouched. The current-year XLSX
         is always produced; the multi-year ZIP only when
-        ``download_history`` is ``True``. Transform is identity.
+        `download_history` is `True`. Transform is identity.
 
     Output locations:
-        - ``settings.fp("eex_auctions", settings.dir_source, ending="xlsx")``
-        - ``settings.fp("eex_auctions", settings.dir_source, ending="zip")``
-          (only when ``download_history=True``)
+
+    - `settings.fp("eex_auctions", settings.dir_source, ending="xlsx")`
+    - `settings.fp("eex_auctions", settings.dir_source, ending="zip")`
+      (only when `download_history=True`)
 
     Failure modes:
-        - No XLSX link on the page → ``FileNotFoundError`` (raised by
-          ``find_first_xlsx_and_zip`` in load).
-        - ``download_history=True`` but no ZIP link on the page →
-          ``FileNotFoundError`` (raised in save).
+
+    - No XLSX link on the page → `FileNotFoundError` (raised by
+      `find_first_xlsx_and_zip` in load).
+    - `download_history=True` but no ZIP link on the page →
+      `FileNotFoundError` (raised in save).
     """
 
     name = "fetch_eex_auctions"
@@ -83,21 +85,22 @@ class ExtractEEXAuctionsPipeline(Pipeline):
     """Read the EEX XLSX (and ZIP if present), parse, and write a parquet.
 
     Inputs:
-        - ``settings.fp("eex_auctions", settings.dir_source, ending="xlsx")``
-          — required, must exist on disk.
-        - ``settings.fp("eex_auctions", settings.dir_source, ending="zip")``
-          — optional, concatenated with the XLSX if present.
+
+    - `settings.fp("eex_auctions", settings.dir_source, ending="xlsx")`
+      — required, must exist on disk.
+    - `settings.fp("eex_auctions", settings.dir_source, ending="zip")`
+      — optional, concatenated with the XLSX if present.
 
     Product:
-        The cleaned auction-price table: harmonised column names, exploded
-        country-level revenue breakdown, consistent dtypes, plus a
-        ``created_at`` stamp.
+        The cleaned auction-price table: harmonised column names,
+        exploded country-level revenue breakdown, consistent dtypes, plus
+        a `created_at` stamp.
 
     Output location:
-        ``settings.fp("eex_auctions", settings.dir_extracted, ending="parquet")``
+        `settings.fp("eex_auctions", settings.dir_extracted, ending="parquet")`
 
     Failure mode:
-        Raises ``ValueError`` if no artefact (neither XLSX nor ZIP) is
+        Raises `ValueError` if no artefact (neither XLSX nor ZIP) is
         present on disk to extract from.
     """
 
@@ -129,9 +132,9 @@ class EEXAuctionsBundle(Bundle):
     """EEX EUA primary-auction prices end-to-end: scrape + extract + parse.
 
     Source-level runtime config:
-        ``download_history`` — whether the Fetch pipeline also pulls the
-        multi-year historical ZIP. When ``True`` and the ZIP ends up on
-        disk, :class:`ExtractEEXAuctionsPipeline` concatenates it with the
+        `download_history` — whether the Fetch pipeline also pulls the
+        multi-year historical ZIP. When `True` and the ZIP ends up on
+        disk, `ExtractEEXAuctionsPipeline` concatenates it with the
         current-year XLSX.
     """
 
