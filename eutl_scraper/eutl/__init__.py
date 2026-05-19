@@ -3,6 +3,8 @@ functions to download, extract and normalize the EUTL dataset as provided by
 by the European Commission: https://union-registry-data.ec.europa.eu/report/welcome
 """
 
+from .bundle import EUTLBundle
+from .compliance import ExtractCompliancePipeline, FetchCompliancePipeline
 from .download import download_all
 from .extract import extract_all
 from .pipeline import EUTLPipelineSteps, pipeline_eutl
@@ -12,4 +14,7 @@ __all__ = [
     "pipeline_eutl",
     "download_all",
     "extract_all",
+    "EUTLBundle",
+    "FetchCompliancePipeline",
+    "ExtractCompliancePipeline",
 ]

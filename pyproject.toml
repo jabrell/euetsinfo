@@ -35,6 +35,7 @@ dev = [
 
 [tool.ruff]
 line-length = 88
+extend-exclude = ["main_dev*"]
 
 [tool.ruff.lint]
 # Select rules for PEP8 and import sorting
