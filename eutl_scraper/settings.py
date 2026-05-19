@@ -1,6 +1,6 @@
 import io
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import ClassVar
 
@@ -11,7 +11,79 @@ from loguru import logger
 
 @dataclass
 class Settings:
+    """Central configuration object passed to every pipeline and bundle.
+
+    ``Settings`` is the single source of truth for **where data lives**. Every
+    pipeline resolves its file paths through ``Settings`` — never by
+    constructing paths manually — so that the on-disk layout can be reorganised
+    by changing this one class.
+
+    On-disk layout
+    --------------
+    Under a single root ``dir_data``, the framework maintains two stage
+    directories that are created automatically on construction:
+
+    - ``dir_source`` (``<dir_data>/source``): raw artifacts as they arrive
+      from a remote source or as supplied by the user. Files here are
+      typically untouched copies of upstream data (gzipped CSVs that have
+      been decompressed in-flight, ZIP-embedded CSVs, byte-copied Excel
+      files, etc.). This is the **input directory for extract pipelines**.
+    - ``dir_extracted`` (``<dir_data>/extracted``): cleaned, normalised
+      tables ready for publication. This is the **output directory for
+      extract and augment pipelines** and the input directory for the
+      publication layer.
+
+    Stable internal filenames
+    -------------------------
+    The class-level ``FILENAMES`` dictionary maps an **internal key** (e.g.
+    ``"accounts"``, ``"compliance"``, ``"transactions"``) to a **stable
+    basename** (e.g. ``"eutl_accounts"``). Pipelines use these keys to refer
+    to files; the basenames never change at runtime. Renames go through
+    ``FILENAMES`` so every producer and consumer stays in sync.
+
+    Path resolution
+    ---------------
+    Two methods resolve paths from internal keys:
+
+    - :meth:`fp(key, directory, ending="csv")` — path to an automatically
+      managed file (in ``dir_source`` or ``dir_extracted``). The basename
+      is looked up in ``FILENAMES`` and joined with ``directory`` and
+      ``ending``. Use this for everything the framework writes.
+    - :meth:`fp_manual(key)` — path to a **user-supplied** file (e.g. the
+      PowerBI accounts Excel). The user provides these paths at
+      construction via the ``manual_files`` argument; this method returns
+      the registered external path.
+
+    Manual files
+    ------------
+    Some entities (today: account holders) depend on artifacts that the
+    framework cannot download automatically — the user exports them by hand
+    from a portal and saves them somewhere on their machine. The
+    ``manual_files`` dict maps the same internal key used in ``FILENAMES``
+    to the user's real external path::
+
+        Settings(
+            dir_data=Path("./data"),
+            manual_files={
+                "manual_accounts": Path("manual_data/accounts_20260412.xlsx")
+            },
+        )
+
+    A dedicated ``Fetch*ManualPipeline`` byte-copies the user-supplied file
+    into ``dir_source`` under its stable internal name, so downstream
+    extract pipelines find it via the regular :meth:`fp` lookup.
+
+    Args:
+        dir_data (Path): Root directory under which ``dir_source`` and
+            ``dir_extracted`` are managed.
+        manual_files (dict[str, Path], optional): Mapping from internal
+            ``FILENAMES`` keys to user-supplied external file paths.
+            Defaults to an empty dict. Required for bundles that include a
+            manual-fetch pipeline (e.g. :class:`AccountsBundle`).
+    """
+
     dir_data: Path
+    manual_files: dict[str, Path] = field(default_factory=dict)
 
     FILENAMES: ClassVar[dict[str, str]] = {
         "accounts": "eutl_accounts",
@@ -26,6 +98,7 @@ class Settings:
         "nace_from_leakage_lists": "nace_from_leakage_lists",
         "nace_scheme": "nace_scheme",
         "installation_locations": "installation_locations",
+        "manual_accounts": "eutl_manual_accounts",
     }
 
     def __post_init__(self):
@@ -44,6 +117,27 @@ class Settings:
     def dir_extracted(self) -> Path:
         """Directory containing the extracted datafiles"""
         return self.dir_data / "extracted"
+
+    def fp_manual(self, key: str) -> Path:
+        """Resolve the path to a user-supplied manual file by internal key.
+
+        Args:
+            key (str): Internal key (matching a ``FILENAMES`` key) identifying
+                which manual file is needed.
+
+        Returns:
+            Path: The user-supplied external path for that file.
+
+        Raises:
+            KeyError: If no path has been registered for ``key`` in
+                ``manual_files``.
+        """
+        if key not in self.manual_files:
+            raise KeyError(
+                f"No manual file configured for '{key}'. "
+                f"Provide via Settings(manual_files={{'{key}': Path(...)}})."
+            )
+        return Path(self.manual_files[key])
 
     def fp(self, key: str, directory: Path, ending: str = "csv") -> Path:
         """Get the file path for the given key and directory.

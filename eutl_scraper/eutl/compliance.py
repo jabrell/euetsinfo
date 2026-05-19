@@ -229,11 +229,19 @@ class ExtractCompliancePipeline(Pipeline):
 class ComplianceBundle(Bundle):
     """Compliance entity end-to-end: fetch the raw CSV, then extract the cleaned table.
 
-    Pipelines (in execution order):
-        1. :class:`FetchCompliancePipeline` — downloads the raw CSV into
-           ``dir_source``.
-        2. :class:`ExtractCompliancePipeline` — cleans and normalises the raw
-           CSV into ``dir_extracted``.
+    Data flow:
+
+    - **FetchCompliancePipeline**
+
+      - Input: remote gzipped CSV from the EUTL public Azure blob.
+      - Output: ``dir_source/eutl_compliance.csv`` (gzip decompressed
+        in-flight; written as plain CSV).
+
+    - **ExtractCompliancePipeline**
+
+      - Input: ``dir_source/eutl_compliance.csv``.
+      - Output: ``dir_extracted/eutl_compliance.csv`` (cleaned compliance
+        table).
 
     Run this bundle on its own to produce the published compliance table
     without touching any other EUTL entity.

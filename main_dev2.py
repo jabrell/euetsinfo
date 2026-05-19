@@ -1,5 +1,5 @@
 import os
-
+from pathlib import Path
 from dotenv import load_dotenv
 
 from eutl_scraper import Settings
@@ -7,7 +7,7 @@ from eutl_scraper.eutl import EUTLBundle
 from eutl_scraper.logger import setup_logging
 
 if __name__ == "__main__":
-    settings = Settings(dir_data="data_tmp/")
+    settings = Settings(dir_data="data_tmp/", manual_files={"manual_accounts": Path("manual_data/accounts_20260412.xlsx")})
     setup_logging("INFO")
     # extract_installations(settings=settings, save_to_disk=True)
     # create_ets2_installations(settings=settings)

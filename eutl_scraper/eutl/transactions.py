@@ -295,12 +295,23 @@ class TransactionsBundle(Bundle):
     """Transactions entity end-to-end: fetch the ZIP and extract transactions
     + projects.
 
-    Pipelines (in execution order):
-        1. :class:`FetchTransactionsPipeline` — downloads the ZIP, unzips, and
-           writes the raw transactions CSV to ``dir_source``.
-        2. :class:`ExtractTransactionsPipeline` — cleans the raw CSV and writes
-           both the published transactions table and the derived projects
-           table to ``dir_extracted``.
+    Data flow:
+
+    - **FetchTransactionsPipeline**
+
+      - Input: remote ZIP archive (EC climate document portal URL).
+      - Output: ``dir_source/eutl_transactions.csv`` (the inner CSV from the
+        ZIP, written as-is).
+
+    - **ExtractTransactionsPipeline**
+
+      - Input: ``dir_source/eutl_transactions.csv``.
+      - Outputs:
+
+        - ``dir_extracted/eutl_transactions.csv`` (cleaned transactions
+          table).
+        - ``dir_extracted/eutl_projects.csv`` (unique projects derived from
+          the same cleaning pass).
 
     Run this bundle on its own to produce the published transactions and
     projects tables without touching any other EUTL entity.
