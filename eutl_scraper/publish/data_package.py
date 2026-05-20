@@ -1,3 +1,12 @@
+"""Top-level entry point for building the Frictionless Data Package.
+
+`publish_data_package` reads every published table from
+`Settings.dir_extracted`, runs each through `prepare_table` and
+`create_resource`, and writes the resulting bundle to disk via
+`create_data_package`. Optional whole-package validation is delegated to
+the Frictionless library.
+"""
+
 from pathlib import Path
 
 import pandas as pd

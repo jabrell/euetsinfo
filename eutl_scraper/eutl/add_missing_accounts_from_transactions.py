@@ -29,7 +29,7 @@ class AddMissingAccountsFromTransactionsPipeline(Pipeline):
     - Extracted accounts parquet at
       `settings.fp("accounts", settings.dir_extracted, ending="parquet")`.
 
-    Product:
+    Output:
         The accounts table with one stub row appended per missing
         `account_id`. Stubs carry `accountName` (defaulted to
         `"NotKnown"` if NA on the transaction side), `openingDate`,

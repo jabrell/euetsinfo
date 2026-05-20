@@ -4,10 +4,10 @@ A `Pipeline` is a unit of data processing with three fixed phases
 executed in order by `Pipeline.run`:
 
 1. `load` — bring inputs into memory (remote fetch and/or local read).
-2. `transform` — turn inputs into the pipeline's product.
-3. `save` — persist the product to disk.
+2. `transform` — turn inputs into the pipeline's output.
+3. `save` — persist the output to disk.
 
-Every pipeline produces exactly one cohesive product (which may span
+Every pipeline produces exactly one cohesive output (which may span
 multiple files). The three phases are abstract; `run` is concrete and
 enforces the order, so subclasses cannot skip or reorder phases.
 """
@@ -64,7 +64,7 @@ class Pipeline(ABC):
 
     @abstractmethod
     def transform(self) -> None:
-        """Turn the loaded inputs into the pipeline's product.
+        """Turn the loaded inputs into the pipeline's output.
 
         Identity is allowed (e.g. a fetch pipeline that just persists raw
         bytes).
@@ -72,8 +72,8 @@ class Pipeline(ABC):
 
     @abstractmethod
     def save(self) -> None:
-        """Write the product to disk.
+        """Write the output to disk.
 
         May produce multiple files — the constraint is "one cohesive
-        product", not "one file".
+        output", not "one file".
         """

@@ -3,7 +3,7 @@
 Core building blocks every data flow in this project is built on:
 
 - `Pipeline` — a single `load` → `transform` → `save` unit producing one
-  cohesive product.
+  cohesive output.
 - `Bundle` — a named, flat list of `Pipeline` instances run in order; the
   source-level entry point for runtime config (API keys, manual file
   paths, knobs).

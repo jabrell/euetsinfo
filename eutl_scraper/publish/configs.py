@@ -1,3 +1,22 @@
+"""Per-table publication configurations for core EUTL entities.
+
+Each `*Config` dataclass declares everything the publication layer needs
+for one output table: the canonical name, the path to the Frictionless
+YAML schema under `schemas/`, the resource-level metadata (title,
+description, upstream sources), the raw → published column renaming, and
+the type converters / transformers applied before renaming.
+
+`BaseConfig` provides the shared structure plus a handful of helper
+factories (`_to_datetime`, `_to_nullable_int`, `_dropna_subset`,
+`_format_nace`, `_drop_duplicates_subset`) used by the concrete configs.
+`ResourceMetadata` collects the descriptive fields attached to the
+Frictionless `Resource` after preparation.
+
+The configs in this module cover the EUTL-sourced tables; auxiliary
+configs (locations, NACE, EEX auctions) live in
+`configs_additional_data`. Both are registered in `table_registry`.
+"""
+
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Callable
@@ -9,7 +28,13 @@ SCHEMA_PATH = Path(__file__).parent / "schemas"
 
 @dataclass
 class ResourceMetadata:
-    """Base class for table metadata configurations."""
+    """Descriptive metadata attached to a Frictionless `Resource`.
+
+    Mirrors the subset of Frictionless resource fields the scraper sets
+    when publishing a table: human-readable `title`, longer
+    `description`, the list of upstream `sources`, and the text
+    `encoding` of the published CSV.
+    """
 
     title: str
     description: str
@@ -19,7 +44,18 @@ class ResourceMetadata:
 
 @dataclass
 class BaseConfig:
-    """Base class for table configurations with common type conversion utilities."""
+    """Shared structure for per-table publication configurations.
+
+    Subclasses set sensible defaults for `name`, `schema_path`,
+    `resource_metadata`, `column_mapping`, and (in `__post_init__`)
+    `type_convertors` and `transformers`. They are consumed by
+    `prepare_table` (type/transformer/rename pipeline) and
+    `create_resource` (schema validation + metadata attachment).
+
+    The static helpers return callables suitable for `type_convertors`
+    (column-level) or `transformers` (DataFrame-level) so concrete
+    configs stay declarative.
+    """
 
     name: str
     schema_path: Path
@@ -66,6 +102,13 @@ class BaseConfig:
 
 @dataclass
 class InstallationsConfig(BaseConfig):
+    """Publication config for the `installations` table.
+
+    Covers the installations participating in the EU ETS. ETS2 stub rows
+    created by the augment step are included; they carry `ets_id="ETS2"`
+    and have no associated account.
+    """
+
     name: str = "installations"
     schema_path: Path = SCHEMA_PATH / "installations.yaml"
     resource_metadata: ResourceMetadata = field(
@@ -123,6 +166,12 @@ class InstallationsConfig(BaseConfig):
 
 @dataclass
 class AccountsConfig(BaseConfig):
+    """Publication config for the `accounts` table.
+
+    Covers the registry accounts in the EU ETS. Stub rows added by the
+    augment step for accounts seen only in transactions are included.
+    """
+
     name: str = "accounts"
     schema_path: Path = SCHEMA_PATH / "accounts.yaml"
     resource_metadata: ResourceMetadata = field(
@@ -165,6 +214,13 @@ class AccountsConfig(BaseConfig):
 
 @dataclass
 class AccountHoldersConfig(BaseConfig):
+    """Publication config for the `account_holders` table.
+
+    Account holders are derived from the manually-exported PowerBI
+    accounts XLSX; they are not directly available in the public EUTL
+    data feed.
+    """
+
     name: str = "account_holders"
     schema_path: Path = SCHEMA_PATH / "account_holders.yaml"
     resource_metadata: ResourceMetadata = field(
@@ -210,6 +266,13 @@ class AccountHoldersConfig(BaseConfig):
 
 @dataclass
 class ComplianceConfig(BaseConfig):
+    """Publication config for the `compliance` table.
+
+    Per-installation, per-year compliance data: allocations, verified
+    emissions, surrendered units (broken out by unit type), and
+    exclusion flags.
+    """
+
     name: str = "compliance"
     schema_path: Path = SCHEMA_PATH / "compliance.yaml"
     resource_metadata: ResourceMetadata = field(
@@ -267,6 +330,12 @@ class ComplianceConfig(BaseConfig):
 
 @dataclass
 class ProjectsConfig(BaseConfig):
+    """Publication config for the `projects` table.
+
+    CDM/JI projects that issued credits eligible for EU ETS surrender.
+    Records are derived from the transactions table during extraction.
+    """
+
     name: str = "projects"
     schema_path: Path = SCHEMA_PATH / "projects.yaml"
     resource_metadata: ResourceMetadata = field(
@@ -310,6 +379,12 @@ class ProjectsConfig(BaseConfig):
 
 @dataclass
 class TransactionsConfig(BaseConfig):
+    """Publication config for the `transactions` table.
+
+    Unit-level transactions in the EU ETS registry — transferring and
+    acquiring registries/accounts/installations, unit types, and amounts.
+    """
+
     name: str = "transactions"
     schema_path: Path = SCHEMA_PATH / "transactions.yaml"
     resource_metadata: ResourceMetadata = field(
@@ -359,6 +434,12 @@ class TransactionsConfig(BaseConfig):
 
 @dataclass
 class LinkInstallationAccountConfig(BaseConfig):
+    """Publication config for the `link_installation_account` table.
+
+    Many-to-one mapping between installations and the accounts holding
+    their allowances, snapshotted at the EUTL crawl date.
+    """
+
     name: str = "link_installation_account"
     schema_path: Path = SCHEMA_PATH / "link_installation_account.yaml"
     resource_metadata: ResourceMetadata = field(
@@ -395,6 +476,12 @@ class LinkInstallationAccountConfig(BaseConfig):
 
 @dataclass
 class LinkAccountHolderConfig(BaseConfig):
+    """Publication config for the `link_account_holder` table.
+
+    Many-to-one mapping between accounts and the account holders that
+    operate them.
+    """
+
     name: str = "link_account_holder"
     schema_path: Path = SCHEMA_PATH / "link_account_holder.yaml"
     resource_metadata: ResourceMetadata = field(

@@ -33,7 +33,7 @@ class FetchEEXAuctionsPipeline(Pipeline):
         The EEX market-data HTML page at `EEX_URL` plus the XLSX (always)
         and ZIP (when `download_history=True`) it links to.
 
-    Product:
+    Output:
         The raw EEX artefact(s) on disk, untouched. The current-year XLSX
         is always produced; the multi-year ZIP only when
         `download_history` is `True`. Transform is identity.
@@ -62,7 +62,7 @@ class FetchEEXAuctionsPipeline(Pipeline):
         self.xlsx_url, self.zip_url = find_first_xlsx_and_zip(EEX_URL)
 
     def transform(self) -> None:
-        # identity — raw downloads are the product of a Fetch Pipeline
+        # identity — raw downloads are the output of a Fetch Pipeline
         pass
 
     def save(self) -> None:
@@ -91,7 +91,7 @@ class ExtractEEXAuctionsPipeline(Pipeline):
     - `settings.fp("eex_auctions", settings.dir_source, ending="zip")`
       — optional, concatenated with the XLSX if present.
 
-    Product:
+    Output:
         The cleaned auction-price table: harmonised column names,
         exploded country-level revenue breakdown, consistent dtypes, plus
         a `created_at` stamp.

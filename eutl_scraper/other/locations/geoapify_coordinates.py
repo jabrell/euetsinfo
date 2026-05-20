@@ -121,8 +121,10 @@ def geocode_address(
 
 
 def get_installation_coordinates_geoapify(
-    df_installations, api_key, rate_limit_seconds=1
-):
+    df_installations: pd.DataFrame,
+    api_key: str,
+    rate_limit_seconds: float = 1,
+) -> pd.DataFrame:
     """Gets installation coordinates using geoapify api
 
     Args:

@@ -19,9 +19,6 @@ def extract_nace_by_installation(
     """Parse leakage lists and extract NACE classifications
 
     Args:
-        fn_out (str | Path): output file name
-            If none is provided, the data frame is not saved to disk.
-            Default is None.
         fn_leakage_2015 (Path): path to 2015 leakage list
         fn_leakage_2020 (Path): path to 2020 leakage list
         df_nace_codes (pd.DataFrame): DataFrame containing NACE classification
@@ -115,7 +112,7 @@ def extract_leakage_2020(
     """Parse 2020 leakage list
 
     Args:
-        fn_leakage (str): path to 2020 leakage list
+        fn_leakage_2020 (str): path to 2020 leakage list
         fn_out (str | None): output file name
             If none is provided, the data frame is not saved to disk.
             Default is None.

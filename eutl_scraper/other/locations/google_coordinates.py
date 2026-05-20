@@ -68,7 +68,7 @@ def get_installation_coordinates_google(
     """Gets installation coordinates using googlemaps api
 
     Args:
-        df_in (pd.DataFrame): dataframe with installation data
+        df_installations (pd.DataFrame): dataframe with installation data
         api_key (str): google api key
         rate_limit_seconds (float, optional): delay between api calls to respect
             rate limits. Not applicable for googlemaps, but included for consistency

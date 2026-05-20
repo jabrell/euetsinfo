@@ -1,3 +1,15 @@
+"""Publication configurations for non-EUTL auxiliary tables.
+
+These tables are produced by bundles outside `EUTLBundle`:
+
+- `InstallationLocations` — coordinates from `InstallationLocationsBundle`.
+- `NaceMappings` — NACE codes from `NaceFromLeakageListsBundle`.
+- `EEXAuctions` — EUA primary auction results from `EEXAuctionsBundle`.
+
+They share the `BaseConfig` structure defined in `configs` and are
+registered alongside the EUTL configs in `table_registry`.
+"""
+
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -6,6 +18,12 @@ from .configs import SCHEMA_PATH, BaseConfig, ResourceMetadata
 
 @dataclass
 class InstallationLocations(BaseConfig):
+    """Publication config for the `installation_locations` table.
+
+    Geocoded latitude/longitude for installations. Rows with missing
+    coordinates are dropped by the configured transformer.
+    """
+
     name: str = "installation_locations"
     schema_path: Path = SCHEMA_PATH / "installation_locations.yaml"
     resource_metadata: ResourceMetadata = field(
@@ -52,6 +70,13 @@ class InstallationLocations(BaseConfig):
 
 @dataclass
 class NaceMappings(BaseConfig):
+    """Publication config for the `nace_mappings` table.
+
+    Maps installations to their NACE Rev. 2 economic activity codes from
+    the 2015 and 2020 carbon leakage lists. Duplicate `installation_id`
+    rows are dropped by the configured transformer.
+    """
+
     name: str = "nace_mappings"
     schema_path: Path = SCHEMA_PATH / "nace_mappings.yaml"
     resource_metadata: ResourceMetadata = field(
@@ -92,6 +117,13 @@ class NaceMappings(BaseConfig):
 
 @dataclass
 class EEXAuctions(BaseConfig):
+    """Publication config for the `eex_auctions` table.
+
+    EUA primary auction results from the European Energy Exchange:
+    auction-level prices, volumes, bidder statistics, and per-country
+    revenue allocations.
+    """
+
     name: str = "eex_auctions"
     schema_path: Path = SCHEMA_PATH / "eex_auctions.yaml"
     resource_metadata: ResourceMetadata = field(

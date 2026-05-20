@@ -36,7 +36,7 @@ class FetchTransactionsPipeline(Pipeline):
         document portal. The archive contains a CSV whose filename starts
         with `transactions_EUTL_PUBLIC_NOTESD`.
 
-    Product:
+    Output:
         The raw transactions table as a single DataFrame (read from the
         ZIP-embedded CSV).
 
@@ -98,7 +98,7 @@ class ExtractTransactionsPipeline(Pipeline):
         fetch pipeline (or any equivalent that places this file on disk)
         must have run first; this pipeline does no remote calls.
 
-    Product:
+    Output:
         Two cohesive outputs derived from one cleaning pass:
 
         - The cleaned **transactions** table — one row per transaction

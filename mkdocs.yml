@@ -46,3 +46,15 @@ nav:
     - Overview: data_processing.md
     - Accounts and Account Holders: account_processing.md
     - Carbon prices: carbon_price_data_collecting.md
+  - Architecture:
+    - Overview: architecture/index.md
+    - Settings and paths: architecture/settings.md
+    - Publishing: architecture/publishing.md
+    - Onboarding new data: architecture/onboarding.md
+  - API Reference:
+    - Core abstractions: api/pipeline.md
+    - Top-level bundles: api/bundles.md
+    - EUTL pipelines: api/eutl.md
+    - Auxiliary pipelines: api/other.md
+    - Settings: api/settings.md
+    - Publishing: api/publish.md

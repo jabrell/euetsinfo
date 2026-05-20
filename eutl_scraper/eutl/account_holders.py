@@ -39,7 +39,7 @@ class ExtractAccountHoldersPipeline(Pipeline):
         (in `AccountsBundle`) — this pipeline does no fetch and does not
         read from any user-supplied path directly.
 
-    Product:
+    Output:
         Two cohesive outputs derived from one cleaning pass:
 
         - The **account_holders** table — one row per unique account

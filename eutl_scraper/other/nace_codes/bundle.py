@@ -10,7 +10,7 @@ Orchestrates the existing sibling module `.nace_from_leakage_lists`:
 Two classes:
 
 - `ExtractNaceFromLeakageListsPipeline` — single pipeline producing two
-  cohesive parquet products in `dir_extracted`:
+  cohesive parquet outputs in `dir_extracted`:
   `nace_from_leakage_lists` and `nace_scheme`.
 - `NaceFromLeakageListsBundle` — flat bundle of the pipeline above, with
   one source-level knob: `drop_missing_installations`.
@@ -49,7 +49,7 @@ class ExtractNaceFromLeakageListsPipeline(Pipeline):
         parquet at
         `settings.fp("installations", settings.dir_extracted, ending="parquet")`.
 
-    Product:
+    Output:
         Two cohesive tables written to `dir_extracted`:
 
         - **nace_from_leakage_lists** — one row per installation with
@@ -65,7 +65,7 @@ class ExtractNaceFromLeakageListsPipeline(Pipeline):
     Knobs:
         `drop_missing_installations` — when `True` (default), rows whose
         `installation_id` is not present in the extracted installations
-        table are dropped from the NACE-by-installation product (with a
+        table are dropped from the NACE-by-installation output (with a
         warning). Matches the legacy default.
     """
 

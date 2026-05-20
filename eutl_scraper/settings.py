@@ -221,7 +221,7 @@ class Settings:
 
 
 class DownloadClient:
-    def __init__(self, **overrides):
+    def __init__(self, **overrides: object):
         """HTTP client for downloading data with automatic resume on connection drop.
 
         Args:
@@ -242,7 +242,7 @@ class DownloadClient:
         self._client = httpx.Client(**defaults)
 
     def download_csv(
-        self, url: str, fn_out: Path | None = None, **read_csv_kwargs
+        self, url: str, fn_out: Path | None = None, **read_csv_kwargs: object
     ) -> pd.DataFrame:
         """Download a (possibly gzipped) CSV via client and return it as a DataFrame.
 

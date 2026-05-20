@@ -66,7 +66,7 @@ class ExtractInstallationLocationsPipeline(Pipeline):
         calls *for that service* on those `installation_id`s. Required
         columns in the CSV: `installation_id`, `source`.
 
-    Product:
+    Output:
         One cohesive locations table per installation/service combination.
         Composition:
 

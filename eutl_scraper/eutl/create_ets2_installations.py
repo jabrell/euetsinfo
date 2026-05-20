@@ -27,7 +27,7 @@ class CreateETS2InstallationsPipeline(Pipeline):
         `InstallationsBundle`). This pipeline does no remote calls and no
         reads from `dir_source`.
 
-    Product:
+    Output:
         The installations table augmented with stub rows for any
         `installation_id` that appears in compliance but not in
         installations. Stubs carry only `installation_id`,

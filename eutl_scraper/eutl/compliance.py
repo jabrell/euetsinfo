@@ -23,7 +23,7 @@ class FetchCompliancePipeline(Pipeline):
         Remote URL — the EUTL operators-yearly-activity daily snapshot,
         served as a gzipped CSV from the EU's public Azure blob storage.
 
-    Product:
+    Output:
         The raw compliance table as a single DataFrame (gzip already
         decompressed in-flight by `DownloadClient.download_csv`).
 
@@ -62,7 +62,7 @@ class FetchCompliancePipeline(Pipeline):
                 client.close()
 
     def transform(self) -> None:
-        # identity: the raw CSV is the product of a fetch pipeline
+        # identity: the raw CSV is the output of a fetch pipeline
         pass
 
     def save(self) -> None:
@@ -80,7 +80,7 @@ class ExtractCompliancePipeline(Pipeline):
         pipeline (or any equivalent that places this file on disk) must
         have run first; this pipeline does no remote calls.
 
-    Product:
+    Output:
         The cleaned compliance table — one row per
         `(installation_id, year)` with normalised column names, typed
         numeric fields, NA-substituted sentinels, and added

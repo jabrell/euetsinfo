@@ -1,18 +1,33 @@
+"""Apply a table's publication config to its extracted DataFrame.
+
+`prepare_table` is the first step of `publish_data_package`: it runs the
+column-level type converters, then the DataFrame-level transformers, and
+finally applies the column renaming and selection declared by the
+config. The result is a DataFrame whose columns match the published
+Frictionless schema and is ready for `create_resource`.
+"""
+
 import pandas as pd
 
 from .configs import BaseConfig
 
 
 def prepare_table(table_config: BaseConfig, df: pd.DataFrame) -> pd.DataFrame:
-    """Use the extracted installation data to and prepare a table resource for
-    publication by renaming columns, changing data types, and adding a primary key.
+    """Prepare an extracted table for publication.
+
+    Applies, in order: the per-column `type_convertors`, the
+    DataFrame-level `transformers`, and finally the `column_mapping`
+    rename followed by selection of only the mapped (published) columns.
 
     Args:
         table_config (BaseConfig): Configuration object for the table.
-        df (pd.DataFrame): DataFrame containing the extracted installation data.
+        df (pd.DataFrame): DataFrame containing the extracted data for
+            this table.
 
     Returns:
-        pd.DataFrame: DataFrame containing the prepared installation data.
+        pd.DataFrame: DataFrame with published column names and types,
+            restricted to the columns declared in
+            `table_config.column_mapping`.
     """
     # ensure correct types
     type_convertors = table_config.type_convertors

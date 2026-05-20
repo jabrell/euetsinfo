@@ -1,3 +1,12 @@
+"""Frictionless `Resource` and `Package` construction.
+
+`create_resource` wraps a prepared DataFrame as a Frictionless
+`Resource`, attaches the resource-level metadata from the config, and
+validates the data against the YAML schema. `create_data_package`
+collects validated resources, writes them to CSV alongside the
+`datapackage.{yaml,json}` descriptors, and zips the result.
+"""
+
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from zipfile import ZipFile
@@ -43,21 +52,24 @@ def create_resource(
 
 
 def create_data_package(
-    resources: dict[str, Resource],
+    resources: list[Resource],
     fn_out: Path,
     name: str,
 ) -> Package:
-    """Create a frictionless Data Package from a list of Resources and save
-    it as a zip file.
+    """Write a list of Resources as a zipped Frictionless Data Package.
+
+    Each resource is serialised to a CSV named after its `resource.name`,
+    the package descriptor is written as both YAML and JSON, and all
+    files are zipped into `fn_out`.
 
     Args:
-        resources (dict[str, Resource]): Dictionary of Resources to include in the
-            Data Package.
-        fn_out (Path): Path to save the output zip file.
-        name (str): Name of the Data Package.
+        resources (list[Resource]): Resources to include in the Data
+            Package.
+        fn_out (Path): Path to write the output ZIP file to.
+        name (str): Name of the Data Package descriptor.
 
     Returns:
-        Package: The created Data Package object.
+        Package: The Frictionless `Package` object describing the bundle.
     """
     with TemporaryDirectory() as tmp_dir:
         tmp = Path(tmp_dir)
