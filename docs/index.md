@@ -1,10 +1,18 @@
 # EUTL Scraper v2
 
-Welcome to the EUTL Scraper v2 documentation.
+The Union Registry is the central register of the EU for installations regulated under
+the European Emission Trading system (EU ETS). The EU Transaction Log (EUTL) records the transaction
+of allowances under EU emission trading systems mainly the EU ETS but also transactions
+under the Effort Sharing Decisions (ESD) and likely under the upcoming ETS2 for
+transport and buildings.
 
-## Overview
+This repository collects data from the EUTL, cleans them, and organizes them in
+a meaningful data model. Additionally, we collect associated data including locations, links to other data including ENTSOE power plants
 
-This project provides tools for scraping and processing data from the EU Transaction Log (EUTL).
+The complete data of this package are distributed as a [frictionless](https://frictionlessdata.io/) data package.
+
+
+
 
 ## Contributing
 

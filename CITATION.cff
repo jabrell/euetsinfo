@@ -1,0 +1,20 @@
+cff-version: 1.2.0
+message: "If you use these data processing routines or the resulting EUTL dataset, please cite it using the metadata below."
+type: software
+title: "EUTL Data Fetcher and Frictionless Package"
+authors:
+  - given-names: "Jan"
+    family-names: "Abrell"
+    affiliation: "University of Basel"
+    orcid: "https://orcid.org/0000-0003-1435-0952"
+repository-code: "https://github.com/jabrell/eutl_scraper_v2"
+url: "https://github.com/jabrell/eutl_scraper_v2"
+license: Apache-2.0
+keywords:
+  - "European Emissions Trading System"
+  - "Union Registry"
+  - "European Transaction Log (EUTL)"
+  - "open-data"
+  - "frictionless-data"
+version: "1.0.0"
+date-released: "2026-05-23"
