@@ -41,11 +41,17 @@ plugins:
             show_source: true
 
 nav:
-  - Home: index.md
-  - Data Processing:
-    - Overview: data_processing.md
-    - Accounts and Account Holders: account_processing.md
-    - Carbon prices: carbon_price_data_collecting.md
+  - Home:
+    - Overview: index.md
+    - Contributing: home/contributing.md
+  # - Data Processing:
+  #   - Overview: data_processing.md
+  #   - Accounts and Account Holders: account_processing.md
+  #   - Carbon prices: carbon_price_data_collecting.md
+  - Data:
+    - Overview: data/index.md
+    - Background: data/background.md
+    - Data model: data/data_model.md
   - Architecture:
     - Overview: architecture/index.md
     - Settings and paths: architecture/settings.md
