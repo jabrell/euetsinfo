@@ -34,6 +34,11 @@ theme:
 
 plugins:
   - search
+  - gen-files:
+      scripts:
+        - scripts/gen_data_model.py
+  - literate-nav:
+      nav_file: SUMMARY.md
   - mkdocstrings:
       handlers:
         python:
@@ -51,7 +56,9 @@ nav:
   - Data:
     - Overview: data/index.md
     - Background: data/background.md
-    - Data model: data/data_model.md
+    - Data Model:
+      - Data Model: data/data_model.md
+      - Tables: data/tables/
   - Architecture:
     - Overview: architecture/index.md
     - Settings and paths: architecture/settings.md
