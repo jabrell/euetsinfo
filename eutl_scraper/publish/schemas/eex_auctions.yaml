@@ -1,309 +1,318 @@
-primaryKey:
-  - auction_name
-  - date
-missingValues:
-  - ""
-  - "NA"
-fields:
-  - name: auction_name
-    title: Auction Name
-    description: Name of the auction event.
-    type: string
-    constraints:
-      required: true
-  - name: auction_price_eur_per_tco2
-    title: Auction Price (EUR/tCO2)
-    description: Clearing price of the auction in EUR per tonne of CO2.
-    type: number
-    constraints:
-      required: true
-  - name: auction_volume_tco2
-    title: Auction Volume (tCO2)
-    description: Total volume auctioned in tonnes of CO2.
-    type: integer
-    constraints:
-      required: true
-  - name: average_bid_size
-    title: Average Bid Size
-    description: Average size of bids submitted.
-    type: number
-    constraints:
-      required: true
-  - name: average_bids_per_bidder
-    title: Average Bids per Bidder
-    description: Average number of bids submitted per bidder.
-    type: number
-    constraints:
-      required: true
-  - name: average_volume_bid_per_bidder
-    title: Average Volume Bid per Bidder
-    description: Average volume bid per bidder.
-    type: number
-    constraints:
-      required: true
-  - name: average_volume_won_per_bidder
-    title: Average Volume Won per Bidder
-    description: Average volume won per bidder.
-    type: number
-    constraints:
-      required: true
-  - name: contract
-    title: Contract
-    description: Contract type of the auction.
-    type: string
-    constraints:
-      required: true
-  - name: country
-    title: Country
-    description: Country conducting the auction.
-    type: string
-    constraints:
-      required: true
-  - name: cover_ratio
-    title: Cover Ratio
-    description: Ratio of total bids to volume auctioned.
-    type: number
-    constraints:
-      required: true
-  - name: date
-    title: Date
-    description: Date of the auction.
-    type: datetime
-    constraints:
-      required: true
-  - name: maximum_bid_eur_per_tco2
-    title: Maximum Bid (EUR/tCO2)
-    description: Highest bid price in EUR per tonne of CO2.
-    type: number
-    constraints:
-      required: true
-  - name: mean_price_eur_per_tco2
-    title: Mean Price (EUR/tCO2)
-    description: Mean bid price in EUR per tonne of CO2.
-    type: number
-    constraints:
-      required: true
-  - name: median_price_eur_per_tco2
-    title: Median Price (EUR/tCO2)
-    description: Median bid price in EUR per tonne of CO2.
-    type: number
-    constraints:
-      required: true
-  - name: minimum_bid_eur_per_tco2
-    title: Minimum Bid (EUR/tCO2)
-    description: Lowest bid price in EUR per tonne of CO2.
-    type: number
-    constraints:
-      required: true
-  - name: number_of_bids_submitted
-    title: Number of Bids Submitted
-    description: Total number of bids submitted.
-    type: integer
-    constraints:
-      required: true
-  - name: number_of_successful_bidders
-    title: Number of Successful Bidders
-    description: Number of bidders that won allowances.
-    type: integer
-    constraints:
-      required: true
-  - name: number_of_successful_bids
-    title: Number of Successful Bids
-    description: Number of bids that were successful.
-    type: integer
-    constraints:
-      required: true
-  - name: revenue_at_eur
-    title: Revenue Austria (EUR)
-    description: Auction revenue allocated to Austria.
-    type: number
-  - name: revenue_be_eur
-    title: Revenue Belgium (EUR)
-    description: Auction revenue allocated to Belgium.
-    type: number
-  - name: revenue_bg_eur
-    title: Revenue Bulgaria (EUR)
-    description: Auction revenue allocated to Bulgaria.
-    type: number
-  - name: revenue_cy_eur
-    title: Revenue Cyprus (EUR)
-    description: Auction revenue allocated to Cyprus.
-    type: number
-  - name: revenue_cz_eur
-    title: Revenue Czech Republic (EUR)
-    description: Auction revenue allocated to Czech Republic.
-    type: number
-  - name: revenue_de_eur
-    title: Revenue Germany (EUR)
-    description: Auction revenue allocated to Germany.
-    type: number
-  - name: revenue_dk_eur
-    title: Revenue Denmark (EUR)
-    description: Auction revenue allocated to Denmark.
-    type: number
-  - name: revenue_ee_eur
-    title: Revenue Estonia (EUR)
-    description: Auction revenue allocated to Estonia.
-    type: number
-  - name: revenue_el_eur
-    title: Revenue Greece (EUR)
-    description: Auction revenue allocated to Greece.
-    type: number
-  - name: revenue_es_eur
-    title: Revenue Spain (EUR)
-    description: Auction revenue allocated to Spain.
-    type: number
-  - name: revenue_fi_eur
-    title: Revenue Finland (EUR)
-    description: Auction revenue allocated to Finland.
-    type: number
-  - name: revenue_fr_eur
-    title: Revenue France (EUR)
-    description: Auction revenue allocated to France.
-    type: number
-  - name: revenue_hr_eur
-    title: Revenue Croatia (EUR)
-    description: Auction revenue allocated to Croatia.
-    type: number
-  - name: revenue_hu_eur
-    title: Revenue Hungary (EUR)
-    description: Auction revenue allocated to Hungary.
-    type: number
-  - name: revenue_ie_eur
-    title: Revenue Ireland (EUR)
-    description: Auction revenue allocated to Ireland.
-    type: number
-  - name: revenue_innovation_fund_eur
-    title: Revenue Innovation Fund (EUR)
-    description: Auction revenue allocated to the Innovation Fund.
-    type: number
-  - name: revenue_innovation_fund_rrf_eur
-    title: Revenue Innovation Fund RRF (EUR)
-    description: Auction revenue allocated to the Innovation Fund under the Recovery and Resilience Facility.
-    type: number
-  - name: revenue_is_eur
-    title: Revenue Iceland (EUR)
-    description: Auction revenue allocated to Iceland.
-    type: number
-  - name: revenue_it_eur
-    title: Revenue Italy (EUR)
-    description: Auction revenue allocated to Italy.
-    type: number
-  - name: revenue_li_eur
-    title: Revenue Liechtenstein (EUR)
-    description: Auction revenue allocated to Liechtenstein.
-    type: number
-  - name: revenue_lt_eur
-    title: Revenue Lithuania (EUR)
-    description: Auction revenue allocated to Lithuania.
-    type: number
-  - name: revenue_lu_eur
-    title: Revenue Luxembourg (EUR)
-    description: Auction revenue allocated to Luxembourg.
-    type: number
-  - name: revenue_lv_eur
-    title: Revenue Latvia (EUR)
-    description: Auction revenue allocated to Latvia.
-    type: number
-  - name: revenue_modernisation_fund_eur
-    title: Revenue Modernisation Fund (EUR)
-    description: Auction revenue allocated to the Modernisation Fund.
-    type: number
-  - name: revenue_ms_rrf_eur
-    title: Revenue Member States RRF (EUR)
-    description: Auction revenue allocated to Member States under the Recovery and Resilience Facility.
-    type: number
-  - name: revenue_mt_eur
-    title: Revenue Malta (EUR)
-    description: Auction revenue allocated to Malta.
-    type: number
-  - name: revenue_nl_eur
-    title: Revenue Netherlands (EUR)
-    description: Auction revenue allocated to the Netherlands.
-    type: number
-  - name: revenue_no_eur
-    title: Revenue Norway (EUR)
-    description: Auction revenue allocated to Norway.
-    type: number
-  - name: revenue_pl_eur
-    title: Revenue Poland (EUR)
-    description: Auction revenue allocated to Poland.
-    type: number
-  - name: revenue_pt_eur
-    title: Revenue Portugal (EUR)
-    description: Auction revenue allocated to Portugal.
-    type: number
-  - name: revenue_ro_eur
-    title: Revenue Romania (EUR)
-    description: Auction revenue allocated to Romania.
-    type: number
-  - name: revenue_se_eur
-    title: Revenue Sweden (EUR)
-    description: Auction revenue allocated to Sweden.
-    type: number
-  - name: revenue_si_eur
-    title: Revenue Slovenia (EUR)
-    description: Auction revenue allocated to Slovenia.
-    type: number
-  - name: revenue_sk_eur
-    title: Revenue Slovakia (EUR)
-    description: Auction revenue allocated to Slovakia.
-    type: number
-  - name: revenue_social_climate_fund_eur
-    title: Revenue Social Climate Fund (EUR)
-    description: Auction revenue allocated to the Social Climate Fund.
-    type: number
-  - name: standard_deviation_bid_volume_per_bidder
-    title: Std Dev Bid Volume per Bidder
-    description: Standard deviation of bid volume per bidder.
-    type: number
-    constraints:
-      required: true
-  - name: standard_deviation_volume_won_per_bidder
-    title: Std Dev Volume Won per Bidder
-    description: Standard deviation of volume won per bidder.
-    type: number
-    constraints:
-      required: true
-  - name: status
-    title: Status
-    description: Status of the auction.
-    type: string
-    constraints:
-      required: true
-  - name: time
-    title: Time
-    description: Time of the auction.
-    type: string
-    constraints:
-      required: true
-  - name: total_amount_of_bids
-    title: Total Amount of Bids
-    description: Total volume of all bids submitted.
-    type: integer
-    constraints:
-      required: true
-  - name: total_number_of_bidders
-    title: Total Number of Bidders
-    description: Total number of participating bidders.
-    type: integer
-    constraints:
-      required: true
-  - name: total_revenue_eur
-    title: Total Revenue (EUR)
-    description: Total auction revenue in EUR.
-    type: number
-    constraints:
-      required: true
-  - name: datetime
-    title: Datetime
-    description: Combined date and time of the auction.
-    type: datetime
-    constraints:
-      required: true
-  - name: created_at
-    title: Created At
-    description: Timestamp when the record was created.
-    type: datetime
-    constraints:
-      required: true
+name: eex_auctions
+title: EEX Auction Data
+description: >-
+  Data on auctions of emission allowances on the European Energy Exchange (EEX).
+sources:
+  - title: European Energy Exchange (EEX)
+    path: https://www.eex.com/en/market-data/market-data-hub/environmentals/eex-eua-primary-auction-spot-download
+
+schema:
+  primaryKey:
+    - auction_name
+    - date
+  missingValues:
+    - ""
+    - "NA"
+  fields:
+    - name: auction_name
+      title: Auction Name
+      description: Name of the auction event.
+      type: string
+      constraints:
+        required: true
+    - name: auction_price_eur_per_tco2
+      title: Auction Price (EUR/tCO2)
+      description: Clearing price of the auction in EUR per tonne of CO2.
+      type: number
+      constraints:
+        required: true
+    - name: auction_volume_tco2
+      title: Auction Volume (tCO2)
+      description: Total volume auctioned in tonnes of CO2.
+      type: integer
+      constraints:
+        required: true
+    - name: average_bid_size
+      title: Average Bid Size
+      description: Average size of bids submitted.
+      type: number
+      constraints:
+        required: true
+    - name: average_bids_per_bidder
+      title: Average Bids per Bidder
+      description: Average number of bids submitted per bidder.
+      type: number
+      constraints:
+        required: true
+    - name: average_volume_bid_per_bidder
+      title: Average Volume Bid per Bidder
+      description: Average volume bid per bidder.
+      type: number
+      constraints:
+        required: true
+    - name: average_volume_won_per_bidder
+      title: Average Volume Won per Bidder
+      description: Average volume won per bidder.
+      type: number
+      constraints:
+        required: true
+    - name: contract
+      title: Contract
+      description: Contract type of the auction.
+      type: string
+      constraints:
+        required: true
+    - name: country
+      title: Country
+      description: Country conducting the auction.
+      type: string
+      constraints:
+        required: true
+    - name: cover_ratio
+      title: Cover Ratio
+      description: Ratio of total bids to volume auctioned.
+      type: number
+      constraints:
+        required: true
+    - name: date
+      title: Date
+      description: Date of the auction.
+      type: datetime
+      constraints:
+        required: true
+    - name: maximum_bid_eur_per_tco2
+      title: Maximum Bid (EUR/tCO2)
+      description: Highest bid price in EUR per tonne of CO2.
+      type: number
+      constraints:
+        required: true
+    - name: mean_price_eur_per_tco2
+      title: Mean Price (EUR/tCO2)
+      description: Mean bid price in EUR per tonne of CO2.
+      type: number
+      constraints:
+        required: true
+    - name: median_price_eur_per_tco2
+      title: Median Price (EUR/tCO2)
+      description: Median bid price in EUR per tonne of CO2.
+      type: number
+      constraints:
+        required: true
+    - name: minimum_bid_eur_per_tco2
+      title: Minimum Bid (EUR/tCO2)
+      description: Lowest bid price in EUR per tonne of CO2.
+      type: number
+      constraints:
+        required: true
+    - name: number_of_bids_submitted
+      title: Number of Bids Submitted
+      description: Total number of bids submitted.
+      type: integer
+      constraints:
+        required: true
+    - name: number_of_successful_bidders
+      title: Number of Successful Bidders
+      description: Number of bidders that won allowances.
+      type: integer
+      constraints:
+        required: true
+    - name: number_of_successful_bids
+      title: Number of Successful Bids
+      description: Number of bids that were successful.
+      type: integer
+      constraints:
+        required: true
+    - name: revenue_at_eur
+      title: Revenue Austria (EUR)
+      description: Auction revenue allocated to Austria.
+      type: number
+    - name: revenue_be_eur
+      title: Revenue Belgium (EUR)
+      description: Auction revenue allocated to Belgium.
+      type: number
+    - name: revenue_bg_eur
+      title: Revenue Bulgaria (EUR)
+      description: Auction revenue allocated to Bulgaria.
+      type: number
+    - name: revenue_cy_eur
+      title: Revenue Cyprus (EUR)
+      description: Auction revenue allocated to Cyprus.
+      type: number
+    - name: revenue_cz_eur
+      title: Revenue Czech Republic (EUR)
+      description: Auction revenue allocated to Czech Republic.
+      type: number
+    - name: revenue_de_eur
+      title: Revenue Germany (EUR)
+      description: Auction revenue allocated to Germany.
+      type: number
+    - name: revenue_dk_eur
+      title: Revenue Denmark (EUR)
+      description: Auction revenue allocated to Denmark.
+      type: number
+    - name: revenue_ee_eur
+      title: Revenue Estonia (EUR)
+      description: Auction revenue allocated to Estonia.
+      type: number
+    - name: revenue_el_eur
+      title: Revenue Greece (EUR)
+      description: Auction revenue allocated to Greece.
+      type: number
+    - name: revenue_es_eur
+      title: Revenue Spain (EUR)
+      description: Auction revenue allocated to Spain.
+      type: number
+    - name: revenue_fi_eur
+      title: Revenue Finland (EUR)
+      description: Auction revenue allocated to Finland.
+      type: number
+    - name: revenue_fr_eur
+      title: Revenue France (EUR)
+      description: Auction revenue allocated to France.
+      type: number
+    - name: revenue_hr_eur
+      title: Revenue Croatia (EUR)
+      description: Auction revenue allocated to Croatia.
+      type: number
+    - name: revenue_hu_eur
+      title: Revenue Hungary (EUR)
+      description: Auction revenue allocated to Hungary.
+      type: number
+    - name: revenue_ie_eur
+      title: Revenue Ireland (EUR)
+      description: Auction revenue allocated to Ireland.
+      type: number
+    - name: revenue_innovation_fund_eur
+      title: Revenue Innovation Fund (EUR)
+      description: Auction revenue allocated to the Innovation Fund.
+      type: number
+    - name: revenue_innovation_fund_rrf_eur
+      title: Revenue Innovation Fund RRF (EUR)
+      description: Auction revenue allocated to the Innovation Fund under the Recovery and Resilience Facility.
+      type: number
+    - name: revenue_is_eur
+      title: Revenue Iceland (EUR)
+      description: Auction revenue allocated to Iceland.
+      type: number
+    - name: revenue_it_eur
+      title: Revenue Italy (EUR)
+      description: Auction revenue allocated to Italy.
+      type: number
+    - name: revenue_li_eur
+      title: Revenue Liechtenstein (EUR)
+      description: Auction revenue allocated to Liechtenstein.
+      type: number
+    - name: revenue_lt_eur
+      title: Revenue Lithuania (EUR)
+      description: Auction revenue allocated to Lithuania.
+      type: number
+    - name: revenue_lu_eur
+      title: Revenue Luxembourg (EUR)
+      description: Auction revenue allocated to Luxembourg.
+      type: number
+    - name: revenue_lv_eur
+      title: Revenue Latvia (EUR)
+      description: Auction revenue allocated to Latvia.
+      type: number
+    - name: revenue_modernisation_fund_eur
+      title: Revenue Modernisation Fund (EUR)
+      description: Auction revenue allocated to the Modernisation Fund.
+      type: number
+    - name: revenue_ms_rrf_eur
+      title: Revenue Member States RRF (EUR)
+      description: Auction revenue allocated to Member States under the Recovery and Resilience Facility.
+      type: number
+    - name: revenue_mt_eur
+      title: Revenue Malta (EUR)
+      description: Auction revenue allocated to Malta.
+      type: number
+    - name: revenue_nl_eur
+      title: Revenue Netherlands (EUR)
+      description: Auction revenue allocated to the Netherlands.
+      type: number
+    - name: revenue_no_eur
+      title: Revenue Norway (EUR)
+      description: Auction revenue allocated to Norway.
+      type: number
+    - name: revenue_pl_eur
+      title: Revenue Poland (EUR)
+      description: Auction revenue allocated to Poland.
+      type: number
+    - name: revenue_pt_eur
+      title: Revenue Portugal (EUR)
+      description: Auction revenue allocated to Portugal.
+      type: number
+    - name: revenue_ro_eur
+      title: Revenue Romania (EUR)
+      description: Auction revenue allocated to Romania.
+      type: number
+    - name: revenue_se_eur
+      title: Revenue Sweden (EUR)
+      description: Auction revenue allocated to Sweden.
+      type: number
+    - name: revenue_si_eur
+      title: Revenue Slovenia (EUR)
+      description: Auction revenue allocated to Slovenia.
+      type: number
+    - name: revenue_sk_eur
+      title: Revenue Slovakia (EUR)
+      description: Auction revenue allocated to Slovakia.
+      type: number
+    - name: revenue_social_climate_fund_eur
+      title: Revenue Social Climate Fund (EUR)
+      description: Auction revenue allocated to the Social Climate Fund.
+      type: number
+    - name: standard_deviation_bid_volume_per_bidder
+      title: Std Dev Bid Volume per Bidder
+      description: Standard deviation of bid volume per bidder.
+      type: number
+      constraints:
+        required: true
+    - name: standard_deviation_volume_won_per_bidder
+      title: Std Dev Volume Won per Bidder
+      description: Standard deviation of volume won per bidder.
+      type: number
+      constraints:
+        required: true
+    - name: status
+      title: Status
+      description: Status of the auction.
+      type: string
+      constraints:
+        required: true
+    - name: time
+      title: Time
+      description: Time of the auction.
+      type: datetime
+      constraints:
+        required: true
+    - name: total_amount_of_bids
+      title: Total Amount of Bids
+      description: Total volume of all bids submitted.
+      type: integer
+      constraints:
+        required: true
+    - name: total_number_of_bidders
+      title: Total Number of Bidders
+      description: Total number of participating bidders.
+      type: integer
+      constraints:
+        required: true
+    - name: total_revenue_eur
+      title: Total Revenue (EUR)
+      description: Total auction revenue in EUR.
+      type: number
+      constraints:
+        required: true
+    - name: datetime
+      title: Datetime
+      description: Combined date and time of the auction.
+      type: datetime
+      constraints:
+        required: true
+    - name: created_at
+      title: Created At
+      description: Timestamp when the record was created.
+      type: datetime
+      constraints:
+        required: true

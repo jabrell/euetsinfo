@@ -34,6 +34,11 @@ theme:
 
 plugins:
   - search
+  - gen-files:
+      scripts:
+        - scripts/gen_data_model.py
+  - literate-nav:
+      nav_file: SUMMARY.md
   - mkdocstrings:
       handlers:
         python:
@@ -41,8 +46,28 @@ plugins:
             show_source: true
 
 nav:
-  - Home: index.md
-  - Data Processing:
-    - Overview: data_processing.md
-    - Accounts and Account Holders: account_processing.md
-    - Carbon prices: carbon_price_data_collecting.md
+  - Home:
+    - Overview: index.md
+    - Contributing: home/contributing.md
+  # - Data Processing:
+  #   - Overview: data_processing.md
+  #   - Accounts and Account Holders: account_processing.md
+  #   - Carbon prices: carbon_price_data_collecting.md
+  - Data:
+    - Overview: data/index.md
+    - Background: data/background.md
+    - Data Model:
+      - Data Model: data/data_model.md
+      - Tables: data/tables/
+  - Architecture:
+    - Overview: architecture/index.md
+    - Settings and paths: architecture/settings.md
+    - Publishing: architecture/publishing.md
+    - Onboarding new data: architecture/onboarding.md
+  - API Reference:
+    - Core abstractions: api/pipeline.md
+    - Top-level bundles: api/bundles.md
+    - EUTL pipelines: api/eutl.md
+    - Auxiliary pipelines: api/other.md
+    - Settings: api/settings.md
+    - Publishing: api/publish.md

@@ -1,0 +1,6 @@
+{
+  "permissions": {
+    "allowedTools": ["Read", "Write", "Glob"],
+    "blockedTools": ["Bash(rm *)"]
+  }
+}

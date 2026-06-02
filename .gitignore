@@ -1,7 +1,10 @@
 # custom ignores
 _jab*
 *.zip
-data_tmp/
+data_tmp*/
+eutl_installations*
+!eutl_installations_coordinates.csv
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
@@ -219,5 +222,3 @@ __marimo__/
 # Streamlit
 .streamlit/secrets.toml
 
-eutl_installations*
-!eutl_installations_coordinates.csv"data/source/"

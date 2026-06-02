@@ -1,45 +1,59 @@
-primaryKey:
-  - installation_id
-  - source
-missingValues:
-  - ""
-  - "NA"
-foreignKeys:
-  - fields:
-      - installation_id
-    reference:
-      resource: installations
-      fields:
-        - id
-fields:
-  - name: installation_id
-    title: Installation ID
-    description: Identifier of the installation.
-    type: string
-    constraints:
-      required: true
-  - name: latitude
-    title: Latitude
-    description: Latitude coordinate of the installation.
-    type: number
-    constraints:
-      required: true
-  - name: longitude
-    title: Longitude
-    description: Longitude coordinate of the installation.
-    type: number
-    constraints:
-      required: true
-  - name: source
-    title: Source of the data
-    description: The source from which the coordinates were obtained (e.g.,
-      "geoapify", "googlemaps").
-    type: string
-    constraints:
-      required: true
-  - name: created_at
-    title: Date when the data was created
-    description: Date when data have been downloaded and processed
-    type: datetime
-    constraints:
-      required: true
+name: installation_locations
+title: EU ETS Installation Locations
+description: >-
+  Locations of installations in the European Union Emissions Trading System
+  (EU ETS).
+sources:
+  - title: European Commission, EUTL database
+    path: https://union-registry-data.ec.europa.eu/report/welcome
+  - title: GEOAPIFY API
+    path: https://api.geoapify.com
+  - title: Google Maps Geocoding API
+    path: https://developers.google.com/maps/documentation/geocoding/overview
+
+schema:
+  primaryKey:
+    - installation_id
+    - source
+  missingValues:
+    - ""
+    - "NA"
+  foreignKeys:
+    - fields:
+        - installation_id
+      reference:
+        resource: installations
+        fields:
+          - id
+  fields:
+    - name: installation_id
+      title: Installation ID
+      description: Identifier of the installation.
+      type: string
+      constraints:
+        required: true
+    - name: latitude
+      title: Latitude
+      description: Latitude coordinate of the installation.
+      type: number
+      constraints:
+        required: true
+    - name: longitude
+      title: Longitude
+      description: Longitude coordinate of the installation.
+      type: number
+      constraints:
+        required: true
+    - name: source
+      title: Source of the data
+      description: The source from which the coordinates were obtained (e.g.,
+        "geoapify", "googlemaps").
+      type: string
+      constraints:
+        required: true
+    - name: created_at
+      title: Date when the data was created
+      description: Date when data have been downloaded and processed
+      type: datetime
+      constraints:
+        required: true

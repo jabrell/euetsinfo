@@ -1,27 +1,9 @@
-# EUTL Scraper v2
+# EUETS.INFO
 
-Welcome to the EUTL Scraper v2 documentation.
+The European Union Emissions Trading System (EU ETS) is a centerpiece of European climate policy, regulating greenhouse gas emissions for energy generation, energy-intensive industries, and aviation. As the world's largest carbon market, the system's administrative backbone is the European Union Transaction Log (EUTL). The EUTL records all allowance transactions, including those under the EU ETS, the Effort Sharing Decision (ESD), and the upcoming ETS2 for transport and buildings.
 
-## Overview
+While the EUTL provides comprehensive registry data, accessing and analyzing this raw information can be technically challenging. To increase market transparency and facilitate empirical research on trading and compliance behavior, this repository extracts, cleans, and structures EUTL data into a standardized data model.
 
-This project provides tools for scraping and processing data from the EU Transaction Log (EUTL).
+Additionally, the repository integrates associated metadata, such as facility locations and cross-references to external datasets like ENTSO-E power plants, providing a richer context for analysis.
 
-## Contributing
-
-### Clone the Repository
-
-```bash
-git clone https://github.com/jabrell/eutl_scraper_v2.git
-cd eutl_scraper_v2
-```
-
-### Installation
-
-This project uses [uv](https://docs.astral.sh/uv/) for fast and reliable Python package management.
-
-First, install uv if you haven't already. Then install the project dependencies (including the
-dev dependencies).
-
-```bash
-uv sync --all-groups
-```
+Following open science and FAIR data principles, the complete processed dataset is distributed as a [Frictionless](https://frictionlessdata.io/) data package. This ensures that both the data and the open-source routines used to process it remain highly accessible and interoperable for researchers and analysts.

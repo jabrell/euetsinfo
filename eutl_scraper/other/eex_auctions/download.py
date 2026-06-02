@@ -47,18 +47,18 @@ def download_auction_reports(
 
     if xlsx_url:
         xlsx_path = settings.fp("eex_auctions", settings.dir_source, ending="xlsx")
-        _download_file(xlsx_url, xlsx_path)
+        download_file(xlsx_url, xlsx_path)
     else:
         raise ValueError("Could not find XLSX URL on the page")
 
     if download_history and zip_url:
         zip_path = settings.fp("eex_auctions", settings.dir_source, ending="zip")
-        _download_file(zip_url, zip_path)
+        download_file(zip_url, zip_path)
 
     return xlsx_path, zip_path
 
 
-def _download_file(url: str, dest_path: str | Path):
+def download_file(url: str, dest_path: str | Path):
     """Download a file from a URL and save it to a destination path.
 
     Args:

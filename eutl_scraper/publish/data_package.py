@@ -1,3 +1,12 @@
+"""Top-level entry point for building the Frictionless Data Package.
+
+`publish_data_package` reads every published table from
+`Settings.dir_extracted`, runs each through `prepare_table` and
+`create_resource`, and writes the resulting bundle to disk via
+`create_data_package`. Optional whole-package validation is delegated to
+the Frictionless library.
+"""
+
 from pathlib import Path
 
 import pandas as pd
@@ -30,23 +39,35 @@ def publish_data_package(
             report (if validation is enabled).
     """
     data_paths = {
-        "installations": settings.fp("installations", settings.dir_extracted),
-        "accounts": settings.fp("accounts", settings.dir_extracted),
+        "installations": settings.fp(
+            "installations", settings.dir_extracted, ending="parquet"
+        ),
+        "accounts": settings.fp("accounts", settings.dir_extracted, ending="parquet"),
         "link_installation_account": settings.fp(
-            "link_installation_account", settings.dir_extracted
+            "link_installation_account", settings.dir_extracted, ending="parquet"
         ),
-        "account_holders": settings.fp("account_holders", settings.dir_extracted),
+        "account_holders": settings.fp(
+            "account_holders", settings.dir_extracted, ending="parquet"
+        ),
         "link_account_holder": settings.fp(
-            "link_account_holder", settings.dir_extracted
+            "link_account_holder", settings.dir_extracted, ending="parquet"
         ),
-        "compliance": settings.fp("compliance", settings.dir_extracted),
-        "projects": settings.fp("projects", settings.dir_extracted),
-        "transactions": settings.fp("transactions", settings.dir_extracted),
+        "compliance": settings.fp(
+            "compliance", settings.dir_extracted, ending="parquet"
+        ),
+        "projects": settings.fp("projects", settings.dir_extracted, ending="parquet"),
+        "transactions": settings.fp(
+            "transactions", settings.dir_extracted, ending="parquet"
+        ),
         "installation_locations": settings.fp(
-            "installation_locations", settings.dir_extracted
+            "installation_locations", settings.dir_extracted, ending="parquet"
         ),
-        "nace_mappings": settings.fp("nace_from_leakage_lists", settings.dir_extracted),
-        "eex_auctions": settings.fp("eex_auctions", settings.dir_extracted),
+        "nace_mappings": settings.fp(
+            "nace_from_leakage_lists", settings.dir_extracted, ending="parquet"
+        ),
+        "eex_auctions": settings.fp(
+            "eex_auctions", settings.dir_extracted, ending="parquet"
+        ),
     }
 
     # loop over the tables, prepare the data and create resources
@@ -57,7 +78,7 @@ def publish_data_package(
             f"Processing {table_name} from {path}...", filter="publish_data_package"
         )
         print(f"Create resources for {table_name} from {path}...")
-        df_source = pd.read_csv(path, low_memory=False)
+        df_source = pd.read_parquet(path)
         df = prepare_table(table_config=config, df=df_source)
         resource = create_resource(table_config=config, df=df)
         logger.info(
