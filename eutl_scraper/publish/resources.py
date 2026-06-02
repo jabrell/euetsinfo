@@ -36,6 +36,22 @@ PACKAGE_CONTRIBUTORS = [
     }
 ]
 
+PACKAGE_DESCRIPTION = (
+    "This data package compiles open data on the European Union Emissions "
+    "Trading System (EU ETS) from several public sources, including the "
+    "European Commission's EU Transaction Log (EUTL), the European Energy "
+    "Exchange (EEX), the Eurostat NACE classification, the bundled carbon "
+    "leakage lists, and geocoding services (Geoapify, Google Maps). The "
+    "underlying source data remain the property of their respective providers "
+    "and are subject to those providers' own reuse and licensing terms. The "
+    "CC-BY-4.0 license declared for this package applies only to the "
+    "compilation, structuring, and transformations contributed by the dataset "
+    "authors, not to the underlying source data. Each resource lists its "
+    "specific sources in its 'sources' field. When reusing this dataset, "
+    "please attribute both the original sources and this compilation (see "
+    "citation)."
+)
+
 
 def _build_citation(doi: str = PACKAGE_DOI) -> str:
     """Hardcoded dataset citation, appending the DOI when one is set."""
@@ -44,6 +60,19 @@ def _build_citation(doi: str = PACKAGE_DOI) -> str:
         "University of Basel. https://github.com/jabrell/eutl_scraper_v2"
     )
     return f"{base} https://doi.org/{doi}" if doi else base
+
+
+def _source_attribution(sources: list[dict[str, str]]) -> str:
+    """Build a source-attribution sentence from a resource's sources."""
+    credited = "; ".join(
+        f"{s['title']} ({s['path']})" if s.get("path") else s["title"] for s in sources
+    )
+    return (
+        f"Source data: {credited}. These data remain the property of their "
+        "respective providers and are subject to those providers' own reuse "
+        "and licensing terms; the package license (CC-BY-4.0) covers only the "
+        "compilation and transformations contributed here."
+    )
 
 
 def create_resource(
@@ -68,6 +97,13 @@ def create_resource(
     resource.name = table_config.name
     for key, value in vars(table_config.resource_metadata).items():
         setattr(resource, key, value)
+
+    # append a source-attribution note built from this resource's own sources
+    if resource.description:
+        resource.description = (
+            f"{resource.description.rstrip()} "
+            f"{_source_attribution(table_config.resource_metadata.sources)}"
+        )
 
     # validate the resource and raise an exception if validation fails
     report = resource.validate(limit_rows=max_valid_rows)
@@ -119,6 +155,7 @@ def create_data_package(
         package = Package(
             name=name,
             resources=resources,
+            description=PACKAGE_DESCRIPTION,
             licenses=PACKAGE_LICENSES,
             contributors=PACKAGE_CONTRIBUTORS,
             homepage="https://github.com/jabrell/eutl_scraper_v2",

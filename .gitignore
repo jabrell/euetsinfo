@@ -1,10 +1,9 @@
 # custom ignores
 _jab*
 *.zip
-data_tmp/
+data_tmp*/
 eutl_installations*
 !eutl_installations_coordinates.csv
-data_tmp2/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
