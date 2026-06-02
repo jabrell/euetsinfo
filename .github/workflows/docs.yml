@@ -1,0 +1,61 @@
+name: Publish docs
+
+# Build and deploy the MkDocs site to GitHub Pages.
+# Triggers:
+#   - manually, via the "Run workflow" button (workflow_dispatch)
+#   - on every push to main (i.e. when a PR is merged into main)
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+# Least-privilege token plus the permissions the Pages deployment needs.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow only one concurrent deployment; let an in-progress run finish so a
+# half-published site is never left behind.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.13"
+          enable-cache: true
+
+      - name: Install dependencies
+        # mkdocstrings imports the eutl_scraper package at build time, so the
+        # project and its dev tools (mkdocs, material, mkdocstrings) must be
+        # installed. uv sync installs the dev dependency group by default
+        # (default-groups = ["dev"]), so mkdocs et al. come along.
+        run: uv sync
+
+      - name: Build site
+        run: uv run mkdocs build --site-dir ./site
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
