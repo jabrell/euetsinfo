@@ -15,7 +15,7 @@ Following open science and FAIR data principles, the complete processed dataset 
 
 This project originally began as a webpage, euets.info, to make the data more accessible to the public. With the creation of this repository, I have decided to stop maintaining the website. Fortunately, Bruegel now provides an excellent alternative with their Carbon Tracker, which is a fantastic tool for visualizing and exploring the data.
 
-This project has greatly benefited from many ongoing discussions and contributions. I want to particularly thank Mirjam Kosch and Leonhard Stimpfle for their input. I am also grateful to Hannes Weigt and the University of Basel for providing the time and freedom to work on this project.
+This project has greatly benefited from many ongoing discussions and contributions. I want to particularly thank Mirjam Kosch and Leonhard Stimpfle for their input. I am also grateful to Hannes Weigt and the University of Basel for providing the time and freedom to work on this project. Roberto Rossini provided input to the reverse geocoding for the EUETS installations. Thomas Mramor made the first version of the pipeline for the EEX auction data.
 
 Over the years, the project received financial support from:
 - [Bruegel](https://www.bruegel.org/)
