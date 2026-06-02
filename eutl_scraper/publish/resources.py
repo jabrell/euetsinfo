@@ -16,6 +16,35 @@ from frictionless import Package, Resource, Schema
 
 from .configs import BaseConfig
 
+# DOI not yet minted — fill in once available (e.g. "10.5281/zenodo.XXXXXXX").
+PACKAGE_DOI = ""  # TODO: set the dataset DOI
+
+PACKAGE_LICENSES = [
+    {
+        "name": "CC-BY-4.0",
+        "path": "https://creativecommons.org/licenses/by/4.0/",
+        "title": "Creative Commons Attribution 4.0 International",
+    }
+]
+
+PACKAGE_CONTRIBUTORS = [
+    {
+        "title": "Jan Abrell",
+        "organization": "University of Basel",
+        "path": "https://orcid.org/0000-0003-1435-0952",
+        "role": "author",
+    }
+]
+
+
+def _build_citation(doi: str = PACKAGE_DOI) -> str:
+    """Hardcoded dataset citation, appending the DOI when one is set."""
+    base = (
+        "Abrell, Jan (2026). EUTL Data Fetcher and Frictionless Package. "
+        "University of Basel. https://github.com/jabrell/eutl_scraper_v2"
+    )
+    return f"{base} https://doi.org/{doi}" if doi else base
+
 
 def create_resource(
     table_config: BaseConfig, df: pd.DataFrame, max_valid_rows: int = 10_000
@@ -87,7 +116,18 @@ def create_data_package(
             resource.data = None
 
         # Build package descriptor
-        package = Package(name=name, resources=resources)
+        package = Package(
+            name=name,
+            resources=resources,
+            licenses=PACKAGE_LICENSES,
+            contributors=PACKAGE_CONTRIBUTORS,
+            homepage="https://github.com/jabrell/eutl_scraper_v2",
+        )
+        # DOI -> standard Data Package `id` field (only when one is set)
+        if PACKAGE_DOI:
+            package.id = f"https://doi.org/{PACKAGE_DOI}"
+        # citation is not a standard Data Package field -> custom property
+        package.custom["citation"] = _build_citation()
         package.to_yaml(str(tmp / "datapackage.yaml"))
         package.to_json(str(tmp / "datapackage.json"))
 
