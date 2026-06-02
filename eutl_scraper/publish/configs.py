@@ -1,16 +1,15 @@
 """Per-table publication configurations for core EUTL entities.
 
 Each `*Config` dataclass declares everything the publication layer needs
-for one output table: the canonical name, the path to the Frictionless
-YAML schema under `schemas/`, the resource-level metadata (title,
-description, upstream sources), the raw → published column renaming, and
-the type converters / transformers applied before renaming.
+to *produce* one output table: the canonical name, the path to the
+Frictionless resource descriptor YAML under `schemas/` (which holds the
+table-level title/description/sources as well as the column schema), the
+extracted → published column renaming, and the type converters /
+transformers applied before renaming.
 
 `BaseConfig` provides the shared structure plus a handful of helper
 factories (`_to_datetime`, `_to_nullable_int`, `_dropna_subset`,
 `_format_nace`, `_drop_duplicates_subset`) used by the concrete configs.
-`ResourceMetadata` collects the descriptive fields attached to the
-Frictionless `Resource` after preparation.
 
 The configs in this module cover the EUTL-sourced tables; auxiliary
 configs (locations, NACE, EEX auctions) live in
@@ -27,30 +26,21 @@ SCHEMA_PATH = Path(__file__).parent / "schemas"
 
 
 @dataclass
-class ResourceMetadata:
-    """Descriptive metadata attached to a Frictionless `Resource`.
-
-    Mirrors the subset of Frictionless resource fields the scraper sets
-    when publishing a table: human-readable `title`, longer
-    `description`, the list of upstream `sources`, and the text
-    `encoding` of the published CSV.
-    """
-
-    title: str
-    description: str
-    sources: list[dict[str, str]]
-    encoding: str = "utf-8"
-
-
-@dataclass
 class BaseConfig:
     """Shared structure for per-table publication configurations.
 
     Subclasses set sensible defaults for `name`, `schema_path`,
-    `resource_metadata`, `column_mapping`, and (in `__post_init__`)
-    `type_convertors` and `transformers`. They are consumed by
-    `prepare_table` (type/transformer/rename pipeline) and
-    `create_resource` (schema validation + metadata attachment).
+    `column_mapping`, and (in `__post_init__`) `type_convertors` and
+    `transformers`. They are consumed by `prepare_table`
+    (type/transformer/rename pipeline) and `create_resource` (loads the
+    resource descriptor YAML, validates against its schema, and attaches
+    the table-level metadata).
+
+    `schema_path` points at a Frictionless **resource descriptor** YAML
+    with top-level `name`, `title`, `description`, and `sources` keys
+    plus a nested `schema` key (fields, primaryKey, foreignKeys,
+    missingValues). This keeps all "what the table is" information in one
+    file while this config covers only "how to produce it".
 
     The static helpers return callables suitable for `type_convertors`
     (column-level) or `transformers` (DataFrame-level) so concrete
@@ -59,7 +49,6 @@ class BaseConfig:
 
     name: str
     schema_path: Path
-    resource_metadata: ResourceMetadata
     column_mapping: dict[str, str]
     type_convertors: dict[str, Callable] = field(default_factory=dict)
     transformers: list[Callable] = field(default_factory=list)
@@ -111,24 +100,6 @@ class InstallationsConfig(BaseConfig):
 
     name: str = "installations"
     schema_path: Path = SCHEMA_PATH / "installations.yaml"
-    resource_metadata: ResourceMetadata = field(
-        default_factory=lambda: ResourceMetadata(
-            title="EU ETS Installations",
-            description=(
-                "Information about the installations that are part of the European"
-                " Union Emissions Trading System (EU ETS)."
-                " Note that for euets installations, the account_id is mandatory "
-                "However, ETS2 accounts are currently derived as they appear in the "
-                "compliance data. They do not relate to an account_id"
-            ),
-            sources=[
-                {
-                    "title": "European Commission, EUTL database",
-                    "path": "https://union-registry-data.ec.europa.eu/report/welcome",
-                }
-            ],
-        )
-    )
     column_mapping: dict[str, str] = field(
         default_factory=lambda: {
             "installation_id": "id",
@@ -174,21 +145,6 @@ class AccountsConfig(BaseConfig):
 
     name: str = "accounts"
     schema_path: Path = SCHEMA_PATH / "accounts.yaml"
-    resource_metadata: ResourceMetadata = field(
-        default_factory=lambda: ResourceMetadata(
-            title="EU ETS Accounts",
-            description=(
-                "Information about the accounts that are part of the European"
-                " Union Emissions Trading System (EU ETS)."
-            ),
-            sources=[
-                {
-                    "title": "European Commission, EUTL database",
-                    "path": "https://union-registry-data.ec.europa.eu/report/welcome",
-                }
-            ],
-        )
-    )
     column_mapping: dict[str, str] = field(
         default_factory=lambda: {
             "account_id": "id",
@@ -223,26 +179,6 @@ class AccountHoldersConfig(BaseConfig):
 
     name: str = "account_holders"
     schema_path: Path = SCHEMA_PATH / "account_holders.yaml"
-    resource_metadata: ResourceMetadata = field(
-        default_factory=lambda: ResourceMetadata(
-            title="EU ETS AccountHolders",
-            description=(
-                "Information about the account holders that are part of the European"
-                " Union Emissions Trading System (EU ETS). Account holders are the "
-                "legal entities that hold accounts in the EU ETS and are responsible "
-                "for the operation of the accounts. Note that account holders can hold "
-                "multiple accounts. Account holders are derived from data in the "
-                "accounts and transactions table and are not directly available in "
-                "the EUTL database."
-            ),
-            sources=[
-                {
-                    "title": "European Commission, EUTL database",
-                    "path": "https://union-registry-data.ec.europa.eu/report/welcome",
-                }
-            ],
-        )
-    )
     column_mapping: dict[str, str] = field(
         default_factory=lambda: {
             "account_holder_id": "id",
@@ -275,22 +211,6 @@ class ComplianceConfig(BaseConfig):
 
     name: str = "compliance"
     schema_path: Path = SCHEMA_PATH / "compliance.yaml"
-    resource_metadata: ResourceMetadata = field(
-        default_factory=lambda: ResourceMetadata(
-            title="EU ETS Compliance",
-            description=(
-                "Information about the compliance status of installations "
-                "that are part of the European  Union Emissions Trading System "
-                "(EU ETS)."
-            ),
-            sources=[
-                {
-                    "title": "European Commission, EUTL database",
-                    "path": "https://union-registry-data.ec.europa.eu/report/welcome",
-                }
-            ],
-        )
-    )
     column_mapping: dict[str, str] = field(
         default_factory=lambda: {
             "installation_id": "installation_id",
@@ -338,22 +258,6 @@ class ProjectsConfig(BaseConfig):
 
     name: str = "projects"
     schema_path: Path = SCHEMA_PATH / "projects.yaml"
-    resource_metadata: ResourceMetadata = field(
-        default_factory=lambda: ResourceMetadata(
-            title="EU ETS Projects",
-            description=(
-                "Information about the CDM and JI projects that created allowances "
-                " in the European  Union Emissions Trading System (EU ETS). The data "
-                "is derived from the transactions table"
-            ),
-            sources=[
-                {
-                    "title": "European Commission, EUTL database",
-                    "path": "https://union-registry-data.ec.europa.eu/report/welcome",
-                }
-            ],
-        )
-    )
     column_mapping: dict[str, str] = field(
         default_factory=lambda: {
             "project_id": "id",
@@ -387,21 +291,6 @@ class TransactionsConfig(BaseConfig):
 
     name: str = "transactions"
     schema_path: Path = SCHEMA_PATH / "transactions.yaml"
-    resource_metadata: ResourceMetadata = field(
-        default_factory=lambda: ResourceMetadata(
-            title="EU ETS Transactions",
-            description=(
-                "Information about the transactions in the European Union Emissions "
-                "Trading System (EU ETS)."
-            ),
-            sources=[
-                {
-                    "title": "European Commission, EUTL database",
-                    "path": "https://union-registry-data.ec.europa.eu/report/welcome",
-                }
-            ],
-        )
-    )
     column_mapping: dict[str, str] = field(
         default_factory=lambda: {
             "transaction_id": "id",
@@ -442,21 +331,6 @@ class LinkInstallationAccountConfig(BaseConfig):
 
     name: str = "link_installation_account"
     schema_path: Path = SCHEMA_PATH / "link_installation_account.yaml"
-    resource_metadata: ResourceMetadata = field(
-        default_factory=lambda: ResourceMetadata(
-            title="EU ETS Link Installation Account",
-            description=(
-                "Information about the link between installations and accounts in "
-                "the European Union Emissions Trading System (EU ETS)."
-            ),
-            sources=[
-                {
-                    "title": "European Commission, EUTL database",
-                    "path": "https://union-registry-data.ec.europa.eu/report/welcome",
-                }
-            ],
-        )
-    )
     column_mapping: dict[str, str] = field(
         default_factory=lambda: {
             "installation_id": "installation_id",
@@ -484,21 +358,6 @@ class LinkAccountHolderConfig(BaseConfig):
 
     name: str = "link_account_holder"
     schema_path: Path = SCHEMA_PATH / "link_account_holder.yaml"
-    resource_metadata: ResourceMetadata = field(
-        default_factory=lambda: ResourceMetadata(
-            title="EU ETS Link Account Holder",
-            description=(
-                "Information about the link between account holders and accounts in "
-                "the European Union Emissions Trading System (EU ETS)."
-            ),
-            sources=[
-                {
-                    "title": "European Commission, EUTL database",
-                    "path": "https://union-registry-data.ec.europa.eu/report/welcome",
-                }
-            ],
-        )
-    )
     column_mapping: dict[str, str] = field(
         default_factory=lambda: {
             "account_id": "account_id",

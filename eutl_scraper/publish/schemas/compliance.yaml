@@ -1,130 +1,140 @@
-primaryKey:
-  - installation_id
-  - year
-missingValues:
-  - ""
-  - "NA"
-foreignKeys:
-  - fields:
-      - installation_id
-    reference:
-      resource: installations
-      fields:
-        - id
-fields:
-  - name: installation_id
-    title: Installation ID
-    description: Identifier of the installation.
-    type: string
-    constraints:
-      required: true
-  - name: year
-    title: Year
-    description: Compliance year.
-    type: integer
-    constraints:
-      required: true
-  - name: installation_name
-    title: Installation Name
-    description: Name of the installation.
-    type: string
-  - name: registry_id
-    title: Registry ID
-    description: Identifier of the national registry.
-    type: string
-    constraints:
-      required: true
-  - name: registry_name
-    title: Registry Name
-    description: Name of the national registry.
-    type: string
-    constraints:
-      required: true
-  - name: allocated
-    title: Allocated
-    description: Total number of allowances allocated to the installation for free,
-      including transitional and reserve allocations. However, this does not
-      include allowances allocated under the Swiss ETS.
-    type: number
-  - name: allocated_free
-    title: Allocated Free
-    description: Number of free allowances allocated. This is the number of
-      allowances allocated for free to the installation, excluding transitional
-      and reserve allocations.
-    type: number
-  - name: allocated_ch
-    title: Allocated (CH)
-    description: Number of allowances allocated under the Swiss ETS.
-    type: number
-  - name: allocated_reserve
-    title: Allocation Reserve
-    description: Allowances held in reserve.
-    type: number
-  - name: allocated_transitional
-    title: Allocation Transitional
-    description: Transitional allowances allocated (10c).
-    type: number
-  - name: verified
-    title: Verified Emissions
-    description: Verified emissions in tonnes of CO2 equivalent.
-    type: number
-  - name: verified_ch
-    title: Verified Emissions (CH)
-    description: Verified emissions under the Swiss ETS.
-    type: number
-  - name: surrendered
-    title: Surrendered
-    description: Total number of allowances surrendered.
-    type: number
-  - name: surrendered_eua
-    title: Surrendered EUA
-    description: EU Allowances surrendered.
-    type: number
-  - name: surrendered_euaa
-    title: Surrendered EUAA
-    description: EU Aviation Allowances surrendered.
-    type: number
-  - name: surrendered_chu
-    title: Surrendered CHU
-    description: Swiss allowances surrendered.
-    type: number
-  - name: surrendered_chua
-    title: Surrendered CHUA
-    description: Swiss aviation allowances surrendered.
-    type: number
-  - name: surrendered_eru_from_aau
-    title: Surrendered ERU from AAU
-    description: Emission Reduction Units derived from Assigned Amount Units surrendered.
-    type: number
-  - name: surrendered_former_eua
-    title: Surrendered Former EUA
-    description: Former EU Allowances surrendered.
-    type: number
-  - name: surrendered_cer
-    title: Surrendered CER
-    description: Certified Emission Reductions surrendered.
-    type: number
-  - name: excluded
-    title: Excluded
-    description: Whether the installation is excluded from the EU ETS for this year.
-    type: boolean
-    constraints:
-      required: true
-  - name: excluded_ch
-    title: CH Excluded
-    description: Whether the installation is excluded from the Swiss ETS for this year.
-    type: boolean
-    constraints:
-      required: true
-  - name: snapshot_date
-    title: Snapshot Date
-    description: Date of the data snapshot as provided by the EUTL.
-    type: datetime
-    constraints:
-      required: true
-  - name: created_at
-    title: Date when the data was created
-    description: Date when data have been downloaded and processed
-    type: datetime
-    constraints:
-      required: true
+name: compliance
+title: EU ETS Compliance
+description: >-
+  Information about the compliance status of installations that are part of the
+  European Union Emissions Trading System (EU ETS).
+sources:
+  - title: European Commission, EUTL database
+    path: https://union-registry-data.ec.europa.eu/report/welcome
+
+schema:
+  primaryKey:
+    - installation_id
+    - year
+  missingValues:
+    - ""
+    - "NA"
+  foreignKeys:
+    - fields:
+        - installation_id
+      reference:
+        resource: installations
+        fields:
+          - id
+  fields:
+    - name: installation_id
+      title: Installation ID
+      description: Identifier of the installation.
+      type: string
+      constraints:
+        required: true
+    - name: year
+      title: Year
+      description: Compliance year.
+      type: integer
+      constraints:
+        required: true
+    - name: installation_name
+      title: Installation Name
+      description: Name of the installation.
+      type: string
+    - name: registry_id
+      title: Registry ID
+      description: Identifier of the national registry.
+      type: string
+      constraints:
+        required: true
+    - name: registry_name
+      title: Registry Name
+      description: Name of the national registry.
+      type: string
+      constraints:
+        required: true
+    - name: allocated
+      title: Allocated
+      description: Total number of allowances allocated to the installation for free,
+        including transitional and reserve allocations. However, this does not
+        include allowances allocated under the Swiss ETS.
+      type: number
+    - name: allocated_free
+      title: Allocated Free
+      description: Number of free allowances allocated. This is the number of
+        allowances allocated for free to the installation, excluding transitional
+        and reserve allocations.
+      type: number
+    - name: allocated_ch
+      title: Allocated (CH)
+      description: Number of allowances allocated under the Swiss ETS.
+      type: number
+    - name: allocated_reserve
+      title: Allocation Reserve
+      description: Allowances held in reserve.
+      type: number
+    - name: allocated_transitional
+      title: Allocation Transitional
+      description: Transitional allowances allocated (10c).
+      type: number
+    - name: verified
+      title: Verified Emissions
+      description: Verified emissions in tonnes of CO2 equivalent.
+      type: number
+    - name: verified_ch
+      title: Verified Emissions (CH)
+      description: Verified emissions under the Swiss ETS.
+      type: number
+    - name: surrendered
+      title: Surrendered
+      description: Total number of allowances surrendered.
+      type: number
+    - name: surrendered_eua
+      title: Surrendered EUA
+      description: EU Allowances surrendered.
+      type: number
+    - name: surrendered_euaa
+      title: Surrendered EUAA
+      description: EU Aviation Allowances surrendered.
+      type: number
+    - name: surrendered_chu
+      title: Surrendered CHU
+      description: Swiss allowances surrendered.
+      type: number
+    - name: surrendered_chua
+      title: Surrendered CHUA
+      description: Swiss aviation allowances surrendered.
+      type: number
+    - name: surrendered_eru_from_aau
+      title: Surrendered ERU from AAU
+      description: Emission Reduction Units derived from Assigned Amount Units surrendered.
+      type: number
+    - name: surrendered_former_eua
+      title: Surrendered Former EUA
+      description: Former EU Allowances surrendered.
+      type: number
+    - name: surrendered_cer
+      title: Surrendered CER
+      description: Certified Emission Reductions surrendered.
+      type: number
+    - name: excluded
+      title: Excluded
+      description: Whether the installation is excluded from the EU ETS for this year.
+      type: boolean
+      constraints:
+        required: true
+    - name: excluded_ch
+      title: CH Excluded
+      description: Whether the installation is excluded from the Swiss ETS for this year.
+      type: boolean
+      constraints:
+        required: true
+    - name: snapshot_date
+      title: Snapshot Date
+      description: Date of the data snapshot as provided by the EUTL.
+      type: datetime
+      constraints:
+        required: true
+    - name: created_at
+      title: Date when the data was created
+      description: Date when data have been downloaded and processed
+      type: datetime
+      constraints:
+        required: true

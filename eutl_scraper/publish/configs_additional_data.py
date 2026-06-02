@@ -13,7 +13,7 @@ registered alongside the EUTL configs in `table_registry`.
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from .configs import SCHEMA_PATH, BaseConfig, ResourceMetadata
+from .configs import SCHEMA_PATH, BaseConfig
 
 
 @dataclass
@@ -26,29 +26,6 @@ class InstallationLocations(BaseConfig):
 
     name: str = "installation_locations"
     schema_path: Path = SCHEMA_PATH / "installation_locations.yaml"
-    resource_metadata: ResourceMetadata = field(
-        default_factory=lambda: ResourceMetadata(
-            title="EU ETS Installation Locations",
-            description=(
-                "Locations of installations in the European Union Emissions "
-                "Trading System (EU ETS)."
-            ),
-            sources=[
-                {
-                    "title": "European Commission, EUTL database",
-                    "path": "https://union-registry-data.ec.europa.eu/report/welcome",
-                },
-                {
-                    "title": "GEOAPIFY API",
-                    "path": "https://api.geoapify.com",
-                },
-                {
-                    "title": "Google Maps Geocoding API",
-                    "path": "https://developers.google.com/maps/documentation/geocoding/overview",
-                },
-            ],
-        )
-    )
     column_mapping: dict[str, str] = field(
         default_factory=lambda: {
             "installation_id": "installation_id",
@@ -79,21 +56,6 @@ class NaceMappings(BaseConfig):
 
     name: str = "nace_mappings"
     schema_path: Path = SCHEMA_PATH / "nace_mappings.yaml"
-    resource_metadata: ResourceMetadata = field(
-        default_factory=lambda: ResourceMetadata(
-            title="EU ETS NACE Mapping",
-            description=(
-                "Mapping of NACE codes for installations in the European Union "
-                "Emissions Trading System (EU ETS)."
-            ),
-            sources=[
-                {
-                    "title": "NACE Rev. 2 classification, Eurostat",
-                    "path": "https://ec.europa.eu/eurostat/web/nace/",
-                },
-            ],
-        )
-    )
     column_mapping: dict[str, str] = field(
         default_factory=lambda: {
             "installation_id": "installation_id",
@@ -126,21 +88,6 @@ class EEXAuctions(BaseConfig):
 
     name: str = "eex_auctions"
     schema_path: Path = SCHEMA_PATH / "eex_auctions.yaml"
-    resource_metadata: ResourceMetadata = field(
-        default_factory=lambda: ResourceMetadata(
-            title="EEX Auction Data",
-            description=(
-                "Data on auctions of emission allowances on the European Energy "
-                "Exchange (EEX)."
-            ),
-            sources=[
-                {
-                    "title": "European Energy Exchange (EEX)",
-                    "path": "https://www.eex.com/en/market-data/market-data-hub/environmentals/eex-eua-primary-auction-spot-download",
-                },
-            ],
-        )
-    )
     column_mapping: dict[str, str] = field(
         default_factory=lambda: {
             "auction_name": "auction_name",

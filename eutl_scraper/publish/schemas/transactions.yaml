@@ -1,99 +1,109 @@
-missingValues:
-  - ""
-  - "NA"
-foreignKeys:
-  - fields:
-      - acquiring_account_id
-    reference:
-      resource: accounts
-      fields:
-        - id
-  - fields:
-      - transferring_account_id
-    reference:
-      resource: accounts
-      fields:
-        - id
-  - fields:
-      - project_id
-    reference:
-      resource: projects
-      fields:
-        - id
-fields:
-  - name: id
-    title: Transaction ID
-    description: Identifier of the transaction.
-    type: string
-    constraints:
-      required: true
-  - name: date
-    title: Transaction Date
-    description: Date of the transaction.
-    type: datetime
-    constraints:
-      required: true
-  - name: ets_id
-    title: ETS ID
-    description: Emissions Trading System identifier.
-    type: string
-    constraints:
-      required: true
-  - name: transaction_type
-    title: Transaction Type
-    description: Type of the transaction.
-    type: string
-    constraints:
-      required: true
-  - name: originating_registry_id
-    title: Originating Registry ID
-    description: Identifier of the registry where the transaction originated.
-    type: string
-  - name: acquiring_registry_id
-    title: Acquiring Registry ID
-    description: Identifier of the registry of the acquiring account.
-    type: string
-  - name: acquiring_account_id
-    title: Acquiring Account ID
-    description: Identifier of the account acquiring the units.
-    type: string
-  - name: acquiring_installation_id
-    title: Acquiring Installation ID
-    description: Identifier of the installation associated with the acquiring account.
-    type: string
-  - name: transferring_registry_id
-    title: Transferring Registry ID
-    description: Identifier of the registry of the transferring account.
-    type: string
-  - name: transferring_account_id
-    title: Transferring Account ID
-    description: Identifier of the account transferring the units.
-    type: string
-  - name: transferring_installation_id
-    title: Transferring Installation ID
-    description: Identifier of the installation associated with the transferring account.
-    type: string
-  - name: unit_type_description
-    title: Unit Type
-    description: Description of the unit type being transacted.
-    type: string
-  - name: supp_unit_type_description
-    title: Supplementary Unit Type
-    description: Supplementary description of the unit type.
-    type: string
-  - name: project_id
-    title: Project ID
-    description: Identifier of the project associated with the transaction, if applicable.
-    type: integer
-  - name: amount
-    title: Amount
-    description: Number of units transacted.
-    type: integer
-    constraints:
-      required: true
-  - name: created_at
-    title: Date when the data was created
-    description: Date when data have been downloaded and processed
-    type: datetime
-    constraints:
-      required: true
+name: transactions
+title: EU ETS Transactions
+description: >-
+  Information about the transactions in the European Union Emissions Trading
+  System (EU ETS).
+sources:
+  - title: European Commission, EUTL database
+    path: https://union-registry-data.ec.europa.eu/report/welcome
+
+schema:
+  missingValues:
+    - ""
+    - "NA"
+  foreignKeys:
+    - fields:
+        - acquiring_account_id
+      reference:
+        resource: accounts
+        fields:
+          - id
+    - fields:
+        - transferring_account_id
+      reference:
+        resource: accounts
+        fields:
+          - id
+    - fields:
+        - project_id
+      reference:
+        resource: projects
+        fields:
+          - id
+  fields:
+    - name: id
+      title: Transaction ID
+      description: Identifier of the transaction.
+      type: string
+      constraints:
+        required: true
+    - name: date
+      title: Transaction Date
+      description: Date of the transaction.
+      type: datetime
+      constraints:
+        required: true
+    - name: ets_id
+      title: ETS ID
+      description: Emissions Trading System identifier.
+      type: string
+      constraints:
+        required: true
+    - name: transaction_type
+      title: Transaction Type
+      description: Type of the transaction.
+      type: string
+      constraints:
+        required: true
+    - name: originating_registry_id
+      title: Originating Registry ID
+      description: Identifier of the registry where the transaction originated.
+      type: string
+    - name: acquiring_registry_id
+      title: Acquiring Registry ID
+      description: Identifier of the registry of the acquiring account.
+      type: string
+    - name: acquiring_account_id
+      title: Acquiring Account ID
+      description: Identifier of the account acquiring the units.
+      type: string
+    - name: acquiring_installation_id
+      title: Acquiring Installation ID
+      description: Identifier of the installation associated with the acquiring account.
+      type: string
+    - name: transferring_registry_id
+      title: Transferring Registry ID
+      description: Identifier of the registry of the transferring account.
+      type: string
+    - name: transferring_account_id
+      title: Transferring Account ID
+      description: Identifier of the account transferring the units.
+      type: string
+    - name: transferring_installation_id
+      title: Transferring Installation ID
+      description: Identifier of the installation associated with the transferring account.
+      type: string
+    - name: unit_type_description
+      title: Unit Type
+      description: Description of the unit type being transacted.
+      type: string
+    - name: supp_unit_type_description
+      title: Supplementary Unit Type
+      description: Supplementary description of the unit type.
+      type: string
+    - name: project_id
+      title: Project ID
+      description: Identifier of the project associated with the transaction, if applicable.
+      type: integer
+    - name: amount
+      title: Amount
+      description: Number of units transacted.
+      type: integer
+      constraints:
+        required: true
+    - name: created_at
+      title: Date when the data was created
+      description: Date when data have been downloaded and processed
+      type: datetime
+      constraints:
+        required: true

@@ -1,10 +1,11 @@
 """Frictionless `Resource` and `Package` construction.
 
 `create_resource` wraps a prepared DataFrame as a Frictionless
-`Resource`, attaches the resource-level metadata from the config, and
-validates the data against the YAML schema. `create_data_package`
-collects validated resources, writes them to CSV alongside the
-`datapackage.{yaml,json}` descriptors, and zips the result.
+`Resource`, loading table-level metadata (title, description, sources)
+and the column schema from the YAML resource descriptor pointed to by
+`table_config.schema_path`. `create_data_package` collects validated
+resources, writes them to CSV alongside the `datapackage.{yaml,json}`
+descriptors, and zips the result.
 """
 
 from pathlib import Path
@@ -12,6 +13,7 @@ from tempfile import TemporaryDirectory
 from zipfile import ZipFile
 
 import pandas as pd
+import yaml
 from frictionless import Package, Resource, Schema
 
 from .configs import BaseConfig
@@ -78,7 +80,14 @@ def _source_attribution(sources: list[dict[str, str]]) -> str:
 def create_resource(
     table_config: BaseConfig, df: pd.DataFrame, max_valid_rows: int = 10_000
 ) -> Resource:
-    """Create a frictionless Resource from a DataFrame and a schema definition.
+    """Create a frictionless Resource from a DataFrame and a resource descriptor.
+
+    The resource descriptor YAML at `table_config.schema_path` is expected to be
+    a Frictionless Resource descriptor with top-level `name`, `title`,
+    `description`, and `sources` keys, plus a nested `schema` key holding the
+    Frictionless Table Schema (fields, primaryKey, foreignKeys, missingValues).
+    This structure keeps all "what the table is" information in one file while
+    leaving "how to produce it" (column renaming, type coercion) in the config.
 
     Args:
         table_config (BaseConfig): Configuration object for the table.
@@ -90,19 +99,24 @@ def create_resource(
         Exception: If the validation fails, an exception is raised with details
             about the errors.
     """
-    fn_schema = table_config.schema_path
-    resource = Resource(data=df, schema=Schema.from_descriptor(fn_schema))
-
-    # add the package metadata
-    resource.name = table_config.name
-    for key, value in vars(table_config.resource_metadata).items():
-        setattr(resource, key, value)
+    # Load the resource descriptor; feed only the nested schema to Frictionless
+    # so top-level resource keys never pass through Schema.from_descriptor.
+    descriptor = yaml.safe_load(table_config.schema_path.read_text(encoding="utf-8"))
+    resource = Resource(
+        data=df,
+        name=table_config.name,
+        title=descriptor["title"],
+        description=descriptor["description"],
+        sources=descriptor["sources"],
+        encoding="utf-8",
+        schema=Schema.from_descriptor(descriptor["schema"]),
+    )
 
     # append a source-attribution note built from this resource's own sources
     if resource.description:
         resource.description = (
             f"{resource.description.rstrip()} "
-            f"{_source_attribution(table_config.resource_metadata.sources)}"
+            f"{_source_attribution(descriptor['sources'])}"
         )
 
     # validate the resource and raise an exception if validation fails

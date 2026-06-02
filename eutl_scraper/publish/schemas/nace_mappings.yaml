@@ -1,32 +1,42 @@
-primaryKey: installation_id
-missingValues:
-  - ""
-  - "NA"
-foreignKeys:
-  - fields:
-      - installation_id
-    reference:
-      resource: installations
-      fields:
-        - id
-fields:
-  - name: installation_id
-    title: Installation ID
-    description: Identifier of the installation.
-    type: string
-    constraints:
-      required: true
-  - name: nace_2015
-    title: NACE Code (2015)
-    description: NACE Rev. 2 activity code assigned in the 2015 leakage list.
-    type: string
-  - name: nace_2020
-    title: NACE Code (2020)
-    description: NACE Rev. 2 activity code assigned in the 2020 leakage list.
-    type: string
-  - name: created_at
-    title: Date when the data was created
-    description: Date when data have been downloaded and processed
-    type: datetime
-    constraints:
-      required: true
+name: nace_mappings
+title: EU ETS NACE Mapping
+description: >-
+  Mapping of NACE codes for installations in the European Union Emissions
+  Trading System (EU ETS).
+sources:
+  - title: NACE Rev. 2 classification, Eurostat
+    path: https://ec.europa.eu/eurostat/web/nace/
+
+schema:
+  primaryKey: installation_id
+  missingValues:
+    - ""
+    - "NA"
+  foreignKeys:
+    - fields:
+        - installation_id
+      reference:
+        resource: installations
+        fields:
+          - id
+  fields:
+    - name: installation_id
+      title: Installation ID
+      description: Identifier of the installation.
+      type: string
+      constraints:
+        required: true
+    - name: nace_2015
+      title: NACE Code (2015)
+      description: NACE Rev. 2 activity code assigned in the 2015 leakage list.
+      type: string
+    - name: nace_2020
+      title: NACE Code (2020)
+      description: NACE Rev. 2 activity code assigned in the 2020 leakage list.
+      type: string
+    - name: created_at
+      title: Date when the data was created
+      description: Date when data have been downloaded and processed
+      type: datetime
+      constraints:
+        required: true

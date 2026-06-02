@@ -1,39 +1,50 @@
-primaryKey: id
-missingValues:
-  - ""
-  - "NA"
-fields:
-  - name: id
-    title: Project ID
-    description: Unique identifier for the offset project.
-    type: integer
-    constraints:
-      required: true
-  - name: project_type
-    title: Project Type
-    description: Type of the offset project (e.g., CDM, JI).
-    type: string
-  - name: originating_registry_id
-    title: Originating Registry ID
-    description: Identifier of the registry where the project originated.
-    type: string
-    constraints:
-      required: true
-  - name: lulucf_code_description
-    title: LULUCF Code Description
-    description: Land Use, Land-Use Change and Forestry classification description.
-    type: string
-  - name: track
-    title: Track
-    description: JI project track number.
-    type: number
-  - name: expiry_date
-    title: Expiry Date
-    description: Expiry date of the project credits.
-    type: datetime
-  - name: created_at
-    title: Date when the data was created
-    description: Date when data have been downloaded and processed
-    type: datetime
-    constraints:
-      required: true
+name: projects
+title: EU ETS Projects
+description: >-
+  Information about the CDM and JI projects that created allowances in the
+  European Union Emissions Trading System (EU ETS). The data is derived from
+  the transactions table.
+sources:
+  - title: European Commission, EUTL database
+    path: https://union-registry-data.ec.europa.eu/report/welcome
+
+schema:
+  primaryKey: id
+  missingValues:
+    - ""
+    - "NA"
+  fields:
+    - name: id
+      title: Project ID
+      description: Unique identifier for the offset project.
+      type: integer
+      constraints:
+        required: true
+    - name: project_type
+      title: Project Type
+      description: Type of the offset project (e.g., CDM, JI).
+      type: string
+    - name: originating_registry_id
+      title: Originating Registry ID
+      description: Identifier of the registry where the project originated.
+      type: string
+      constraints:
+        required: true
+    - name: lulucf_code_description
+      title: LULUCF Code Description
+      description: Land Use, Land-Use Change and Forestry classification description.
+      type: string
+    - name: track
+      title: Track
+      description: JI project track number.
+      type: number
+    - name: expiry_date
+      title: Expiry Date
+      description: Expiry date of the project credits.
+      type: datetime
+    - name: created_at
+      title: Date when the data was created
+      description: Date when data have been downloaded and processed
+      type: datetime
+      constraints:
+        required: true
