@@ -18,8 +18,7 @@ from frictionless import Package, Resource, Schema
 
 from .configs import BaseConfig
 
-# DOI not yet minted — fill in once available (e.g. "10.5281/zenodo.XXXXXXX").
-PACKAGE_DOI = ""  # TODO: set the dataset DOI
+PACKAGE_DOI = "10.5281/zenodo.20509231"
 
 PACKAGE_LICENSES = [
     {
