@@ -68,7 +68,7 @@ consumption only, skip the publication steps.
      inside the pipeline.
 
 4. **Compose into `AllDataBundle`.** In
-   [`eutl_scraper/bundles.py`](https://github.com/jabrell/eutl_scraper_v2/blob/main/eutl_scraper/bundles.py),
+   [`eutl_scraper/bundles.py`](https://github.com/jabrell/euetsinfo/blob/main/eutl_scraper/bundles.py),
    splat the new bundle's `.pipelines` into the list returned by
    `AllDataBundle._build_pipelines`. Pass any required runtime config.
    Remember: composition is by flattening; `AllDataBundle` does not hold

@@ -55,7 +55,7 @@ declarative.
 ## Schemas
 
 YAML schemas live in
-[`eutl_scraper/publish/schemas/`](https://github.com/jabrell/eutl_scraper_v2/tree/main/eutl_scraper/publish/schemas).
+[`eutl_scraper/publish/schemas/`](https://github.com/jabrell/euetsinfo/tree/main/eutl_scraper/publish/schemas).
 They describe the published fields in Frictionless field-descriptor
 form: name, type, format, constraints, foreign-key relationships, and
 documentation strings. Adding a new table requires adding a YAML file

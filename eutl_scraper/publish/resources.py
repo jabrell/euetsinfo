@@ -58,7 +58,7 @@ def _build_citation(doi: str = PACKAGE_DOI) -> str:
     """Hardcoded dataset citation, appending the DOI when one is set."""
     base = (
         "Abrell, Jan (2026). EUTL Data Fetcher and Frictionless Package. "
-        "University of Basel. https://github.com/jabrell/eutl_scraper_v2"
+        "University of Basel. https://github.com/jabrell/euetsinfo"
     )
     return f"{base} https://doi.org/{doi}" if doi else base
 
@@ -171,7 +171,7 @@ def create_data_package(
             description=PACKAGE_DESCRIPTION,
             licenses=PACKAGE_LICENSES,
             contributors=PACKAGE_CONTRIBUTORS,
-            homepage="https://github.com/jabrell/eutl_scraper_v2",
+            homepage="https://github.com/jabrell/euetsinfo",
         )
         # DOI -> standard Data Package `id` field (only when one is set)
         if PACKAGE_DOI:

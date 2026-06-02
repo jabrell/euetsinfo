@@ -8,7 +8,7 @@ from tqdm import tqdm
 from .geoapify_coordinates import build_full_address
 
 NOMINATIM_URL = "https://nominatim.openstreetmap.org/search"
-USER_AGENT = "eutl_scraper_v2"  # Required by OSM to identify your application
+USER_AGENT = "euetsinfo"  # Required by OSM to identify your application
 
 
 def geocode_address_osm(

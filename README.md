@@ -1,12 +1,12 @@
-# eutl_scraper_v2
+# euetsinfo
 
 ## Project Management
 
 ### Clone the Repository
 
 ```bash
-git clone https://github.com/jabrell/eutl_scraper_v2.git
-cd eutl_scraper_v2
+git clone https://github.com/jabrell/euetsinfo.git
+cd euetsinfo
 ```
 
 ### Install with uv
