@@ -33,6 +33,9 @@ theme:
     - content.code.annotate
     - content.tabs.link
 
+markdown_extensions:
+  - admonition
+
 plugins:
   - search
   - gen-files:
