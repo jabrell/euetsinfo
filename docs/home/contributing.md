@@ -2,7 +2,7 @@
 
 We welcome contributions to the repository. To start a discussion, report a bug, or recommend additional features, please [open an issue](https://github.com/jabrell/euetsinfo/issues).
 
-To contribute to the code or a new dataset, have a look at the [architecture](../architecture/index.md)
+To contribute to the code or a new dataset, have a look at the [Technical Approach](../technical_approach/architecture/index.md)
 section that explains the approach.
 
 If you would like to contribute code, assign yourself to an open issue, and then clone or fork the repository:

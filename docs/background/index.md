@@ -1,6 +1,6 @@
-### Institutional Background
+# Institutional Background
 
-#### European Emissions Trading System
+## European Emissions Trading System
 The EU ETS regulates the greenhouse gas emissions of energy and energy intense industries,
 air, and maritime transport. To manage both the environmental compliance and the market trading of these emissions, it helps to think in two layers:
 

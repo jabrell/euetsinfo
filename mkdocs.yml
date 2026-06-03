@@ -57,21 +57,23 @@ nav:
   #   - Overview: data_processing.md
   #   - Accounts and Account Holders: account_processing.md
   #   - Carbon prices: carbon_price_data_collecting.md
+  - Background:
+    - EU ETS: background/index.md
   - Data:
     - Overview: data/index.md
-    - Background: data/background.md
     - Data Model:
       - Data Model: data/data_model.md
       - Tables: data/tables/
-  - Architecture:
-    - Overview: architecture/index.md
-    - Settings and paths: architecture/settings.md
-    - Publishing: architecture/publishing.md
-    - Onboarding new data: architecture/onboarding.md
-  - API Reference:
-    - Core abstractions: api/pipeline.md
-    - Top-level bundles: api/bundles.md
-    - EUTL pipelines: api/eutl.md
-    - Auxiliary pipelines: api/other.md
-    - Settings: api/settings.md
-    - Publishing: api/publish.md
+  - Technical Approach:
+    - Architecture:
+      - Overview: technical_approach/architecture/index.md
+      - Settings and paths: technical_approach/architecture/settings.md
+      - Publishing: technical_approach/architecture/publishing.md
+      - Onboarding new data: technical_approach/architecture/onboarding.md
+    - API Reference:
+      - Core abstractions: technical_approach/api/pipeline.md
+      - Top-level bundles: technical_approach/api/bundles.md
+      - EUTL pipelines: technical_approach/api/eutl.md
+      - Auxiliary pipelines: technical_approach/api/other.md
+      - Settings: technical_approach/api/settings.md
+      - Publishing: technical_approach/api/publish.md
