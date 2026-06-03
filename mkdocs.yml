@@ -35,6 +35,11 @@ theme:
 
 markdown_extensions:
   - admonition
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
 
 plugins:
   - search
@@ -64,6 +69,9 @@ nav:
     - Data Model:
       - Data Model: data/data_model.md
       - Tables: data/tables/
+    - Data Processing:
+      - EU Transaction Log: data/processing/eutl.md
+      - Other Sources: data/processing/other.md
     - Legacy Data: data/legacy.md
   - Technical Approach:
     - Architecture:

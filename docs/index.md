@@ -21,7 +21,7 @@ This project originally began as a webpage, euets.info, to make the data more ac
 
 This project has greatly benefited from many ongoing discussions and contributions. I want to particularly thank Mirjam Kosch and Leonhard Stimpfle for their input. I am also grateful to Hannes Weigt and the University of Basel for providing the time and freedom to work on this project. Roberto Rossini provided input to the reverse geocoding for the EUETS installations. Thomas Mramor made the first version of the pipeline for the EEX auction data.
 
-Over the years, the project received financial support from:
+The project received financial support from:
 
-- [Bruegel](https://www.bruegel.org/)
+- [Bruegel](https://www.bruegel.org/) (ongoing)
 - [European University Institute,Florence School of Regulation – Climate](https://fsr.eui.eu/energy/climate/) under the "LIFE COASE - Collaborative Observatory for ASsessment of the EU ETS" project (Grant Agreement n. LIFE21-GIC-IT-LIFE COASE - 101074420)

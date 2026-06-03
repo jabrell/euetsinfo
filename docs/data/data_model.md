@@ -1,5 +1,22 @@
 # Data Model
 
+The data model is structured in a way such that it is easily extensible. The basic
+EUTL data are given as several tables that are interconnected by their identifiers.
+Many-to-many references are always given with a linking table.
+
+We never merge additional information in the original EUTL data. All additional
+information is given in separate as an additional table and the identifiers are
+used to link to the EUTL data set. E.g., locations are additional data and thus
+not merged into the EUTL data set but kept as a separate table that links to the
+installation table using the installation identifier.
+
+The diagram below shows the core published tables and how they relate. To keep
+it readable only the key fields (primary and foreign keys) plus a few headline
+fields are shown; see the per-table pages under **Tables** for the full column
+lists.
+
+<!-- ER_DIAGRAM -->
+
 # Tables
 
 The published dataset is a [Frictionless Data Package](https://specs.frictionlessdata.io/)

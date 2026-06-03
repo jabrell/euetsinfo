@@ -37,6 +37,24 @@ TABLES_DIR = "data/tables"
 # Physical landing page — read from the repo, extended with the summary table.
 _LANDING_MD = Path(__file__).resolve().parent.parent / "docs" / "data" / "data_model.md"
 
+# Placeholder in the landing page replaced by the generated ER diagram.
+_DIAGRAM_PLACEHOLDER = "<!-- ER_DIAGRAM -->"
+
+# Curated headline fields shown in the ER diagram on top of every primary- and
+# foreign-key field. Keep this short — the diagram is a relationship overview,
+# not a full column listing (those live on the per-table pages). Tables not
+# listed here show their key fields only.
+MAIN_FIELDS: dict[str, list[str]] = {
+    "installations": ["name", "activity_name"],
+    "accounts": ["name", "account_type"],
+    "account_holders": ["name"],
+    "projects": ["project_type"],
+    "compliance": ["allocated", "verified", "surrendered"],
+    "transactions": ["date", "transaction_type", "amount"],
+    "installation_locations": ["latitude", "longitude"],
+    "nace_mappings": ["nace_2015", "nace_2020"],
+}
+
 
 def as_list(value) -> list:
     """Coerce a scalar/list/None descriptor value into a list.
@@ -159,6 +177,71 @@ def render_page(
     return "\n".join(lines)
 
 
+def render_er_diagram(
+    descriptors: dict[str, dict],
+    reverse_index: dict[str, list[tuple[str, str, str]]],
+) -> str:
+    """Render a Mermaid ``erDiagram`` of the FK-connected tables.
+
+    A table is included iff it declares a foreign key or is the target of one
+    (so standalone tables such as ``eex_auctions`` are dropped automatically).
+    Each entity box lists its primary-key and foreign-key fields (marked
+    ``PK``/``FK``) plus the curated headline fields in ``MAIN_FIELDS``; each FK
+    is drawn as a ``target ||--o{ source`` edge labelled with the source field.
+    """
+    # Tables that participate in at least one relationship.
+    connected = {
+        name
+        for name, descriptor in descriptors.items()
+        if descriptor["schema"].get("foreignKeys")
+    } | set(reverse_index)
+
+    lines: list[str] = [
+        "```mermaid",
+        "%%{init: {'er': {'layoutDirection': 'TB'}}}%%",
+        "erDiagram",
+    ]
+
+    # Entity boxes — registry order, connected tables only.
+    for name, descriptor in descriptors.items():
+        if name not in connected:
+            continue
+        schema = descriptor["schema"]
+        fields = schema.get("fields", [])
+        type_by_name = {f["name"]: f.get("type", "string") for f in fields}
+        primary_key = as_list(schema.get("primaryKey"))
+        fk_fields = [
+            f for fk in schema.get("foreignKeys", []) for f in as_list(fk["fields"])
+        ]
+
+        # Attribute order: PK fields → FK-only fields → curated mains, deduped.
+        ordered: list[str] = []
+        for field in [*primary_key, *fk_fields, *MAIN_FIELDS.get(name, [])]:
+            if field not in ordered and field in type_by_name:
+                ordered.append(field)
+
+        lines.append(f"    {name} {{")
+        for field in ordered:
+            markers = []
+            if field in primary_key:
+                markers.append("PK")
+            if field in fk_fields:
+                markers.append("FK")
+            key = ", ".join(markers)
+            lines.append(f"        {type_by_name[field]} {field} {key}".rstrip())
+        lines.append("    }")
+
+    # Relationships — one labelled edge per FK field.
+    for name, descriptor in descriptors.items():
+        for fk in descriptor["schema"].get("foreignKeys", []):
+            target = fk["reference"]["resource"]
+            for src in as_list(fk["fields"]):
+                lines.append(f'    {target} ||--o{{ {name} : "{src}"')
+
+    lines.append("```")
+    return "\n".join(lines)
+
+
 def render_summary_table(descriptors: dict[str, dict]) -> str:
     """Render a Markdown summary table: table title (linked) + one-line description."""
     rows = [
@@ -194,11 +277,17 @@ def main() -> None:
     with mkdocs_gen_files.open(f"{TABLES_DIR}/SUMMARY.md", "w") as fd:
         fd.writelines(nav.build_literate_nav())
 
-    # Landing page: hand-written intro + auto-generated summary table.
+    # Landing page: hand-written intro + ER diagram + auto-generated summary table.
     intro = _LANDING_MD.read_text(encoding="utf-8").rstrip()
+    diagram = render_er_diagram(descriptors, reverse_index)
+    body = (
+        intro.replace(_DIAGRAM_PLACEHOLDER, diagram)
+        if _DIAGRAM_PLACEHOLDER in intro
+        else f"{intro}\n\n{diagram}"
+    )
     summary = render_summary_table(descriptors)
     with mkdocs_gen_files.open("data/data_model.md", "w") as fd:
-        fd.write(f"{intro}\n\n{summary}\n")
+        fd.write(f"{body}\n\n{summary}\n")
 
 
 main()
