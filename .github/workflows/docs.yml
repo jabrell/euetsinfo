@@ -3,11 +3,13 @@ name: Publish docs
 # Build and deploy the MkDocs site to GitHub Pages.
 # Triggers:
 #   - manually, via the "Run workflow" button (workflow_dispatch)
-#   - on every push to main (i.e. when a PR is merged into main)
+#
+# Automatic deployment on push to main is temporarily disabled — re-enable it by
+# uncommenting the `push` trigger below.
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
+  # push:
+  #   branches: [main]
 
 # Least-privilege token plus the permissions the Pages deployment needs.
 permissions:
