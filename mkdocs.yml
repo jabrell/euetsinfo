@@ -64,6 +64,7 @@ nav:
     - Data Model:
       - Data Model: data/data_model.md
       - Tables: data/tables/
+    - Legacy Data: data/legacy.md
   - Technical Approach:
     - Architecture:
       - Overview: technical_approach/architecture/index.md
