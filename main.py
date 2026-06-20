@@ -7,13 +7,13 @@ from eutl_scraper import AllDataBundle, Settings, setup_logging
 
 if __name__ == "__main__":
     # path to the manual accounts file
-    fn_manual_accounts = Path("manual_data") / "accounts_20260602.xlsx"
+    fn_manual_accounts = Path("manual_data") / "accounts_20260620.xlsx"
 
     # settings and logging
     settings = Settings(
         dir_data="data_tmp/",
         manual_files={
-            "manual_accounts": Path("manual_data/accounts_20260602.xlsx"),
+            "manual_accounts": fn_manual_accounts,
             "existing_installation_locations": Path(
                 "manual_data/coordinates_geoapify.csv"
             ),
