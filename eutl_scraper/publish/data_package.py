@@ -65,9 +65,10 @@ def publish_data_package(
         "nace_mappings": settings.fp(
             "nace_from_leakage_lists", settings.dir_extracted, ending="parquet"
         ),
-        "eex_auctions": settings.fp(
-            "eex_auctions", settings.dir_extracted, ending="parquet"
-        ),
+        # exclude the EEX auction data due to licensing issues
+        # "eex_auctions": settings.fp(
+        #     "eex_auctions", settings.dir_extracted, ending="parquet"
+        # ),
     }
 
     # loop over the tables, prepare the data and create resources
