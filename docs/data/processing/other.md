@@ -78,3 +78,30 @@ and turns the published spreadsheets into a tidy table of auction results.
 
 The result is one row per auction, with harmonised prices, volumes, and a
 per-country revenue breakdown.
+
+## Power plant and IED-facility mapping
+
+EUTL installations can be linked to two further datasets: the power plants of the
+**ENTSO-E Transparency Platform** and the industrial facilities of the EU's
+**Industrial Emissions Portal (IEP)**, regulated under the Industrial Emissions
+Directive (IED). The `EntsoeEidBundle` (`eutl_scraper/other/entsoe_eid/`) reads a
+prepared set of mapping files bundled in the repository and writes them to the
+extracted directory — the matching itself is done externally, and the methodology
+is documented in the accompanying paper:
+
+> Abrell, J., Kosch, M., and Stimpfle, L. (2025), *Linking EU ETS installations to
+> ENTSO-E Power Plants and IEP Facilities*
+> ([PDF](../../static/abrell_kosch_stimpfle_2025_linking_euets_entsoe_iep.pdf)).
+
+Because the relationship between EUTL installations and ENTSO-E generation units is
+**many-to-many**, an intermediate **power plant** entity resolves it. The bundle
+produces four tables:
+
+- **`powerplants`** — one row per power plant (`plant_id`, `fuel`), an aggregation
+  of ENTSO-E generation and production units.
+- **`map_entsoe_to_plant`** — links ENTSO-E generation (`eic_g`) and production
+  (`eic_p`) units to their `plant_id`.
+- **`map_installation_to_plant`** — links EUTL `installation_id`s to `plant_id`s.
+- **`map_installation_to_eid_facility`** — links EUTL `installation_id`s to IEP
+  facilities by their INSPIRE id (`facility_inspire_id`), together with a
+  `match_probability`.

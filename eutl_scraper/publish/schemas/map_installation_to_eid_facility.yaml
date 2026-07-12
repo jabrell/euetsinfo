@@ -6,7 +6,7 @@ description: >-
   Emission Portal (IEP).
 sources:
   - title: Abrell, J, Kosch, M., and Stimpfle, L. (2025), Linking EU ETS installations to ENTSOE-Power Plants and IEP Facilities
-    # path: https://union-registry-data.ec.europa.eu/report/welcome
+    path: https://jabrell.github.io/euetsinfo/static/abrell_kosch_stimpfle_2025_linking_euets_entsoe_iep.pdf
 
 schema:
   primaryKey:
