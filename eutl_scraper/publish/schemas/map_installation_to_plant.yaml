@@ -1,0 +1,41 @@
+name: map_installation_to_plant
+title: Mapping of EUTL installations to power plants
+description: >-
+  Mapping of EUTL installations to power plants. The mapping established a link
+  between the EUTL installations and the power plants in the ENTSOE-Power Plants.
+  Since the it is a many-to-many mapping, the mapping is established via a plant
+  table that contains the unique plant identifiers and the fuel type of the plant.
+sources:
+  - title: Abrell, J, Kosch, M., and Stimpfle, L. (2025), Linking EU ETS installations to ENTSOE-Power Plants and IEP Facilities
+    # path: https://union-registry-data.ec.europa.eu/report/welcome
+
+schema:
+  primaryKey:
+    - plant_id
+    - installation_id
+  foreignKeys:
+    - fields:
+        - installation_id
+      reference:
+        resource: installations
+        fields:
+          - id
+    - fields:
+        - plant_id
+      reference:
+        resource: powerplants
+        fields:
+          - plant_id
+  fields:
+    - name: installation_id
+      title: EUTL Installation ID
+      description: Unique identifier for the EUTL installation.
+      type: string
+      constraints:
+        required: true
+    - name: plant_id
+      title: Plant ID
+      description: Unique identifier for the power plant. Starts with the 2-digit country code followed by the plant name
+      type: string
+      constraints:
+        required: true

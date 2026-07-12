@@ -20,7 +20,11 @@ from .configs import (
 from .configs_additional_data import (
     EEXAuctions,
     InstallationLocations,
+    MapEntsoeToPlant,
+    MapInstallationToEidFacility,
+    MapInstallationToPlant,
     NaceMappings,
+    Powerplants,
 )
 
 TABLE_REGISTRY = {
@@ -35,4 +39,8 @@ TABLE_REGISTRY = {
     "eex_auctions": EEXAuctions(),
     "link_installation_account": LinkInstallationAccountConfig(),
     "link_account_holder": LinkAccountHolderConfig(),
+    "powerplants": Powerplants(),
+    "map_installation_to_plant": MapInstallationToPlant(),
+    "map_installation_to_eid_facility": MapInstallationToEidFacility(),
+    "map_entsoe_to_plant": MapEntsoeToPlant(),
 }

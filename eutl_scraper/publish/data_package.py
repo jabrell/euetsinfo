@@ -69,6 +69,18 @@ def publish_data_package(
         # "eex_auctions": settings.fp(
         #     "eex_auctions", settings.dir_extracted, ending="parquet"
         # ),
+        "powerplants": settings.fp(
+            "powerplants", settings.dir_extracted, ending="parquet"
+        ),
+        "map_installation_to_plant": settings.fp(
+            "map_installation_to_plant", settings.dir_extracted, ending="parquet"
+        ),
+        "map_installation_to_eid_facility": settings.fp(
+            "map_installation_to_eid_facility", settings.dir_extracted, ending="parquet"
+        ),
+        "map_entsoe_to_plant": settings.fp(
+            "map_entsoe_to_plant", settings.dir_extracted, ending="parquet"
+        ),
     }
 
     # loop over the tables, prepare the data and create resources

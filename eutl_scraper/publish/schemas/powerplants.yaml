@@ -1,0 +1,35 @@
+name: powerplants
+title: Power Plants
+description: >-
+  Power plants are aggregation of ENSTOE generation and production units. They
+  are created to resolve the many-to-many relationship between EUTL installations
+  and ENTSOE generation units.
+sources:
+  - title: Abrell, J, Kosch, M., and Stimpfle, L. (2025), Linking EU ETS installations to ENTSOE-Power Plants and IEP Facilities
+    # path: https://union-registry-data.ec.europa.eu/report/welcome
+
+schema:
+  primaryKey: plant_id
+  fields:
+    - name: plant_id
+      title: Plant ID
+      description: Unique identifier for the power plant. Starts with the 2-digit country code followed by the plant name
+      type: string
+      constraints:
+        required: true
+    - name: fuel
+      title: Fuel
+      description: >-
+        Type of fuel used by the power plant. Based on the ENTSOE fuel classification.
+        The possible values are: gas, coal, lignite, oil, biomass, coalgas, waste.
+      type: string
+      constraints:
+        required: true
+        enum:
+          - gas
+          - coal
+          - lignite
+          - oil
+          - biomass
+          - coalgas
+          - waste
