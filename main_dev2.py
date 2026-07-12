@@ -7,6 +7,7 @@ from eutl_scraper.eutl import EUTLBundle
 from eutl_scraper.other.eex_auctions import EEXAuctionsBundle
 from eutl_scraper.other.nace_codes import  NaceFromLeakageListsBundle
 from eutl_scraper.other.locations import InstallationLocationsBundle
+from eutl_scraper.other import EntsoeEidBundle
 from eutl_scraper.logger import setup_logging
 
 if __name__ == "__main__":
@@ -34,6 +35,7 @@ if __name__ == "__main__":
     # EUTLBundle(settings=settings).run()
     # EEXAuctionsBundle(settings=settings).run()
     # NaceFromLeakageListsBundle(settings=settings, drop_missing_installations=True).run()
-    AllDataBundle(settings=settings, api_keys=api_keys).run()
+    # AllDataBundle(settings=settings, api_keys=api_keys).run()
+    EntsoeEidBundle(settings=settings).run()
 
     print("here")
