@@ -1,6 +1,7 @@
 from .eutl import EUTLBundle
 from .other import (
     EEXAuctionsBundle,
+    EntsoeEidBundle,
     InstallationLocationsBundle,
     NaceFromLeakageListsBundle,
 )
@@ -35,4 +36,5 @@ class AllDataBundle(Bundle):
                 api_keys=self.api_keys,
                 max_installations=self.max_installations,
             ).pipelines,
+            *EntsoeEidBundle(self.settings).pipelines,
         ]

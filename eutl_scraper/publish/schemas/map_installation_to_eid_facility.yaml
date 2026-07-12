@@ -1,0 +1,42 @@
+name: map_installation_to_eid_facility
+title: Mapping of EUTL installations to facilities under the Industrial Emissions Directive (IED)
+description: >-
+  Mapping of EUTL installations to IED facilities. The mapping established a link
+  between the EUTL installations and the IED facilities as provided by the Industrial
+  Emission Portal (IEP).
+sources:
+  - title: Abrell, J, Kosch, M., and Stimpfle, L. (2025), Linking EU ETS installations to ENTSOE-Power Plants and IEP Facilities
+    path: https://jabrell.github.io/euetsinfo/static/abrell_kosch_stimpfle_2025_linking_euets_entsoe_iep.pdf
+
+schema:
+  primaryKey:
+    - installation_id
+    - facility_inspire_id
+  foreignKeys:
+    - fields:
+        - installation_id
+      reference:
+        resource: installations
+        fields:
+          - id
+  fields:
+    - name: installation_id
+      title: EUTL Installation ID
+      description: Unique identifier for the EUTL installation.
+      type: string
+      constraints:
+        required: true
+    - name: facility_inspire_id
+      title: IED Facility INSPIRE ID
+      description: Unique identifier for the IED facility (INSPIRE ID).
+      type: string
+      constraints:
+        required: true
+    - name: match_probability
+      title: Matching Probability
+      description: Probability that the EUTL installation and the IED facility are a match.
+      type: number
+      constraints:
+        required: true
+        minimum: 0
+        maximum: 1

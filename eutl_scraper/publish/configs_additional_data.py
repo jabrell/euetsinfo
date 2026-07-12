@@ -165,3 +165,60 @@ class EEXAuctions(BaseConfig):
             "datetime": self._to_datetime("datetime"),
             "created_at": self._to_datetime("created_at"),
         }
+
+
+@dataclass
+class Powerplants(BaseConfig):
+    """Publication config for the `powerplants` table.
+
+    Power plant data from the ENTSO-E Transparency Platform.
+    """
+
+    name: str = "powerplants"
+    schema_path: Path = SCHEMA_PATH / "powerplants.yaml"
+    column_mapping: dict[str, str] = field(
+        default_factory=lambda: {"plant_id": "plant_id", "fuel": "fuel"}
+    )
+
+
+@dataclass
+class MapInstallationToPlant(BaseConfig):
+    name: str = "map_installation_to_plant"
+    schema_path: Path = SCHEMA_PATH / "map_installation_to_plant.yaml"
+    column_mapping: dict[str, str] = field(
+        default_factory=lambda: {
+            "installation_id": "installation_id",
+            "plant_id": "plant_id",
+        }
+    )
+
+    def __post_init__(self):
+        self.type_convertors = {}
+
+
+@dataclass
+class MapInstallationToEidFacility(BaseConfig):
+    name: str = "map_installation_to_eid_facility"
+    schema_path: Path = SCHEMA_PATH / "map_installation_to_eid_facility.yaml"
+    column_mapping: dict[str, str] = field(
+        default_factory=lambda: {
+            "installation_id": "installation_id",
+            "facility_inspire_id": "facility_inspire_id",
+            "match_probability": "match_probability",
+        }
+    )
+
+
+@dataclass
+class MapEntsoeToPlant(BaseConfig):
+    name: str = "map_entsoe_to_plant"
+    schema_path: Path = SCHEMA_PATH / "map_entsoe_to_plant.yaml"
+    column_mapping: dict[str, str] = field(
+        default_factory=lambda: {
+            "eic_g": "eic_g",
+            "name_g": "name_g",
+            "eic_p": "eic_p",
+            "name_p": "name_p",
+            "plant_id": "plant_id",
+        }
+    )

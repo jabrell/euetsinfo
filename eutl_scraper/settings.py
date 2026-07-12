@@ -125,6 +125,10 @@ class Settings:
         "installation_locations": "installation_locations",
         "existing_installation_locations": "existing_installation_locations",
         "manual_accounts": "eutl_manual_accounts",
+        "powerplants": "powerplants",
+        "map_entsoe_to_plant": "map_entsoe_to_plant",
+        "map_installation_to_plant": "map_installation_to_plant",
+        "map_installation_to_eid_facility": "map_installation_to_eid_facility",
     }
 
     # Keys accepted in ``manual_files`` and what each manual file is for.
