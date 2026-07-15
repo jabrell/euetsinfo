@@ -1,5 +1,7 @@
 # euetsinfo
 
+[![Documentation](https://img.shields.io/badge/docs-github.io-blue?style=for-the-badge&logo=githubpages&logoColor=white)](https://jabrell.github.io/euetsinfo/)
+
 ## Project Management
 
 ### Clone the Repository
