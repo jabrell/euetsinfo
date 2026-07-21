@@ -129,6 +129,7 @@ class Settings:
         "map_entsoe_to_plant": "map_entsoe_to_plant",
         "map_installation_to_plant": "map_installation_to_plant",
         "map_installation_to_eid_facility": "map_installation_to_eid_facility",
+        "map_orbis": "map_orbis",
     }
 
     # Keys accepted in ``manual_files`` and what each manual file is for.
