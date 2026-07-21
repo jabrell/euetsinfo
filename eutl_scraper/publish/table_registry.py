@@ -23,6 +23,7 @@ from .configs_additional_data import (
     MapEntsoeToPlant,
     MapInstallationToEidFacility,
     MapInstallationToPlant,
+    MapOrbis,
     NaceMappings,
     Powerplants,
 )
@@ -43,4 +44,5 @@ TABLE_REGISTRY = {
     "map_installation_to_plant": MapInstallationToPlant(),
     "map_installation_to_eid_facility": MapInstallationToEidFacility(),
     "map_entsoe_to_plant": MapEntsoeToPlant(),
+    "map_orbis": MapOrbis(),
 }

@@ -94,11 +94,15 @@ class ExtractOrbisMatchingPipeline(Pipeline):
         df_grow2 = self.df_grow.rename(columns=col_grow)[
             list(col_grow.values())
         ].drop_duplicates()
-        self.df_orbis_match = df_holder.merge(
-            df_grow2,
-            on="eutl_national_id",
-            how="inner",
-        ).drop(columns=["eutl_national_id"])
+        self.df_orbis_match = (
+            df_holder.merge(
+                df_grow2,
+                on="eutl_national_id",
+                how="inner",
+            )
+            .drop(columns=["eutl_national_id"])
+            .assign(created_at=pd.Timestamp.now(tz="UTC"))
+        )
 
     def save(self) -> None:
         self.df_orbis_match.to_parquet(

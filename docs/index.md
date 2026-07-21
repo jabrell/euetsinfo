@@ -8,12 +8,33 @@ Additionally, the repository integrates associated metadata, such as facility lo
 
 Following open science and FAIR data principles, the complete processed dataset is distributed as a [Frictionless](https://frictionlessdata.io/) data package. This ensures that both the data and the open-source routines used to process it remain highly accessible and interoperable for researchers and analysts.
 
-!!! warning "Under Active Development"
-    This repository is currently in the development stage. Features, APIs, and overall architecture are subject to breaking changes without prior notice.
-
 If you're interested in the data produced by this repository, you can access them
 interactively using the [Bruegel ETS Tracker](https://ets.bruegel.org/). The source
 data can be downloaded from [Zenodo](https://zenodo.org/records/20509231)
+
+## Which data are processed
+
+We process data from several sources. For a detailed explanation of data and how
+they are processed see the data section.
+
+The **main data** provided are:
+
+| Data | Reference | Remarks |
+| --- | --- | --- |
+| Data on emissions and transactions under the EUTS | [https://union-registry-data.ec.europa.eu/report/welcome](https://union-registry-data.ec.europa.eu/report/welcome) | |
+| Location of stationary installations  regulated under the EUETS| [https://www.geoapify.com/](https://www.geoapify.com/) | |
+| NACE codes for EUETS installations | Based on the leakage lists formerly provided by the EU Commission | |
+|Prices and volumes including revenues by EU member state. Thomas Mramor from Bruegel provided a draft version of the code. |  [https://www.eex.com/en/market-data/market-data-hub/environmentals/eex-eua-primary-auction-spot-download](https://www.eex.com/en/market-data/market-data-hub/environmentals/eex-eua-primary-auction-spot-download) | Due to license restrictions these data are not provided fro download but the routine to download and process the data is available. |
+
+Furthermore **linking tables** to relate the EUTL data to other datasets are provided:
+
+
+| Data | Reference | Remarks |
+| --- | --- | --- |
+| Mapping to  [ENTSOE power plants](https://transparency.entsoe.eu/)| [Abrell, Kosch, and Stimpfle (2025), *Linking EU ETS installations to ENTSO-E Power Plants and IEP Facilities*.](../static/abrell_kosch_stimpfle_2025_linking_euets_entsoe_iep.pdf)| |
+| Mapping to facilities regulated under the [Industrial Emission Directive](https://industry.eea.europa.eu/) (local air pollution) | [Abrell, Kosch, and Stimpfle (2025), *Linking EU ETS installations to ENTSO-E Power Plants and IEP Facilities*.](../static/abrell_kosch_stimpfle_2025_linking_euets_entsoe_iep.pdf) | |
+| Describes the methodology used to establish the mapping from EUTL installations to ENTSO-E power plants and IEP facilities. [Download PDF](../static/abrell_kosch_stimpfle_2025_linking_euets_entsoe_iep.pdf). | |
+|  Mapping from EUETS company registration numbers to the ORBIS identifiers. | [Cameron, A. & Ho, V. (2024): Matching the EU Transaction Log and ORBIS:  A Natural Language Processing approach.](https://single-market-economy.ec.europa.eu/single-market/chief-economist-business-intelligence-unit/analytical-work/single-market-industry-and-competitiveness/matching-eu-transaction-log-orbis-database_en)|
 
 ## Acknowledgements
 
