@@ -98,7 +98,7 @@ class EEXAuctions(BaseConfig):
             "average_volume_bid_per_bidder": "average_volume_bid_per_bidder",
             "average_volume_won_per_bidder": "average_volume_won_per_bidder",
             "contract": "contract",
-            "country": "country",
+            "Zone": "country",
             "cover_ratio": "cover_ratio",
             "date": "date",
             "maximum_bid_eur_per_tco2": "maximum_bid_eur_per_tco2",

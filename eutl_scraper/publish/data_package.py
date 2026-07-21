@@ -21,7 +21,10 @@ from .table_registry import TABLE_REGISTRY
 
 
 def publish_data_package(
-    settings: Settings, fn_out: str | Path, validate_package: bool = False
+    settings: Settings,
+    fn_out: str | Path,
+    validate_package: bool = False,
+    include_eex_auctions: bool = False,
 ) -> tuple[Package, Report | None]:
     """Create and save a frictionless data package from the given input directory
     containing the extracted CSV files.
@@ -33,6 +36,10 @@ def publish_data_package(
             Defaults to False. If True, the created package will be validated
             using the frictionless data library and any validation errors will be
             logged.
+        include_eex_auctions (bool): Whether to include the EEX auctions data in the
+            data package. Defaults to False. If True, the EEX auctions data will be
+            included in the data package, otherwise it will be excluded due to
+            licensing issues.
 
     Returns:
         tuple[Package, Report | None]: The created data package and the validation
@@ -65,10 +72,6 @@ def publish_data_package(
         "nace_mappings": settings.fp(
             "nace_from_leakage_lists", settings.dir_extracted, ending="parquet"
         ),
-        # exclude the EEX auction data due to licensing issues
-        # "eex_auctions": settings.fp(
-        #     "eex_auctions", settings.dir_extracted, ending="parquet"
-        # ),
         "powerplants": settings.fp(
             "powerplants", settings.dir_extracted, ending="parquet"
         ),
@@ -84,6 +87,10 @@ def publish_data_package(
         "map_orbis": settings.fp("map_orbis", settings.dir_extracted, ending="parquet"),
     }
 
+    if include_eex_auctions:
+        data_paths["eex_auctions"] = settings.fp(
+            "eex_auctions", settings.dir_extracted, ending="parquet"
+        )
     # loop over the tables, prepare the data and create resources
     resources = []
     for table_name, path in data_paths.items():

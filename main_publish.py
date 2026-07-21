@@ -10,6 +10,9 @@ if __name__ == "__main__":
     fn_publish = Path("published") / f"eutl_data_package_{date.today().isoformat()}.zip"
     setup_logging("INFO")
     package, report = publish_data_package(
-        settings=settings, fn_out=fn_publish, validate_package=True
+        settings=settings,
+        fn_out=fn_publish,
+        validate_package=True,
+        include_eex_auctions=False,
     )
     print("here")
