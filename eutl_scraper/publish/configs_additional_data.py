@@ -222,3 +222,23 @@ class MapEntsoeToPlant(BaseConfig):
             "plant_id": "plant_id",
         }
     )
+
+
+@dataclass
+class MapOrbis(BaseConfig):
+    name: str = "map_orbis"
+    schema_path: Path = SCHEMA_PATH / "map_orbis.yaml"
+    column_mapping: dict[str, str] = field(
+        default_factory=lambda: {
+            "account_holder_id": "account_holder_id",
+            "orbis_bvd_id": "orbis_bvd_id",
+            "source": "source",
+            "rank": "rank",
+        }
+    )
+
+    def __post_init__(self):
+        self.type_convertors = {
+            "rank": self._to_nullable_int("rank"),
+            "created_at": self._to_datetime("created_at"),
+        }

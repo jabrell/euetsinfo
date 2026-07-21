@@ -81,6 +81,7 @@ def publish_data_package(
         "map_entsoe_to_plant": settings.fp(
             "map_entsoe_to_plant", settings.dir_extracted, ending="parquet"
         ),
+        "map_orbis": settings.fp("map_orbis", settings.dir_extracted, ending="parquet"),
     }
 
     # loop over the tables, prepare the data and create resources

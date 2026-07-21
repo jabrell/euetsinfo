@@ -83,6 +83,7 @@ class AddMissingAccountsFromTransactionsPipeline(Pipeline):
         "closingDate",
         "account_id",
         "account_type2",
+        "registry_id",
     ]
 
     def load(self) -> None:
@@ -115,6 +116,7 @@ class AddMissingAccountsFromTransactionsPipeline(Pipeline):
             df_missing_parties[self._STUB_COLUMNS]
             .assign(
                 accountName=lambda df: df["accountName"].fillna("NotKnown"),
+                registry_id=lambda df: df["registry_id"].str.split("_").str[0],
                 account_type=lambda df: df["account_type2"].map(
                     self._format_account_type
                 ),

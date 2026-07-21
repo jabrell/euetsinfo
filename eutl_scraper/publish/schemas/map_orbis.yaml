@@ -1,0 +1,51 @@
+name: map_orbis
+title: Mapping from EUTL account holders to ORBIS companies
+description: >-
+  Mapping from EUTL account holders to ORBIS companies. The mapping is based on the
+  company registration number given in the EUTL. In the dataset provided here company
+  registration numbers belong to the account holder. The matching has been performed
+  for several years which is indicated the source column. The mapping contains
+  a rank column which indicates the quality of the match. Cameron and Ho (2024) recommend
+  to use only the matches with rank 1.
+sources:
+  - title: >-
+      Cameron, A. & Ho, V. (2024): Matching the EU Transaction Log and ORBIS:
+      A Natural Language Processing approach.
+    path: https://single-market-economy.ec.europa.eu/single-market/chief-economist-business-intelligence-unit/analytical-work/single-market-industry-and-competitiveness/matching-eu-transaction-log-orbis-database_en
+
+schema:
+  foreignKeys:
+    - fields:
+        - account_holder_id
+      reference:
+        resource: account_holders
+        fields:
+          - id
+  fields:
+    - name: account_holder_id
+      title: EUTL Account Holder ID
+      description: Unique identifier for the EUTL account holder.
+      type: string
+      constraints:
+        required: true
+    - name: orbis_bvd_id
+      title: ORBIS BVD ID
+      description: Unique identifier for the ORBIS company.
+      type: string
+      constraints:
+        required: true
+    - name: source
+      title: Source of the match
+      description: >-
+        The source of the match indicates the year of the EUTL data used for the
+        matching. The matching has been performed for several years which is indicated
+        the source column.
+      type: string
+      constraints:
+        required: true
+    - name: rank
+      title: Rank of the match
+      description: >-
+        The rank indicates the quality of the match. Cameron and Ho (2024) recommend
+        to use only the matches with rank 1.
+      type: integer

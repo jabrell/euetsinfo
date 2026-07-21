@@ -7,7 +7,7 @@ from eutl_scraper import AllDataBundle, Settings, setup_logging
 
 if __name__ == "__main__":
     # path to the manual accounts file
-    fn_manual_accounts = Path("manual_data") / "accounts_20260620.xlsx"
+    fn_manual_accounts = Path("manual_data") / "accounts_20260721.xlsx"
 
     # settings and logging
     settings = Settings(

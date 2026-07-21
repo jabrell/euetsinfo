@@ -2,6 +2,7 @@ from .eutl import EUTLBundle
 from .other import (
     EEXAuctionsBundle,
     EntsoeEidBundle,
+    ExtractOrbisMatchingBundle,
     InstallationLocationsBundle,
     NaceFromLeakageListsBundle,
 )
@@ -37,4 +38,5 @@ class AllDataBundle(Bundle):
                 max_installations=self.max_installations,
             ).pipelines,
             *EntsoeEidBundle(self.settings).pipelines,
+            *ExtractOrbisMatchingBundle(self.settings).pipelines,
         ]
