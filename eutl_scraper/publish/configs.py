@@ -149,6 +149,7 @@ class AccountsConfig(BaseConfig):
         default_factory=lambda: {
             "account_id": "id",
             "accountName": "name",
+            "registry_id": "registry_id",
             "account_type": "account_type",
             "openingDate": "opening_date",
             "closingDate": "closing_date",

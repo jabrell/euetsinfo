@@ -136,7 +136,7 @@ class ExtractAccountsPipeline(Pipeline):
 
     _COLUMN_MAP: dict[str, str] = {
         "account_id": "account_id",
-        "registry_code": "registry_id",
+        "REGISTRY_CODE": "registry_id",
         "ACCOUNT_NAME": "accountName",
         "OPEN_DATE": "openingDate",
         "END_OF_VALIDITY_DATE": "closingDate",
@@ -146,14 +146,50 @@ class ExtractAccountsPipeline(Pipeline):
 
     def load(self) -> None:
         self.df = pd.read_csv(self.settings.fp("accounts", self.settings.dir_source))
+        self.df_manual = pd.read_excel(
+            self.settings.fp(
+                "manual_accounts", self.settings.dir_source, ending="xlsx"
+            ),
+            skipfooter=2,
+            engine="calamine",
+            na_values=["-"],
+            keep_default_na=True,
+        )
 
     def transform(self) -> None:
         self.df = (
             self.df.pipe(self._strip_str)
             .pipe(self._clean_and_create_ids)
             .pipe(self._rename_and_check)
-            .assign(created_at=pd.Timestamp.now())
         )
+
+        # look whether the manual accounts contain any new accounts not already
+        # in the extracted accounts. If so, append them to the extracted accounts
+        # table
+        given_accounts = self.df.account_id.unique()
+        df = (
+            self.df_manual.pipe(self._strip_str)
+            .rename(
+                columns={
+                    "..1": "REGISTRY_CODE",
+                    "Account Identifier": "ACCOUNT_IDENTIFIER",
+                }
+            )
+            .pipe(self._clean_and_create_ids)
+            .query(f"account_id not in {list(given_accounts)}")
+            .rename(
+                columns={
+                    "REGISTRY_CODE": "registry_id",
+                    "Account Name": "accountName",
+                    "account_id": "account_id",
+                    "Account Type": "account_type",
+                }
+            )[["account_id", "registry_id", "accountName", "account_type"]]
+        )
+        self.df = pd.concat([self.df, df], ignore_index=True).assign(
+            created_at=pd.Timestamp.now(tz="UTC")
+        )
+        assert self.df.account_id.is_unique, "account_id is not unique after merge"
 
     def save(self) -> None:
         self.df.to_parquet(
@@ -204,7 +240,7 @@ class ExtractAccountsPipeline(Pipeline):
             DataFrame containing accounts in the published shape.
         """
         df_accounts = df.rename(columns=cls._COLUMN_MAP).drop(
-            columns=["REGISTRY_NAME", "ACCOUNT_IDENTIFIER", "REGISTRY_CODE"]
+            columns=["REGISTRY_NAME", "ACCOUNT_IDENTIFIER"]
         )
         df_accounts = df_accounts.assign(
             account_type=(
