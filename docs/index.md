@@ -31,9 +31,8 @@ Furthermore **linking tables** to relate the EUTL data to other datasets are pro
 
 | Data | Reference | Remarks |
 | --- | --- | --- |
-| Mapping to  [ENTSOE power plants](https://transparency.entsoe.eu/)| [Abrell, Kosch, and Stimpfle (2025), *Linking EU ETS installations to ENTSO-E Power Plants and IEP Facilities*.](../static/abrell_kosch_stimpfle_2025_linking_euets_entsoe_iep.pdf)| |
-| Mapping to facilities regulated under the [Industrial Emission Directive](https://industry.eea.europa.eu/) (local air pollution) | [Abrell, Kosch, and Stimpfle (2025), *Linking EU ETS installations to ENTSO-E Power Plants and IEP Facilities*.](../static/abrell_kosch_stimpfle_2025_linking_euets_entsoe_iep.pdf) | |
-| Describes the methodology used to establish the mapping from EUTL installations to ENTSO-E power plants and IEP facilities. [Download PDF](../static/abrell_kosch_stimpfle_2025_linking_euets_entsoe_iep.pdf). | |
+| Mapping to  [ENTSOE power plants](https://transparency.entsoe.eu/)| [Abrell, Kosch, and Stimpfle (2025), *Linking EU ETS installations to ENTSO-E Power Plants and IEP Facilities*.](./static/abrell_kosch_stimpfle_2025_linking_euets_entsoe_iep.pdf)| |
+| Mapping to facilities regulated under the [Industrial Emission Directive](https://industry.eea.europa.eu/) (local air pollution) | [Abrell, Kosch, and Stimpfle (2025), *Linking EU ETS installations to ENTSO-E Power Plants and IEP Facilities*.](./static/abrell_kosch_stimpfle_2025_linking_euets_entsoe_iep.pdf) | |
 |  Mapping from EUETS company registration numbers to the ORBIS identifiers. | [Cameron, A. & Ho, V. (2024): Matching the EU Transaction Log and ORBIS:  A Natural Language Processing approach.](https://single-market-economy.ec.europa.eu/single-market/chief-economist-business-intelligence-unit/analytical-work/single-market-industry-and-competitiveness/matching-eu-transaction-log-orbis-database_en)|
 
 ## Acknowledgements
