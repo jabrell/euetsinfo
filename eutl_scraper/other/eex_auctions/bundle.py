@@ -113,11 +113,16 @@ class ExtractEEXAuctionsPipeline(Pipeline):
         self.df_zip = extract_data(zip_) if zip_.exists() else None
 
     def transform(self) -> None:
-        frames = [df for df in (self.df_xlsx, self.df_zip) if df is not None]
-        if not frames:
+        frames: list[pd.DataFrame | None] = list()
+        if self.df_xlsx is not None and not self.df_xlsx.empty:
+            frames.append(self.df_xlsx.pipe(parse_auctions))
+        if self.df_zip is not None and not self.df_zip.empty:
+            frames.append(self.df_zip.pipe(parse_auctions))
+        if len(frames) == 0:
             raise ValueError("No EEX auction artefact on disk to extract from.")
-        df = pd.concat(frames, ignore_index=True) if len(frames) > 1 else frames[0]
-        self.df = parse_auctions(df).assign(created_at=pd.Timestamp.now())
+        self.df = pd.concat(frames, ignore_index=True).assign(
+            created_at=pd.Timestamp.now()
+        )
 
     def save(self) -> None:
         self.df.to_parquet(
@@ -140,7 +145,7 @@ class EEXAuctionsBundle(Bundle):
 
     name = "eex_auctions"
 
-    def __init__(self, settings: Settings, download_history: bool = False):
+    def __init__(self, settings: Settings, download_history: bool = True):
         self.download_history = download_history
         super().__init__(settings)
 

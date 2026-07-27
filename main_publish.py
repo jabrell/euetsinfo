@@ -13,6 +13,6 @@ if __name__ == "__main__":
         settings=settings,
         fn_out=fn_publish,
         validate_package=True,
-        include_eex_auctions=False,
+        include_eex_auctions=True,
     )
     print("here")

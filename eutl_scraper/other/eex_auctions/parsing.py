@@ -12,6 +12,7 @@ MAP_COLUMN_NAMES = {
     "Certificate": "certificate",
     "Status": "status",
     "Country": "country",
+    "Zone": "country",
     # --- Prices ---
     "Auction Price €/tCO2": "auction_price_eur_per_tco2",
     "Minimum Bid €/tCO2": "minimum_bid_eur_per_tco2",

@@ -10,6 +10,7 @@ schema:
   primaryKey:
     - auction_name
     - date
+    - contract
   missingValues:
     - ""
     - "NA"
@@ -24,8 +25,6 @@ schema:
       title: Auction Price (EUR/tCO2)
       description: Clearing price of the auction in EUR per tonne of CO2.
       type: number
-      constraints:
-        required: true
     - name: auction_volume_tco2
       title: Auction Volume (tCO2)
       description: Total volume auctioned in tonnes of CO2.
@@ -36,26 +35,18 @@ schema:
       title: Average Bid Size
       description: Average size of bids submitted.
       type: number
-      constraints:
-        required: true
     - name: average_bids_per_bidder
       title: Average Bids per Bidder
       description: Average number of bids submitted per bidder.
       type: number
-      constraints:
-        required: true
     - name: average_volume_bid_per_bidder
       title: Average Volume Bid per Bidder
       description: Average volume bid per bidder.
       type: number
-      constraints:
-        required: true
     - name: average_volume_won_per_bidder
       title: Average Volume Won per Bidder
       description: Average volume won per bidder.
       type: number
-      constraints:
-        required: true
     - name: contract
       title: Contract
       description: Contract type of the auction.
@@ -66,14 +57,10 @@ schema:
       title: Country
       description: Country conducting the auction.
       type: string
-      constraints:
-        required: true
     - name: cover_ratio
       title: Cover Ratio
       description: Ratio of total bids to volume auctioned.
       type: number
-      constraints:
-        required: true
     - name: date
       title: Date
       description: Date of the auction.
@@ -84,44 +71,30 @@ schema:
       title: Maximum Bid (EUR/tCO2)
       description: Highest bid price in EUR per tonne of CO2.
       type: number
-      constraints:
-        required: true
     - name: mean_price_eur_per_tco2
       title: Mean Price (EUR/tCO2)
       description: Mean bid price in EUR per tonne of CO2.
       type: number
-      constraints:
-        required: true
     - name: median_price_eur_per_tco2
       title: Median Price (EUR/tCO2)
       description: Median bid price in EUR per tonne of CO2.
       type: number
-      constraints:
-        required: true
     - name: minimum_bid_eur_per_tco2
       title: Minimum Bid (EUR/tCO2)
       description: Lowest bid price in EUR per tonne of CO2.
       type: number
-      constraints:
-        required: true
     - name: number_of_bids_submitted
       title: Number of Bids Submitted
       description: Total number of bids submitted.
       type: integer
-      constraints:
-        required: true
     - name: number_of_successful_bidders
       title: Number of Successful Bidders
       description: Number of bidders that won allowances.
       type: integer
-      constraints:
-        required: true
     - name: number_of_successful_bids
       title: Number of Successful Bids
       description: Number of bids that were successful.
       type: integer
-      constraints:
-        required: true
     - name: revenue_at_eur
       title: Revenue Austria (EUR)
       description: Auction revenue allocated to Austria.
@@ -266,20 +239,14 @@ schema:
       title: Std Dev Bid Volume per Bidder
       description: Standard deviation of bid volume per bidder.
       type: number
-      constraints:
-        required: true
     - name: standard_deviation_volume_won_per_bidder
       title: Std Dev Volume Won per Bidder
       description: Standard deviation of volume won per bidder.
       type: number
-      constraints:
-        required: true
     - name: status
       title: Status
       description: Status of the auction.
       type: string
-      constraints:
-        required: true
     - name: time
       title: Time
       description: Time of the auction.
@@ -290,20 +257,14 @@ schema:
       title: Total Amount of Bids
       description: Total volume of all bids submitted.
       type: integer
-      constraints:
-        required: true
     - name: total_number_of_bidders
       title: Total Number of Bidders
       description: Total number of participating bidders.
       type: integer
-      constraints:
-        required: true
     - name: total_revenue_eur
       title: Total Revenue (EUR)
       description: Total auction revenue in EUR.
       type: number
-      constraints:
-        required: true
     - name: datetime
       title: Datetime
       description: Combined date and time of the auction.
