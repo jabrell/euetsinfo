@@ -27,14 +27,15 @@ ZIP_PATTERN = re.compile(
 
 
 def download_auction_reports(
-    settings: Settings, download_history: bool = False
+    settings: Settings, download_history: bool = True
 ) -> tuple[Path | None, Path | None]:
     """Download the current auction price data (XLSX) and optionally the historical
     data (ZIP) from the EEX website.
 
     Args:
         settings (Settings): The settings object containing configuration values.
-        download_history: Whether to download the historical data ZIP file.
+        download_history (bool): Whether to download the historical data ZIP file.
+            Default is True.
 
     Returns:
         A tuple of (xlsx_path, zip_path) where each is a Path to the downloaded
