@@ -46,10 +46,11 @@ class FetchTransactionsPipeline(Pipeline):
     """
 
     name = "fetch_transactions"
+    # todo: need to fetch the latest URL dynamically
     URL = (
         "https://climate.ec.europa.eu/document/download/"
-        "0cda99f1-16f6-41e7-b190-887cd71339a4_en"
-        "?filename=transactions_eutl_2024_0.zip"
+        "6be60240-c5ec-4389-a78a-b5a16d6b9849_en"
+        "?filename=transactions_eutl_2026.zip"
     )
     CSV_PREFIX = "transactions_EUTL_PUBLIC_NOTESD"
 

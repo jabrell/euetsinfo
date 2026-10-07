@@ -162,6 +162,18 @@ class AddMissingAccountsFromTransactionsPipeline(Pipeline):
             )
             .drop_duplicates()
         )
+
+        # some duplicates are not removed as the lack the account_type_1 entry for
+        # one of the otherwise duplicated row. So we drop them explicitly keeping
+        # the occurence that has the account_type_1 value.
+        subset = df_parties.columns.difference(["account_type1"])
+
+        df_parties = (
+            df_parties.sort_values("account_type1", na_position="last")
+            .drop_duplicates(subset=subset, keep="first")
+            .sort_index()
+        )
+
         if not df_parties.account_id.is_unique:
             raise ValueError(
                 "Derived account_id is not unique across transaction parties."
