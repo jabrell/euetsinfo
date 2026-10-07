@@ -321,3 +321,5 @@ map_registryCodes = {
 }
 
 map_registryCode_inv = {v: k for k, v in map_registryCodes.items()}
+# transactions CSV uses "Eu" instead of "European Commission"
+map_registryCode_inv["Eu"] = "EU"
