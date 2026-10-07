@@ -20,7 +20,7 @@ reproducibility; newest release first.
 
 | Version | Published | Zenodo | Changes |
 | --- | --- | --- | --- |
-| 3 | 2026-10-07 | [10.5281/zenodo.23208374](https://doi.org/10.5281/zenodo.23208374) | Update for the 2026 release of EUTL data. Fix: transaction parties held in the EU registry (registry name `Eu`) now get registry id `EU` and a valid account id; previously these were missing, and 24 accounts appeared twice in the accounts table (with and without registry id). |
+| 3 | 2026-10-07 | [10.5281/zenodo.23208374](https://doi.org/10.5281/zenodo.23208374) | Update for the 2026 release of EUTL data. Fix: transaction parties held in the EU registry (registry name `Eu`) now get registry id `EU` and a valid account id; previously these were missing, and 24 accounts appeared twice in the accounts table (with and without registry id). Fix: projects issuing temporary CERs now have project type `tCER` (previously `CER`). |
 | 2 | 2026-07-17 | [10.5281/zenodo.21414185](https://doi.org/10.5281/zenodo.21414185) | Added links to ENTSO-E power plants and to industrial facilities reporting under the Industrial Emission Directive. |
 | 1 | 2026-06-02 | [10.5281/zenodo.20509231](https://doi.org/10.5281/zenodo.20509231) | Initial release. |
 
