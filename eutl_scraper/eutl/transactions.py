@@ -269,14 +269,16 @@ class ExtractTransactionsPipeline(Pipeline):
         """
 
         def impose_project_type(unit_type_desc: str) -> str | None:
+            # ERUs converted from RMUs stem from LULUCF projects -> "RMU";
+            # otherwise use the leading unit code, e.g. "tCER - Temporary CER"
+            # (substring matching would label tCER as CER)
+            if not isinstance(unit_type_desc, str):
+                return None
             if "RMU" in unit_type_desc:
                 return "RMU"
-            if "CER" in unit_type_desc:
-                return "CER"
-            if "tCER" in unit_type_desc:
-                return "tCER"
-            if "ERU" in unit_type_desc:
-                return "ERU"
+            code = unit_type_desc.split(" - ")[0].strip()
+            if code in {"CER", "tCER", "ERU"}:
+                return code
             return None
 
         return (

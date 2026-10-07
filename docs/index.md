@@ -10,7 +10,19 @@ Following open science and FAIR data principles, the complete processed dataset 
 
 If you're interested in the data produced by this repository, you can access them
 interactively using the [Bruegel ETS Tracker](https://ets.bruegel.org/). The source
-data can be downloaded from [Zenodo](https://zenodo.org/records/20509231)
+data can be downloaded from [Zenodo](https://doi.org/10.5281/zenodo.20509230)
+(this link always points to the latest release).
+
+## Releases
+
+All releases are published on Zenodo. Earlier versions remain available for
+reproducibility; newest release first.
+
+| Version | Published | Zenodo | Changes |
+| --- | --- | --- | --- |
+| 3 | 2026-10-07 | [10.5281/zenodo.23208374](https://doi.org/10.5281/zenodo.23208374) | Update for the 2026 release of EUTL data. Fix: transaction parties held in the EU registry (registry name `Eu`) now get registry id `EU` and a valid account id; previously these were missing, and 24 accounts appeared twice in the accounts table (with and without registry id). Fix: projects issuing temporary CERs now have project type `tCER` (previously `CER`). |
+| 2 | 2026-07-17 | [10.5281/zenodo.21414185](https://doi.org/10.5281/zenodo.21414185) | Added links to ENTSO-E power plants and to industrial facilities reporting under the Industrial Emission Directive. |
+| 1 | 2026-06-02 | [10.5281/zenodo.20509231](https://doi.org/10.5281/zenodo.20509231) | Initial release. |
 
 ## Which data are processed
 

@@ -21,6 +21,7 @@ dependencies = [
     "pandas>=2.3.3",
     "pyarrow>=23.0.1",
     "python-calamine>=0.6.2",
+    "requests>=2.34.2",
     "tqdm>=4.67.1",
     "xlrd>=2.0.2",
 ]
