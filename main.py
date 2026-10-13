@@ -15,7 +15,7 @@ if __name__ == "__main__":
         manual_files={
             "manual_accounts": fn_manual_accounts,
             "existing_installation_locations": Path(
-                "manual_data/coordinates_geoapify.csv"
+                "manual_data/coordinates_geoapify_updated.csv"
             ),
         },
     )
