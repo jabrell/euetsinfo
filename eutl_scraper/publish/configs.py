@@ -93,9 +93,8 @@ class BaseConfig:
 class InstallationsConfig(BaseConfig):
     """Publication config for the `installations` table.
 
-    Covers the installations participating in the EU ETS. ETS2 stub rows
-    created by the augment step are included; they carry `ets_id="ETS2"`
-    and have no associated account.
+    Covers the installations participating in the EU ETS (`ets_id="euets"`)
+    and the ETS2 regulated entities (`ets_id="ets2"`, activity type 70).
     """
 
     name: str = "installations"

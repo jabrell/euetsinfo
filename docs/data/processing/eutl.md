@@ -58,13 +58,12 @@ tables together, so they are constructed once, the same way, everywhere.
 
 Most data describe the original EU ETS (covering stationary installations and
 aviation, here tagged `euets`). The newer **ETS2** (buildings, road transport,
-and additional fuels) appears in the compliance data before the installation
-register catches up. The `CreateETS2InstallationsPipeline` detects
-`installation_id`s that occur in compliance but are missing from the
-installations table and creates stub installation rows tagged `ets_id="ETS2"`,
-so that every compliance record resolves to an installation. The pipeline
-refuses to run if more than 30 installations are missing — a safety check that
-flags an upstream change rather than silently mass-tagging rows.
+and additional fuels) regulates fuel suppliers rather than installations. These
+**regulated entities** are listed in the EUTL operators file alongside the EU ETS
+installations, with activity type code 70 ("Regulated Entity"). The installations
+extraction tags them `ets_id="ets2"`; all other rows are tagged `euets`. The
+compliance table carries no ETS identifier of its own — join it to installations
+via `installation_id` to tell the two systems apart.
 
 ## Accounts
 

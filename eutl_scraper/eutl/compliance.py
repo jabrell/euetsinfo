@@ -186,7 +186,6 @@ class ExtractCompliancePipeline(Pipeline):
                 installation_id=lambda df: (
                     df.REGISTRY_CODE + "_" + df.INSTALLATION_IDENTIFIER.astype(str)
                 ),
-                ets_id="euets",
                 snapshot_date=pd.to_datetime(df.SNAPSHOT_DATE, format="%Y-%m-%d"),
             )
             .drop(columns=["INSTALLATION_IDENTIFIER", "SNAPSHOT_DATE"])

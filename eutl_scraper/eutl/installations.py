@@ -21,6 +21,11 @@ from eutl_scraper.settings import DownloadClient, Settings
 
 from .union_registry_scrapers import resolve_download_url
 
+# Activity type codes that identify ETS2 regulated entities (fuel
+# suppliers under Chapter IVa of Directive 2003/87/EC). Every other code
+# belongs to the EU ETS.
+ETS2_ACTIVITY_TYPE_CODES: frozenset[int] = frozenset({70})
+
 
 class FetchInstallationsPipeline(Pipeline):
     """Download the raw EUTL installations CSV from the EUTL public Azure blob.
@@ -99,8 +104,9 @@ class ExtractInstallationsPipeline(Pipeline):
         Two cohesive outputs derived from one cleaning pass:
 
         - The cleaned **installations** table — one row per installation
-          with composite `installation_id`, registry IDs, activity
-          metadata, address, and snapshot / `created_at` stamps.
+          with composite `installation_id`, `ets_id` (derived from the
+          activity type code), registry IDs, activity metadata, address,
+          and snapshot / `created_at` stamps.
         - The **link_installation_account** table mapping
           `installation_id` to `account_id` with the snapshot /
           `created_at` stamps.
@@ -192,7 +198,9 @@ class ExtractInstallationsPipeline(Pipeline):
 
         Returns:
             DataFrame with composite `installation_id` and `account_id`
-            columns, `ets_id`, and a parsed `snapshot_date`.
+            columns, `ets_id` (`"ets2"` for activity type codes in
+            `ETS2_ACTIVITY_TYPE_CODES`, `"euets"` otherwise), and a parsed
+            `snapshot_date`.
         """
         map_col = {"REGISTRY_CODE": "registry_id"}
         return (
@@ -203,7 +211,9 @@ class ExtractInstallationsPipeline(Pipeline):
                 account_id=lambda df: (
                     df.ACCOUNT_REGISTRY_CODE + "_" + df.ACCOUNT_IDENTIFIER.astype(str)
                 ),
-                ets_id="euets",
+                ets_id=lambda df: df.ACTIVITY_TYPE_CODE.isin(
+                    ETS2_ACTIVITY_TYPE_CODES
+                ).map({True: "ets2", False: "euets"}),
                 snapshot_date=pd.to_datetime(df.SNAPSHOT_DATE, format="%Y-%m-%d"),
             )
             .drop(columns=["INSTALLATION_IDENTIFIER", "SNAPSHOT_DATE"])

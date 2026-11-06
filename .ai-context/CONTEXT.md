@@ -35,7 +35,7 @@ _Avoid_: using entity names as download names — "compliance" data comes from `
 A pipeline whose **Load** reads only from `dir_source` (no remote calls) and whose **Save** writes to `dir_extracted`. Produces one logical entity (e.g. accounts, installations, account_holders). May have multi-input load (e.g. account holders reads the manual Excel plus the accounts raw file).
 
 **Augment Pipeline**:
-A pipeline whose **Save** writes back to `dir_extracted`, typically overwriting an existing entity. Its **Load** reads from `dir_extracted` (multiple entities allowed); it may *additionally* read from `dir_source` when the extracted artifacts do not preserve the upstream detail the augment needs (e.g. the missing-accounts-from-transactions augment needs raw per-side party columns that `ExtractTransactionsPipeline` drops). The defining trait of an augment is "writes back into the extracted layer," not "reads only from it." The ETS2-stubs and missing-accounts-from-transactions work are augment pipelines.
+A pipeline whose **Save** writes back to `dir_extracted`, typically overwriting an existing entity. Its **Load** reads from `dir_extracted` (multiple entities allowed); it may *additionally* read from `dir_source` when the extracted artifacts do not preserve the upstream detail the augment needs (e.g. the missing-accounts-from-transactions augment needs raw per-side party columns that `ExtractTransactionsPipeline` drops). The defining trait of an augment is "writes back into the extracted layer," not "reads only from it." The missing-accounts-from-transactions work is an augment pipeline.
 _Note_: "augment" is no longer a phase inside a larger pipeline — it is a pipeline of its own. It is **not** a special "depends on previous steps" construct; its dependency on prior outputs is just "my load reads files from `dir_extracted` (and sometimes `dir_source`)" — the same kind of disk-based dependency an Extract Pipeline has on `dir_source`.
 
 **Bundle**:
@@ -56,7 +56,7 @@ _Avoid_: pipeline-of-pipelines, meta-pipeline, nested bundle.
   - Fetch: remote → `dir_source`
   - Extract: `dir_source` → `dir_extracted`
   - Augment: `dir_extracted` (and optionally `dir_source`) → `dir_extracted`
-- Cross-entity work (ETS2 stubs, missing accounts) is modelled as an **Augment Pipeline**, never as a phase inside another pipeline.
+- Cross-entity work (e.g. missing accounts from transactions) is modelled as an **Augment Pipeline**, never as a phase inside another pipeline.
 
 ## Flagged ambiguities
 

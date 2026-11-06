@@ -23,10 +23,6 @@ Per-entity bundles and pipelines that make up
 
 ::: eutl_scraper.eutl.account_holders
 
-## Augment: ETS2 installations
-
-::: eutl_scraper.eutl.create_ets2_installations
-
 ## Augment: accounts missing from transactions
 
 ::: eutl_scraper.eutl.add_missing_accounts_from_transactions
