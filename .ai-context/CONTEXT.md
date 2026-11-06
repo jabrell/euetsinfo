@@ -39,7 +39,7 @@ A named, **flat** collection of pipelines — a list of nodes with implicit edge
 1. **Factory** — accepts source-level runtime config (API keys, user-supplied file paths, knobs like `max_installations`) and uses it to decide *which* pipelines to instantiate. E.g. the geocoding bundle includes `GeoapifyPipeline` only if a Geoapify key is provided.
 2. **Runner** — `Bundle.run()` is `for p in self.pipelines: p.run()` in declared list order, nothing more.
 3. **Composition target** — bundles overlap freely. A pipeline may be reachable from more than one Bundle; a coarser Bundle composes by *flattening* finer Bundles' pipeline lists at construction time (e.g. `EUTLBundle._build_pipelines` inlines `ComplianceBundle(...).pipelines`, `AccountsBundle(...).pipelines`, …). Composition lives at the factory level; the runtime type stays `list[Pipeline]`.
-Source-level runtime config (API keys, manually-downloaded file paths) enters the system via the Bundle's constructor. Per-pipeline disk paths still come from **Settings**.
+Source-level runtime config (API keys, manually-downloaded file paths) enters the system via the Bundle's constructor. Per-pipeline disk paths still come from **Settings**. Example: the geocoding bundle's `manual_entries` (`{source_label: path}` for curated coordinate files) is passed to the constructor rather than via `Settings.manual_files`, because its keys are open-ended source labels, not a fixed enumerated set.
 _Not a Pipeline_: a Bundle does not have load/transform/save; it only has `run()`. The shared interface with Pipeline is `run()` and nothing else (Composite pattern, not inheritance).
 _Avoid_: pipeline-of-pipelines, meta-pipeline, nested bundle.
 

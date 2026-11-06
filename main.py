@@ -15,7 +15,7 @@ if __name__ == "__main__":
         manual_files={
             "manual_accounts": fn_manual_accounts,
             "existing_installation_locations": Path(
-                "manual_data/coordinates_geoapify_updated.csv"
+                "manual_data/coordinates_geoapify.csv"
             ),
         },
     )
@@ -32,6 +32,9 @@ if __name__ == "__main__":
     AllDataBundle(
         settings=settings,
         api_keys=api_keys,
+        manual_entries={
+            "manual_bruegel": Path("manual_data/bruegel_manual.csv"),
+        },
     ).run()
 
     print("here")
