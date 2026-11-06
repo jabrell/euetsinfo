@@ -22,8 +22,12 @@ class FetchCompliancePipeline(Pipeline):
     """Download the raw EUTL compliance CSV from the EUTL public Azure blob.
 
     Inputs:
-        Remote URL — the EUTL operators-yearly-activity daily snapshot,
-        served as a gzipped CSV from the EU's public Azure blob storage.
+        The EUTL operators-yearly-activity daily snapshot ("Operators
+        Yearly Activity Daily"), served as a gzipped CSV from the EU's
+        public Azure blob storage.
+        The download URL is resolved at runtime from the Union Registry
+        data-download listing via `resolve_download_url(DOWNLOAD_NAME)`
+        unless `url` is passed explicitly.
 
     Output:
         The raw compliance table as a single DataFrame (gzip already

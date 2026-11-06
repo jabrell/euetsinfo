@@ -27,8 +27,12 @@ class FetchRegistryHoldingsPipeline(Pipeline):
     public Azure blob.
 
     Inputs:
-        Remote URL — the EUTL registry holdings daily snapshot, served as a
-        gzipped CSV from the EU's public Azure blob storage.
+        The EUTL registry holdings daily snapshot ("Registry Holdings
+        Daily"), served as a gzipped CSV from the EU's public Azure blob
+        storage.
+        The download URL is resolved at runtime from the Union Registry
+        data-download listing via `resolve_download_url(DOWNLOAD_NAME)`
+        unless `url` is passed explicitly.
 
     Output:
         The raw registry holdings table as a single DataFrame (gzip already

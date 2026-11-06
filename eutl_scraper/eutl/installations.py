@@ -26,8 +26,11 @@ class FetchInstallationsPipeline(Pipeline):
     """Download the raw EUTL installations CSV from the EUTL public Azure blob.
 
     Inputs:
-        Remote URL — the EUTL operators daily snapshot, served as a
-        gzipped CSV from the EU's public Azure blob storage.
+        The EUTL operators daily snapshot ("Operators Daily"), served as
+        a gzipped CSV from the EU's public Azure blob storage.
+        The download URL is resolved at runtime from the Union Registry
+        data-download listing via `resolve_download_url(DOWNLOAD_NAME)`
+        unless `url` is passed explicitly.
 
     Output:
         The raw installations table as a single DataFrame (gzip already

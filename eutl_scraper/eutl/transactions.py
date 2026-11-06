@@ -36,6 +36,9 @@ class FetchTransactionsPipeline(Pipeline):
         Remote ZIP archive served by the European Commission's climate
         document portal. The archive contains a CSV whose filename starts
         with `transactions_EUTL_PUBLIC_NOTESD`.
+        The download URL is resolved at runtime from the Union Registry
+        data-download listing via `resolve_download_url(DOWNLOAD_NAME)`
+        unless `url` is passed explicitly.
 
     Output:
         The raw transactions table as a single DataFrame (read from the
@@ -308,7 +311,8 @@ class TransactionsBundle(Bundle):
     Data flow:
 
     - **FetchTransactionsPipeline**
-        - Input: remote ZIP archive (EC climate document portal URL).
+        - Input: remote ZIP archive (EC climate document portal; URL
+          resolved from the Union Registry data-download listing).
         - Output: `dir_source/eutl_transactions.csv` (the inner CSV from
           the ZIP, written as-is).
     - **ExtractTransactionsPipeline**

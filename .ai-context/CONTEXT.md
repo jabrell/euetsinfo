@@ -27,6 +27,10 @@ The coherent output of a single pipeline. Examples: "the raw EUTL accounts CSV,"
 **Fetch Pipeline**:
 A pipeline whose **Load** reaches a remote source and whose **Save** writes to `dir_source`. Its **Transform** may be identity (raw passthrough) or non-trivial (unzip a transactions archive, decompress gzip, drop sentinel rows). One fetch pipeline corresponds to one source operation and may produce multiple files.
 
+**Download Name**:
+The exact label of an entry in the Union Registry website's "Data Download" menu (e.g. `"Transactions"`, `"Operators Yearly Activity Daily"`). EUTL Fetch Pipelines declare it as `DOWNLOAD_NAME` and resolve the current URL from it at runtime (`resolve_download_url`); URLs are never hard-coded because the provider moves files while old URLs keep serving stale data. A failed lookup raises rather than falling back to a known URL.
+_Avoid_: using entity names as download names — "compliance" data comes from `"Operators Yearly Activity Daily"`, not the menu's `"Compliance <year>"` XLSX entries.
+
 **Extract Pipeline**:
 A pipeline whose **Load** reads only from `dir_source` (no remote calls) and whose **Save** writes to `dir_extracted`. Produces one logical entity (e.g. accounts, installations, account_holders). May have multi-input load (e.g. account holders reads the manual Excel plus the accounts raw file).
 

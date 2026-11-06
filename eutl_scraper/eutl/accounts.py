@@ -30,8 +30,11 @@ class FetchAccountsPipeline(Pipeline):
     """Download the raw EUTL accounts CSV from the EUTL public Azure blob.
 
     Inputs:
-        Remote URL — the EUTL accounts daily snapshot, served as a
+        The EUTL accounts daily snapshot ("Accounts Daily"), served as a
         gzipped CSV from the EU's public Azure blob storage.
+        The download URL is resolved at runtime from the Union Registry
+        data-download listing via `resolve_download_url(DOWNLOAD_NAME)`
+        unless `url` is passed explicitly.
 
     Output:
         The raw accounts table as a single DataFrame (gzip already
