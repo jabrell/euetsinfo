@@ -8,6 +8,12 @@ from zipfile import ZipFile
 
 import pandas as pd
 
+# Known names of the EUA (EU ETS1) primary-auction sheet, oldest first. EEX renamed
+# the sheet from "Primary Market Auction" to "EU ETS1" in the 2026 report. The
+# sheet is matched by name rather than position so that a future "EU ETS2" sheet
+# is never picked up by mistake; an unknown layout raises instead.
+PRIMARY_AUCTION_SHEETS = ("Primary Market Auction", "EU ETS1")
+
 
 def detect_header_row(df: pd.DataFrame) -> int | None:
     """Determine the header row in a DataFrame by looking for a row that
@@ -68,17 +74,21 @@ def extract_data_from_excel(file_path: str | Path | BytesIO) -> pd.DataFrame:
     Returns:
         A DataFrame with the extracted data.
     """
-    sheet_name = "Primary Market Auction"
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", message="Workbook contains no default style")
-        df = pd.read_excel(
-            file_path,
-            sheet_name=sheet_name,
-            header=None,
-        )
+        with pd.ExcelFile(file_path) as xls:
+            sheet_name = next(
+                (s for s in PRIMARY_AUCTION_SHEETS if s in xls.sheet_names), None
+            )
+            if sheet_name is None:
+                raise ValueError(
+                    f"None of the known EUA auction sheets {PRIMARY_AUCTION_SHEETS} "
+                    f"found in {file_path}. Available sheets: {xls.sheet_names}"
+                )
+            df = pd.read_excel(xls, sheet_name=sheet_name, header=None)
     df = extract_raw_data(df, max_rows=120)
 
-    if df.empty:
+    if df is None or df.empty:
         raise ValueError(f"No valid data found in Excel file {file_path}")
 
     return df
