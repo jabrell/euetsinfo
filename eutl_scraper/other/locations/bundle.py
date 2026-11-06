@@ -267,7 +267,7 @@ class ExtractInstallationLocationsPipeline(Pipeline):
         """Append the pre-loaded manual entries to the automatic locations."""
         if not self.manual_frames:
             return df_auto
-        return pd.concat([df_auto, *self.manual_frames], ignore_index=True)
+        return pd.concat([*self.manual_frames, df_auto], ignore_index=True)
 
     def _installations_to_fetch(self, service: str) -> pd.DataFrame:
         """Return installations needing a fresh API call for `service`."""
