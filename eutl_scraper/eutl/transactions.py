@@ -26,6 +26,7 @@ from eutl_scraper.pipeline import Bundle, Pipeline
 from eutl_scraper.settings import DownloadClient, Settings
 
 from .mappings import map_registryCode_inv
+from .union_registry_scrapers import resolve_download_url
 
 
 class FetchTransactionsPipeline(Pipeline):
@@ -46,15 +47,15 @@ class FetchTransactionsPipeline(Pipeline):
     """
 
     name = "fetch_transactions"
-    # todo: need to fetch the latest URL dynamically
-    URL = (
-        "https://climate.ec.europa.eu/document/download/"
-        "6be60240-c5ec-4389-a78a-b5a16d6b9849_en"
-        "?filename=transactions_eutl_2026.zip"
-    )
+    DOWNLOAD_NAME = "Transactions"
     CSV_PREFIX = "transactions_EUTL_PUBLIC_NOTESD"
 
-    def __init__(self, settings: Settings, client: DownloadClient | None = None):
+    def __init__(
+        self,
+        settings: Settings,
+        client: DownloadClient | None = None,
+        url: str | None = None,
+    ):
         """Initialise the pipeline.
 
         Args:
@@ -63,15 +64,20 @@ class FetchTransactionsPipeline(Pipeline):
             client: Shared HTTP client to reuse across multiple fetch
                 pipelines. If `None`, the pipeline creates and closes its
                 own.
+            url: Download URL to use instead of resolving `DOWNLOAD_NAME`
+                from the Union Registry data-download listing. Only
+                needed when the listing is unavailable.
         """
         super().__init__(settings)
         self._client = client
+        self._url = url
 
     def load(self) -> None:
         own_client = self._client is None
         client = self._client or DownloadClient()
         try:
-            self._zip_bytes: io.BytesIO = client.download_with_resume(url=self.URL)
+            url = self._url or resolve_download_url(self.DOWNLOAD_NAME, client)
+            self._zip_bytes: io.BytesIO = client.download_with_resume(url=url)
         finally:
             if own_client:
                 client.close()
