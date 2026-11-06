@@ -36,8 +36,9 @@ def resolve_download_url(name: str, client: DownloadClient | None = None) -> str
 
     Raises:
         httpx.HTTPStatusError: If the listing endpoint returns an error status.
-        ValueError: If the listing is malformed, or `name` matches no entry or
-            more than one entry. The message lists the available names.
+        ValueError: If the listing is not a list of objects, `name` matches no
+            entry or more than one entry (the message lists the available
+            names), or the matching entry has no `http(s)` URL.
     """
     own_client = client is None
     client = client or DownloadClient()
@@ -53,7 +54,13 @@ def resolve_download_url(name: str, client: DownloadClient | None = None) -> str
             f"got {type(entries).__name__}"
         )
 
-    matches = [e["url"] for e in entries if e.get("name") == name]
+    if not all(isinstance(e, dict) for e in entries):
+        raise ValueError(
+            f"Unexpected response from {DATA_DOWNLOAD_API}: expected a list of "
+            "objects, got non-object entries"
+        )
+
+    matches = [e for e in entries if e.get("name") == name]
     if len(matches) != 1:
         available = [e.get("name") for e in entries]
         problem = "No entry" if not matches else f"{len(matches)} entries"
@@ -62,5 +69,11 @@ def resolve_download_url(name: str, client: DownloadClient | None = None) -> str
             f"Available names: {available}"
         )
 
-    logger.info(f"Resolved {name!r} to {matches[0]}")
-    return matches[0]
+    url = matches[0].get("url")
+    if not isinstance(url, str) or not url.startswith(("http://", "https://")):
+        raise ValueError(
+            f"Entry {name!r} in {DATA_DOWNLOAD_API} has no valid download URL: {url!r}"
+        )
+
+    logger.info(f"Resolved {name!r} to {url}")
+    return url
