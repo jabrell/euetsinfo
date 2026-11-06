@@ -24,10 +24,10 @@ class AllDataBundle(Bundle):
         settings: Settings,
         api_keys: dict[str, str],
         max_installations: int | None = None,
-        manual_entries: dict[str, Path] | None = None,
+        manual_location_entries: dict[str, Path] | None = None,
     ):
         self.api_keys = api_keys
-        self.manual_entries = manual_entries
+        self.manual_location_entries = manual_location_entries
         self.max_installations = max_installations
         super().__init__(settings)
 
@@ -39,7 +39,7 @@ class AllDataBundle(Bundle):
             *InstallationLocationsBundle(
                 self.settings,
                 api_keys=self.api_keys,
-                manual_entries=self.manual_entries,
+                manual_location_entries=self.manual_location_entries,
                 max_installations=self.max_installations,
             ).pipelines,
             *EntsoeEidBundle(self.settings).pipelines,

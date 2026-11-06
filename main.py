@@ -32,7 +32,7 @@ if __name__ == "__main__":
     AllDataBundle(
         settings=settings,
         api_keys=api_keys,
-        manual_entries={
+        manual_location_entries={
             "manual_bruegel": Path("manual_data/bruegel_manual.csv"),
         },
     ).run()

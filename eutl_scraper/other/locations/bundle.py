@@ -10,7 +10,7 @@ Runs the configured services in parallel (one thread per service) and
 skips, per service, any `installation_id` that already has a row for that
 service in the user-supplied existing-locations CSV. The 10/50
 activity-type filter is applied once up front. Optional curated
-`manual_entries` files are appended to the result under their own
+`manual_location_entries` files are appended to the result under their own
 `source` label.
 
 Two classes:
@@ -18,7 +18,7 @@ Two classes:
 - `ExtractInstallationLocationsPipeline` — single pipeline producing the
   combined locations table.
 - `InstallationLocationsBundle` — thin Bundle wrapper that surfaces
-  `api_keys`, `manual_entries` and `max_installations` at the source-level
+  `api_keys`, `manual_location_entries` and `max_installations` at the source-level
   entry point.
 """
 
@@ -85,13 +85,13 @@ class ExtractInstallationLocationsPipeline(Pipeline):
         - Existing rows whose `source` does **not** map to any configured
           service are dropped — the output mirrors what the API loop would
           have produced.
-        - Rows from each `manual_entries` file are appended, tagged with the
-          dict key as `source`. Manual entries do **not** suppress API calls
+        - Rows from each `manual_location_entries` file are appended, tagged with the
+          dict key as `source`. Manual location entries do **not** suppress API calls
           and are not subject to the activity-type filter or
           `max_installations`.
 
-    Manual entries:
-        `manual_entries` maps a source label (e.g. `"manual_bruegel"`) to a
+    Manual location entries:
+        `manual_location_entries` maps a source label (e.g. `"manual_<provider>"`) to a
         CSV with exactly the columns `installation_id`, `latitude`,
         `longitude`, `created_at`. Files are read and validated in `load`,
         i.e. before any API call is made.
@@ -106,8 +106,8 @@ class ExtractInstallationLocationsPipeline(Pipeline):
     - A key in `api_keys` is not one of `_SERVICES`.
     - Existing-locations CSV is registered but missing
       `installation_id` or `source` columns.
-    - A `manual_entries` key collides with an automatic source label.
-    - A manual-entries file does not have exactly the expected columns,
+    - A `manual_location_entries` key collides with an automatic source label.
+    - A manual-location-entries file does not have exactly the expected columns,
       or has missing values, unparseable `created_at` values or duplicate
       `installation_id`s.
     """
@@ -119,7 +119,7 @@ class ExtractInstallationLocationsPipeline(Pipeline):
         settings: Settings,
         api_keys: dict[str, str],
         max_installations: int | None = None,
-        manual_entries: dict[str, Path] | None = None,
+        manual_location_entries: dict[str, Path] | None = None,
     ):
         super().__init__(settings)
         if not api_keys:
@@ -130,15 +130,15 @@ class ExtractInstallationLocationsPipeline(Pipeline):
                 f"Unknown geocoding services in api_keys: {sorted(unknown)}. "
                 f"Valid keys: {sorted(_SERVICES)}."
             )
-        manual_entries = manual_entries or {}
-        reserved = set(manual_entries) & _RESERVED_SOURCES
+        manual_location_entries = manual_location_entries or {}
+        reserved = set(manual_location_entries) & _RESERVED_SOURCES
         if reserved:
             raise ValueError(
-                f"manual_entries keys {sorted(reserved)} collide with automatic "
-                f"geocoding sources {sorted(_RESERVED_SOURCES)}."
+                f"manual_location_entries keys {sorted(reserved)} collide with "
+                f"automatic geocoding sources {sorted(_RESERVED_SOURCES)}."
             )
         self.api_keys = api_keys
-        self.manual_entries = manual_entries
+        self.manual_location_entries = manual_location_entries
         self.max_installations = max_installations
 
     def load(self) -> None:
@@ -153,7 +153,7 @@ class ExtractInstallationLocationsPipeline(Pipeline):
             df_inst = df_inst.head(self.max_installations)
         self.df_installations = df_inst
 
-        # Manual entries — optional; validated before any API call.
+        # Manual location entries — optional; validated before any API call.
         self.manual_frames = self._load_manual_entries()
 
         # Existing locations — optional.
@@ -227,31 +227,40 @@ class ExtractInstallationLocationsPipeline(Pipeline):
         )
 
     def _load_manual_entries(self) -> list[pd.DataFrame]:
-        """Read and validate each `manual_entries` file, tagged with its source."""
+        """Read and validate each `manual_location_entries` file.
+
+        Each file's rows are tagged with its dict key as `source`.
+        """
         columns = ["installation_id", "latitude", "longitude", "created_at"]
         frames: list[pd.DataFrame] = []
-        for source, path in self.manual_entries.items():
+        for source, path in self.manual_location_entries.items():
             df = pd.read_csv(path)
             if sorted(df.columns) != sorted(columns):
                 raise ValueError(
-                    f"Manual entries file {path} must have exactly the columns "
-                    f"{columns}. Found: {list(df.columns)}."
+                    f"Manual location entries file {path} must have exactly the "
+                    f"columns {columns}. Found: {list(df.columns)}."
                 )
             if df.isna().any().any():
-                raise ValueError(f"Manual entries file {path} has missing values.")
+                raise ValueError(
+                    f"Manual location entries file {path} has missing values."
+                )
             df["created_at"] = pd.to_datetime(
                 df["created_at"], format="ISO8601", errors="coerce"
             )
             if df["created_at"].isna().any():
                 raise ValueError(
-                    f"Manual entries file {path} has unparseable 'created_at' values."
+                    f"Manual location entries file {path} has unparseable "
+                    "'created_at' values."
                 )
             if df["installation_id"].duplicated().any():
                 raise ValueError(
-                    f"Manual entries file {path} has duplicate installation_ids."
+                    f"Manual location entries file {path} has duplicate "
+                    "installation_ids."
                 )
             frames.append(df.assign(source=source))
-            logger.info(f"Loaded {len(df)} manual entries for source {source!r}.")
+            logger.info(
+                f"Loaded {len(df)} manual location entries for source {source!r}."
+            )
         return frames
 
     def _append_manual_data(self, df_auto: pd.DataFrame) -> pd.DataFrame:
@@ -283,8 +292,8 @@ class InstallationLocationsBundle(Bundle):
     - `api_keys` — `dict[str, str]` mapping service key to API key (or
       user-agent string for OSM). Service keys must be a subset of
       `_SERVICES` (`googlemaps`, `geoapify`, `osm`).
-    - `manual_entries` — optional `dict[str, Path]` mapping a source label
-      (e.g. `"manual_bruegel"`) to a curated coordinates CSV. Appended to
+    - `manual_location_entries` — optional `dict[str, Path]` mapping a source label
+      (e.g. `"manual_<provider>"`) to a curated coordinates CSV. Appended to
       the output under that label; see
       `ExtractInstallationLocationsPipeline`.
     - `max_installations` — optional test cap, applied after the
@@ -304,10 +313,10 @@ class InstallationLocationsBundle(Bundle):
         settings: Settings,
         api_keys: dict[str, str],
         max_installations: int | None = None,
-        manual_entries: dict[str, Path] | None = None,
+        manual_location_entries: dict[str, Path] | None = None,
     ):
         self.api_keys = api_keys
-        self.manual_entries = manual_entries
+        self.manual_location_entries = manual_location_entries
         self.max_installations = max_installations
         super().__init__(settings)
 
@@ -316,7 +325,7 @@ class InstallationLocationsBundle(Bundle):
             ExtractInstallationLocationsPipeline(
                 self.settings,
                 api_keys=self.api_keys,
-                manual_entries=self.manual_entries,
+                manual_location_entries=self.manual_location_entries,
                 max_installations=self.max_installations,
             ),
         ]

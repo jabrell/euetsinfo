@@ -110,9 +110,8 @@ Two artefacts cannot be downloaded automatically and are supplied via `Settings(
   coordinates (needs `installation_id` + `source` columns); suppresses redundant geocoding calls.
 
 Manually **curated coordinates** are not a `manual_files` key: they are passed as
-`manual_entries={"manual_<provider>": Path(...)}` to `AllDataBundle`/`InstallationLocationsBundle`
-(e.g. `manual_data/bruegel_manual.csv` as `"manual_bruegel"`). The dict key becomes the `source`
-value; the CSV must have exactly `installation_id, latitude, longitude, created_at` and **no**
+`manual_location_entries={"manual_<provider>": Path(...)}` to `AllDataBundle`/`InstallationLocationsBundle`.
+The dict key becomes the `source` value; the CSV must have exactly `installation_id, latitude, longitude, created_at` and **no**
 `source` column. Files are validated in `load` (before any API call) and appended to the geocoded
 rows; they do not suppress API calls.
 
@@ -165,4 +164,4 @@ keys are `googlemaps`, `geoapify`, `osm` (for OSM the value is a user-agent stri
 parallel (one thread each). Activity types 10 (aircraft), 50 (shipping), and NA are skipped. When an
 existing-locations cache is registered, API calls are suppressed **per service** for already-cached
 `installation_id`s. The `max_installations` cap (applied after the activity-type filter) is available
-for local testing. `manual_entries` rows bypass both the activity-type filter and the cap.
+for local testing. `manual_location_entries` rows bypass both the activity-type filter and the cap.

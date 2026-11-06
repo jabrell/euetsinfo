@@ -5,8 +5,7 @@ description: >-
   (EU ETS). An installation can have one row per source: coordinates
   geocoded from the registered address by an API (e.g. "geoapify",
   "googlemaps") and manually curated coordinates (sources prefixed
-  "manual_", e.g. "manual_bruegel"). Manually curated coordinates are
-  generally more precise than geocoded ones.
+  "manual_").
 sources:
   - title: European Commission, EUTL database
     path: https://union-registry-data.ec.europa.eu/report/welcome
@@ -53,7 +52,7 @@ schema:
     - name: source
       title: Source of the data
       description: The source from which the coordinates were obtained (e.g.,
-        "geoapify", "googlemaps" for API geocoding; "manual_bruegel" for
+        "geoapify", "googlemaps" for API geocoding; "manual_<provider>" for
         manually curated coordinates).
       type: string
       constraints:
