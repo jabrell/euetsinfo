@@ -2,7 +2,10 @@ name: installation_locations
 title: EU ETS Installation Locations
 description: >-
   Locations of installations in the European Union Emissions Trading System
-  (EU ETS).
+  (EU ETS). An installation can have one row per source: coordinates
+  geocoded from the registered address by an API (e.g. "geoapify",
+  "googlemaps") and manually curated coordinates (sources prefixed
+  "manual_").
 sources:
   - title: European Commission, EUTL database
     path: https://union-registry-data.ec.europa.eu/report/welcome
@@ -10,6 +13,8 @@ sources:
     path: https://api.geoapify.com
   - title: Google Maps Geocoding API
     path: https://developers.google.com/maps/documentation/geocoding/overview
+  - title: Bruegel, manually curated installation coordinates
+    path: https://www.bruegel.org
 
 schema:
   primaryKey:
@@ -47,7 +52,8 @@ schema:
     - name: source
       title: Source of the data
       description: The source from which the coordinates were obtained (e.g.,
-        "geoapify", "googlemaps").
+        "geoapify", "googlemaps" for API geocoding; "manual_<provider>" for
+        manually curated coordinates).
       type: string
       constraints:
         required: true

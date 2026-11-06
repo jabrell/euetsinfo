@@ -18,15 +18,21 @@ addresses into latitude/longitude pairs.
 - Geocoding can run against several services in parallel — **Geoapify**, **Google
   Maps**, and **OpenStreetMap** — one thread each. Each service tags its rows with
   its own `source`, so results from different providers can be compared or
-  combined. Only Geoapify-derived coordinates are published; the Google Maps and
-  OSM paths exist for cross-checking and are not distributed.
+  combined. Of the geocoded coordinates, only Geoapify-derived ones are
+  published; the Google Maps and OSM paths exist for cross-checking and are not
+  distributed.
 - An optional user-maintained cache of already-geocoded coordinates can be
   supplied. When present, API calls are suppressed **per service** for any
   `installation_id` already cached for that service, which avoids re-spending API
   quota on each run.
+- Manually curated coordinates can be added as their own sources via
+  `manual_location_entries` (`{source_label: csv_path}`, labels prefixed
+  `manual_`). They are appended to the geocoded rows and do not replace them.
+  Their quality is the responsibility of the respective provider.
 
-The published table holds `installation_id`, `lat`, `lon`, and the `source`
-service, linking back to installations by `installation_id`.
+The published table holds `installation_id`, `latitude`, `longitude`, `source`,
+and `created_at`, linking back to installations by `installation_id`. An
+installation can have one row per source.
 
 ## NACE codes
 
