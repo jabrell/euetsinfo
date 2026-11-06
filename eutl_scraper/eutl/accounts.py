@@ -23,13 +23,18 @@ import pandas as pd
 from eutl_scraper.pipeline import Bundle, Pipeline
 from eutl_scraper.settings import DownloadClient, Settings
 
+from .union_registry_scrapers import resolve_download_url
+
 
 class FetchAccountsPipeline(Pipeline):
     """Download the raw EUTL accounts CSV from the EUTL public Azure blob.
 
     Inputs:
-        Remote URL — the EUTL accounts daily snapshot, served as a
+        The EUTL accounts daily snapshot ("Accounts Daily"), served as a
         gzipped CSV from the EU's public Azure blob storage.
+        The download URL is resolved at runtime from the Union Registry
+        data-download listing via `resolve_download_url(DOWNLOAD_NAME)`
+        unless `url` is passed explicitly.
 
     Output:
         The raw accounts table as a single DataFrame (gzip already
@@ -41,12 +46,14 @@ class FetchAccountsPipeline(Pipeline):
     """
 
     name = "fetch_accounts"
-    URL = (
-        "https://dlsclimabi.blob.core.windows.net/public-data/eutlpublic/"
-        "extracts/_all_extracts/account/accounts_daily.csv.gz"
-    )
+    DOWNLOAD_NAME = "Accounts Daily"
 
-    def __init__(self, settings: Settings, client: DownloadClient | None = None):
+    def __init__(
+        self,
+        settings: Settings,
+        client: DownloadClient | None = None,
+        url: str | None = None,
+    ):
         """Initialise the pipeline.
 
         Args:
@@ -55,15 +62,20 @@ class FetchAccountsPipeline(Pipeline):
             client: Shared HTTP client to reuse across multiple fetch
                 pipelines. If `None`, the pipeline creates and closes its
                 own.
+            url: Download URL to use instead of resolving `DOWNLOAD_NAME`
+                from the Union Registry data-download listing. Only
+                needed when the listing is unavailable.
         """
         super().__init__(settings)
         self._client = client
+        self._url = url
 
     def load(self) -> None:
         own_client = self._client is None
         client = self._client or DownloadClient()
         try:
-            self.df = client.download_csv(url=self.URL)
+            url = self._url or resolve_download_url(self.DOWNLOAD_NAME, client)
+            self.df = client.download_csv(url=url)
         finally:
             if own_client:
                 client.close()

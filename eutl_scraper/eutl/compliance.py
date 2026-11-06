@@ -15,13 +15,19 @@ import pandas as pd
 from eutl_scraper.pipeline import Bundle, Pipeline
 from eutl_scraper.settings import DownloadClient, Settings
 
+from .union_registry_scrapers import resolve_download_url
+
 
 class FetchCompliancePipeline(Pipeline):
     """Download the raw EUTL compliance CSV from the EUTL public Azure blob.
 
     Inputs:
-        Remote URL — the EUTL operators-yearly-activity daily snapshot,
-        served as a gzipped CSV from the EU's public Azure blob storage.
+        The EUTL operators-yearly-activity daily snapshot ("Operators
+        Yearly Activity Daily"), served as a gzipped CSV from the EU's
+        public Azure blob storage.
+        The download URL is resolved at runtime from the Union Registry
+        data-download listing via `resolve_download_url(DOWNLOAD_NAME)`
+        unless `url` is passed explicitly.
 
     Output:
         The raw compliance table as a single DataFrame (gzip already
@@ -33,13 +39,14 @@ class FetchCompliancePipeline(Pipeline):
     """
 
     name = "fetch_compliance"
-    URL = (
-        "https://dlsclimabi.blob.core.windows.net/public-data/eutlpublic/"
-        "extracts/_all_extracts/operators_yearly_activity/"
-        "operators_yearly_activity_daily.csv.gz"
-    )
+    DOWNLOAD_NAME = "Operators Yearly Activity Daily"
 
-    def __init__(self, settings: Settings, client: DownloadClient | None = None):
+    def __init__(
+        self,
+        settings: Settings,
+        client: DownloadClient | None = None,
+        url: str | None = None,
+    ):
         """Initialise the pipeline.
 
         Args:
@@ -48,15 +55,20 @@ class FetchCompliancePipeline(Pipeline):
             client: Shared HTTP client to reuse across multiple fetch
                 pipelines. If `None`, the pipeline creates and closes its
                 own.
+            url: Download URL to use instead of resolving `DOWNLOAD_NAME`
+                from the Union Registry data-download listing. Only
+                needed when the listing is unavailable.
         """
         super().__init__(settings)
         self._client = client
+        self._url = url
 
     def load(self) -> None:
         own_client = self._client is None
         client = self._client or DownloadClient()
         try:
-            self.df = client.download_csv(url=self.URL)
+            url = self._url or resolve_download_url(self.DOWNLOAD_NAME, client)
+            self.df = client.download_csv(url=url)
         finally:
             if own_client:
                 client.close()
@@ -174,7 +186,6 @@ class ExtractCompliancePipeline(Pipeline):
                 installation_id=lambda df: (
                     df.REGISTRY_CODE + "_" + df.INSTALLATION_IDENTIFIER.astype(str)
                 ),
-                ets_id="euets",
                 snapshot_date=pd.to_datetime(df.SNAPSHOT_DATE, format="%Y-%m-%d"),
             )
             .drop(columns=["INSTALLATION_IDENTIFIER", "SNAPSHOT_DATE"])

@@ -19,14 +19,20 @@ import pandas as pd  # noqa: F401
 from eutl_scraper.pipeline import Bundle, Pipeline  # noqa: F401
 from eutl_scraper.settings import DownloadClient, Settings
 
+from .union_registry_scrapers import resolve_download_url
 
-class FetchFetchRegistryHoldingsPipeline(Pipeline):
+
+class FetchRegistryHoldingsPipeline(Pipeline):
     """Download the daily snapshot of EUTL registry holdings from the EUTL
     public Azure blob.
 
     Inputs:
-        Remote URL — the EUTL registry holdings daily snapshot, served as a
-        gzipped CSV from the EU's public Azure blob storage.
+        The EUTL registry holdings daily snapshot ("Registry Holdings
+        Daily"), served as a gzipped CSV from the EU's public Azure blob
+        storage.
+        The download URL is resolved at runtime from the Union Registry
+        data-download listing via `resolve_download_url(DOWNLOAD_NAME)`
+        unless `url` is passed explicitly.
 
     Output:
         The raw registry holdings table as a single DataFrame (gzip already
@@ -38,29 +44,36 @@ class FetchFetchRegistryHoldingsPipeline(Pipeline):
     """
 
     name = "fetch_registry_holdings"
-    URL = (
-        "https://dlsclimabi.blob.core.windows.net/public-data/eutlpublic/extracts/"
-        "_all_extracts/registry_holdings/registry_holdings_daily.csv.gz"
-    )
+    DOWNLOAD_NAME = "Registry Holdings Daily"
 
-    def __init__(self, settings: Settings, client: DownloadClient | None = None):
+    def __init__(
+        self,
+        settings: Settings,
+        client: DownloadClient | None = None,
+        url: str | None = None,
+    ):
         """Initialise the pipeline.
 
         Args:
             settings: Configuration object used to resolve the output path
-                via `settings.fp("accounts", dir_source)`.
+                via `settings.fp("registry_holdings", dir_source)`.
             client: Shared HTTP client to reuse across multiple fetch
                 pipelines. If `None`, the pipeline creates and closes its
                 own.
+            url: Download URL to use instead of resolving `DOWNLOAD_NAME`
+                from the Union Registry data-download listing. Only
+                needed when the listing is unavailable.
         """
         super().__init__(settings)
         self._client = client
+        self._url = url
 
     def load(self) -> None:
         own_client = self._client is None
         client = self._client or DownloadClient()
         try:
-            self.df = client.download_csv(url=self.URL)
+            url = self._url or resolve_download_url(self.DOWNLOAD_NAME, client)
+            self.df = client.download_csv(url=url)
         finally:
             if own_client:
                 client.close()
@@ -71,5 +84,5 @@ class FetchFetchRegistryHoldingsPipeline(Pipeline):
 
     def save(self) -> None:
         self.df.to_csv(
-            self.settings.fp("accounts", self.settings.dir_source), index=False
+            self.settings.fp("registry_holdings", self.settings.dir_source), index=False
         )

@@ -46,7 +46,7 @@ class EUTLBundle(Bundle):
             *ComplianceBundle(self.settings).pipelines,
             *TransactionsBundle(self.settings).pipelines,
             # ...
-            CreateETS2InstallationsPipeline(self.settings),
+            AddMissingAccountsFromTransactionsPipeline(self.settings),
         ]
 ```
 

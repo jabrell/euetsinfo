@@ -10,7 +10,6 @@ from .add_missing_accounts_from_transactions import (
 )
 from .bundle import EUTLBundle
 from .compliance import ComplianceBundle
-from .create_ets2_installations import CreateETS2InstallationsPipeline
 from .installations import InstallationsBundle
 from .transactions import TransactionsBundle
 
@@ -26,5 +25,4 @@ __all__ = [
     "InstallationsBundle",
     "TransactionsBundle",
     "AddMissingAccountsFromTransactionsPipeline",
-    "CreateETS2InstallationsPipeline",
 ]

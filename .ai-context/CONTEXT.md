@@ -27,11 +27,15 @@ The coherent output of a single pipeline. Examples: "the raw EUTL accounts CSV,"
 **Fetch Pipeline**:
 A pipeline whose **Load** reaches a remote source and whose **Save** writes to `dir_source`. Its **Transform** may be identity (raw passthrough) or non-trivial (unzip a transactions archive, decompress gzip, drop sentinel rows). One fetch pipeline corresponds to one source operation and may produce multiple files.
 
+**Download Name**:
+The exact label of an entry in the Union Registry website's "Data Download" menu (e.g. `"Transactions"`, `"Operators Yearly Activity Daily"`). EUTL Fetch Pipelines declare it as `DOWNLOAD_NAME` and resolve the current URL from it at runtime (`resolve_download_url`); URLs are never hard-coded because the provider moves files while old URLs keep serving stale data. A failed lookup raises rather than falling back to a known URL.
+_Avoid_: using entity names as download names — "compliance" data comes from `"Operators Yearly Activity Daily"`, not the menu's `"Compliance <year>"` XLSX entries.
+
 **Extract Pipeline**:
 A pipeline whose **Load** reads only from `dir_source` (no remote calls) and whose **Save** writes to `dir_extracted`. Produces one logical entity (e.g. accounts, installations, account_holders). May have multi-input load (e.g. account holders reads the manual Excel plus the accounts raw file).
 
 **Augment Pipeline**:
-A pipeline whose **Save** writes back to `dir_extracted`, typically overwriting an existing entity. Its **Load** reads from `dir_extracted` (multiple entities allowed); it may *additionally* read from `dir_source` when the extracted artifacts do not preserve the upstream detail the augment needs (e.g. the missing-accounts-from-transactions augment needs raw per-side party columns that `ExtractTransactionsPipeline` drops). The defining trait of an augment is "writes back into the extracted layer," not "reads only from it." The ETS2-stubs and missing-accounts-from-transactions work are augment pipelines.
+A pipeline whose **Save** writes back to `dir_extracted`, typically overwriting an existing entity. Its **Load** reads from `dir_extracted` (multiple entities allowed); it may *additionally* read from `dir_source` when the extracted artifacts do not preserve the upstream detail the augment needs (e.g. the missing-accounts-from-transactions augment needs raw per-side party columns that `ExtractTransactionsPipeline` drops). The defining trait of an augment is "writes back into the extracted layer," not "reads only from it." The missing-accounts-from-transactions work is an augment pipeline.
 _Note_: "augment" is no longer a phase inside a larger pipeline — it is a pipeline of its own. It is **not** a special "depends on previous steps" construct; its dependency on prior outputs is just "my load reads files from `dir_extracted` (and sometimes `dir_source`)" — the same kind of disk-based dependency an Extract Pipeline has on `dir_source`.
 
 **Bundle**:
@@ -52,7 +56,7 @@ _Avoid_: pipeline-of-pipelines, meta-pipeline, nested bundle.
   - Fetch: remote → `dir_source`
   - Extract: `dir_source` → `dir_extracted`
   - Augment: `dir_extracted` (and optionally `dir_source`) → `dir_extracted`
-- Cross-entity work (ETS2 stubs, missing accounts) is modelled as an **Augment Pipeline**, never as a phase inside another pipeline.
+- Cross-entity work (e.g. missing accounts from transactions) is modelled as an **Augment Pipeline**, never as a phase inside another pipeline.
 
 ## Flagged ambiguities
 

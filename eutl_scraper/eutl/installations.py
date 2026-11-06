@@ -19,13 +19,23 @@ import pandas as pd
 from eutl_scraper.pipeline import Bundle, Pipeline
 from eutl_scraper.settings import DownloadClient, Settings
 
+from .union_registry_scrapers import resolve_download_url
+
+# Activity type codes that identify ETS2 regulated entities (fuel
+# suppliers under Chapter IVa of Directive 2003/87/EC). Every other code
+# belongs to the EU ETS.
+ETS2_ACTIVITY_TYPE_CODES: frozenset[int] = frozenset({70})
+
 
 class FetchInstallationsPipeline(Pipeline):
     """Download the raw EUTL installations CSV from the EUTL public Azure blob.
 
     Inputs:
-        Remote URL — the EUTL operators daily snapshot, served as a
-        gzipped CSV from the EU's public Azure blob storage.
+        The EUTL operators daily snapshot ("Operators Daily"), served as
+        a gzipped CSV from the EU's public Azure blob storage.
+        The download URL is resolved at runtime from the Union Registry
+        data-download listing via `resolve_download_url(DOWNLOAD_NAME)`
+        unless `url` is passed explicitly.
 
     Output:
         The raw installations table as a single DataFrame (gzip already
@@ -37,12 +47,14 @@ class FetchInstallationsPipeline(Pipeline):
     """
 
     name = "fetch_installations"
-    URL = (
-        "https://dlsclimabi.blob.core.windows.net/public-data/eutlpublic/"
-        "extracts/_all_extracts/operator/operators_daily.csv.gz"
-    )
+    DOWNLOAD_NAME = "Operators Daily"
 
-    def __init__(self, settings: Settings, client: DownloadClient | None = None):
+    def __init__(
+        self,
+        settings: Settings,
+        client: DownloadClient | None = None,
+        url: str | None = None,
+    ):
         """Initialise the pipeline.
 
         Args:
@@ -51,15 +63,20 @@ class FetchInstallationsPipeline(Pipeline):
             client: Shared HTTP client to reuse across multiple fetch
                 pipelines. If `None`, the pipeline creates and closes its
                 own.
+            url: Download URL to use instead of resolving `DOWNLOAD_NAME`
+                from the Union Registry data-download listing. Only
+                needed when the listing is unavailable.
         """
         super().__init__(settings)
         self._client = client
+        self._url = url
 
     def load(self) -> None:
         own_client = self._client is None
         client = self._client or DownloadClient()
         try:
-            self.df = client.download_csv(url=self.URL)
+            url = self._url or resolve_download_url(self.DOWNLOAD_NAME, client)
+            self.df = client.download_csv(url=url)
         finally:
             if own_client:
                 client.close()
@@ -87,8 +104,9 @@ class ExtractInstallationsPipeline(Pipeline):
         Two cohesive outputs derived from one cleaning pass:
 
         - The cleaned **installations** table — one row per installation
-          with composite `installation_id`, registry IDs, activity
-          metadata, address, and snapshot / `created_at` stamps.
+          with composite `installation_id`, `ets_id` (derived from the
+          activity type code), registry IDs, activity metadata, address,
+          and snapshot / `created_at` stamps.
         - The **link_installation_account** table mapping
           `installation_id` to `account_id` with the snapshot /
           `created_at` stamps.
@@ -180,7 +198,9 @@ class ExtractInstallationsPipeline(Pipeline):
 
         Returns:
             DataFrame with composite `installation_id` and `account_id`
-            columns, `ets_id`, and a parsed `snapshot_date`.
+            columns, `ets_id` (`"ets2"` for activity type codes in
+            `ETS2_ACTIVITY_TYPE_CODES`, `"euets"` otherwise), and a parsed
+            `snapshot_date`.
         """
         map_col = {"REGISTRY_CODE": "registry_id"}
         return (
@@ -191,7 +211,9 @@ class ExtractInstallationsPipeline(Pipeline):
                 account_id=lambda df: (
                     df.ACCOUNT_REGISTRY_CODE + "_" + df.ACCOUNT_IDENTIFIER.astype(str)
                 ),
-                ets_id="euets",
+                ets_id=lambda df: df.ACTIVITY_TYPE_CODE.isin(
+                    ETS2_ACTIVITY_TYPE_CODES
+                ).map({True: "ets2", False: "euets"}),
                 snapshot_date=pd.to_datetime(df.SNAPSHOT_DATE, format="%Y-%m-%d"),
             )
             .drop(columns=["INSTALLATION_IDENTIFIER", "SNAPSHOT_DATE"])

@@ -88,17 +88,36 @@ Any bundle can be run on its own (e.g. `ComplianceBundle(settings).run()`) to pr
 
 `EUTLBundle` ([`eutl/bundle.py`](../eutl_scraper/eutl/bundle.py)) in turn flattens per-entity bundles
 (`ComplianceBundle`, `TransactionsBundle`, `AccountsBundle`, `InstallationsBundle`,
-`AccountHoldersBundle`) followed by two cross-entity augment pipelines:
+`AccountHoldersBundle`) followed by one cross-entity augment pipeline:
 
-- `CreateETS2InstallationsPipeline` — detects installations present in compliance but missing from
-  the installations table and creates stub rows tagged `ets_id="ETS2"`.
 - `AddMissingAccountsFromTransactionsPipeline` — scans transaction parties for `account_id`s absent
   from the accounts table and appends them with limited metadata.
+
+ETS2 regulated entities come directly from the operators file (activity type code 70);
+`ExtractInstallationsPipeline` tags them `ets_id="ets2"`, everything else `"euets"`
+(`ETS2_ACTIVITY_TYPE_CODES` in [`eutl/installations.py`](../eutl_scraper/eutl/installations.py)).
 
 Each per-entity module (e.g. [`eutl/compliance.py`](../eutl_scraper/eutl/compliance.py)) typically
 holds a `Fetch*Pipeline` (download raw CSV to `dir_source`), an `Extract*Pipeline`
 (read → clean/rename → validate uniqueness → write parquet to `dir_extracted`), and the `*Bundle`
 that wires them in order.
+
+### Download URLs (Union Registry data-download listing)
+
+EUTL download URLs are **never hard-coded**. The provider occasionally moves files to new URLs while
+the old ones keep serving stale snapshots (e.g. `eutlpublic/` → `eutlpublic_prod/`). Each EUTL
+`Fetch*Pipeline` declares a `DOWNLOAD_NAME` — the exact label of its entry in the "Data Download"
+menu of https://union-registry-data.ec.europa.eu/report/welcome (e.g. `"Transactions"`,
+`"Operators Yearly Activity Daily"` for compliance) — and resolves it in `load()` via
+`resolve_download_url(name, client)`
+([`eutl/union_registry_scrapers.py`](../eutl_scraper/eutl/union_registry_scrapers.py)).
+
+- The website is an Angular SPA; the menu is built from the JSON endpoint `/api/data-download`,
+  which the resolver reads (via `DownloadClient.get_json`). Do not parse the HTML.
+- Matching is exact and case-sensitive. Note the menu's `Compliance <year>` entries are yearly XLSX
+  reports, **not** the compliance CSV we parse.
+- A failed lookup raises — there is deliberately **no fallback** to a known URL. To bypass the
+  listing (e.g. endpoint down), pass `url=...` to the Fetch pipeline's constructor.
 
 ### Manual files
 
