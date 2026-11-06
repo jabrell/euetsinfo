@@ -5,7 +5,9 @@ description: >-
   (EU ETS). An installation can have one row per source: coordinates
   geocoded from the registered address by an API (e.g. "geoapify",
   "googlemaps") and manually curated coordinates (sources prefixed
-  "manual_").
+  "manual_"). ETS2 regulated entities are fuel suppliers rather than
+  plants; their coordinates mark the registered company address, not an
+  emission source.
 sources:
   - title: European Commission, EUTL database
     path: https://union-registry-data.ec.europa.eu/report/welcome
