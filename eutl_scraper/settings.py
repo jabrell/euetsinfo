@@ -247,6 +247,25 @@ class DownloadClient:
         defaults.update(overrides)
         self._client = httpx.Client(**defaults)
 
+    def get_json(self, url: str) -> list | dict:
+        """Fetch a JSON document and return it parsed.
+
+        Intended for small API responses (e.g. download listings), not for
+        bulk data; use `download_with_resume` for large files.
+
+        Args:
+            url: URL of the JSON resource.
+
+        Returns:
+            The parsed JSON body.
+
+        Raises:
+            httpx.HTTPStatusError: If the response has a 4xx/5xx status.
+        """
+        response = self._client.get(url)
+        response.raise_for_status()
+        return response.json()
+
     def download_csv(
         self, url: str, fn_out: Path | None = None, **read_csv_kwargs: object
     ) -> pd.DataFrame:

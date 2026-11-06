@@ -48,7 +48,7 @@ class FetchFetchRegistryHoldingsPipeline(Pipeline):
 
         Args:
             settings: Configuration object used to resolve the output path
-                via `settings.fp("accounts", dir_source)`.
+                via `settings.fp("registry_holdings", dir_source)`.
             client: Shared HTTP client to reuse across multiple fetch
                 pipelines. If `None`, the pipeline creates and closes its
                 own.
@@ -71,5 +71,5 @@ class FetchFetchRegistryHoldingsPipeline(Pipeline):
 
     def save(self) -> None:
         self.df.to_csv(
-            self.settings.fp("accounts", self.settings.dir_source), index=False
+            self.settings.fp("registry_holdings", self.settings.dir_source), index=False
         )
